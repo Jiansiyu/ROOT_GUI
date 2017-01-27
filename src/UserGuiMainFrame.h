@@ -13,8 +13,15 @@
 #include "TGDockableFrame.h"
 #include "TGFrame.h"
 #include "TGMenu.h"
-//#include "TGPo"
+#include "TRootEmbeddedCanvas.h"
 #include "TGCanvas.h"
+#include "TCanvas.h"
+#include "TG3DLine.h"
+#include "TGButton.h"
+#include "TGButtonGroup.h"
+#include "TGSplitter.h"
+#include "TGCanvas.h"
+#include "TGLabel.h"
 
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
@@ -67,19 +74,39 @@ public:
 
 private:
 	TGDockableFrame *fMenuDock;
-	TGCompositeFrame *fStatusFrame;
-	TGCanvas *fCanvasWindow;
 
+	// set the menu layout
 	TGMenuBar *fMenuBar;
 	TGPopupMenu *fMenuFile, *fMenuSet, *fMenuView, *fMenuHelp;
 	TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
 
+
+	// set the work zone variables
+	TGHorizontalFrame *fWorkZoneFrame;
+	TGLayoutHints *fWorkZoneLayout;//, *fWorkZoneItemLayout;
+	TRootEmbeddedCanvas *fEmnbeddedCanvas;
+
+	TGVerticalFrame *fWorkZoneControlFrame;
+	TGLayoutHints *fWorkZoneControlFrameLayout;
+	TGVerticalFrame *fWorkZoneCanvasFrame;
+	TGLayoutHints *fWorkZoneCanvasFrameLayout;
+	TGVertical3DLine *fWorkZoneSeparation;
+
+	// set the status bar variables
+	TGCompositeFrame *fStatusFrame;
+	TGLayoutHints *fStatusFrameLayout;
+
+
 private:
-	// functions that used for the the menu
+	// menu
 	void SetMenuFile();
 	void SetMenuSet();
 	void SetMenuView();
 	void SetMenuHelp();
+
+private:
+	void SetWorkZone();    // set the workspace
+
 
 };
 
