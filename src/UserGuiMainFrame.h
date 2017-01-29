@@ -75,7 +75,10 @@ enum ETestCommandIdentifiers {
 	C_WORKMODE_ANALYSIS,
 
 	C_RAWFILE_PEDESTAL,
-	C_RAWFILE_DAT
+	C_RAWFILE_DAT,
+
+	V_NUMBERINPUT,
+	C_CONFIRM
 };
 
 class UserGuiMainFrame: public TGMainFrame {
@@ -98,6 +101,8 @@ private:
 	std::string vPedestalName;
 	std::vector<std::string> vRawDataList;
 	char vWorkMode;
+	long int vEventNumber;
+
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:
@@ -143,6 +148,14 @@ private:
 	TGListBox *tRawFileEntry;
 	TGTextButton *bRawFileButton;
 
+
+	//number input button
+	TGGroupFrame *fNumberFrame;
+	TGNumberEntry *tNumberEntry;
+
+	// Confirm button
+	TGTextButton *bConfirmButton;
+
 	// status bar display
 	TGLabel *nStatusBarTimeLabel;
 	TGHProgressBar * pStatusBarProcessBar;
@@ -158,6 +171,7 @@ private:
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
 	void SetStatusBar();
+
 
 public:
 	void fFileBrowse();

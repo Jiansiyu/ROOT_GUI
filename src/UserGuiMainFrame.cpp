@@ -2,7 +2,7 @@
  * UserGuiMainFrame.cpp
  *
  *  Created on: Jan 25, 2017
- *      Author: newdriver
+ *      Author: Siyu Jian
  */
 
 #include "UserGuiMainFrame.h"
@@ -11,6 +11,7 @@
 #include "TGLayout.h"
 #include "TG3DLine.h"
 #include "TGFrame.h"
+#include "TGNumberEntry.h"
 
 const char *filetype[] = {
 			"ROOT files", "*.root",
@@ -194,6 +195,18 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	fDataInputFrame->AddFrame(tRawFileEntry,new TGLayoutHints(kLHintsLeft|kLHintsExpandX,5,5,5,5));
 	fDataInputFrame->AddFrame(bRawFileButton,new TGLayoutHints(kLHintsRight));
 	fWorkZoneControlFrame->AddFrame(fDataInputFrame,new TGLayoutHints(kLHintsCenterX));
+
+	fNumberFrame = new TGGroupFrame(fWorkZoneControlFrame, "Event Control");
+	fNumberFrame->SetTitlePos(TGGroupFrame::kCenter);
+	tNumberEntry = new TGNumberEntry(fNumberFrame);
+	tNumberEntry->SetUniqueID(V_NUMBERINPUT);
+	tNumberEntry->Associate(this);
+	fNumberFrame->AddFrame(tNumberEntry,new TGLayoutHints(kLHintsExpandX));
+	fWorkZoneControlFrame->AddFrame(fNumberFrame,new TGLayoutHints(kLHintsExpandX));
+
+	bConfirmButton = new TGTextButton(fWorkZoneControlFrame,"Confirm",C_CONFIRM);
+	bConfirmButton->Associate(this);
+	fWorkZoneControlFrame->AddFrame(bConfirmButton, new TGLayoutHints(kLHintsBottom|kLHintsExpandX,5,5,5,5));
 }
 
 void UserGuiMainFrame::SetStatusBar(){
@@ -227,6 +240,7 @@ void UserGuiMainFrame::fFileBrowse() {
 void UserGuiMainFrame::SetDataFileName(){
 	printf("where am I \n");
 }
+
 UserGuiMainFrame::~UserGuiMainFrame() {
 // TODO Auto-generated destructor stub
 }
@@ -237,8 +251,9 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
-	printf("key pressed %d, %d\n",msg,parm1);
+	printf("transfer key pressed %d, %d, %d\n",kCM_CHECKBUTTON,GET_MSG(msg),parm1);
 	switch (GET_MSG(msg)) {
+
 	case kC_COMMAND:
 		switch (GET_SUBMSG(msg)) {
 		case kCM_MENU:
@@ -274,17 +289,16 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 			break;
 		case kCM_BUTTON:
-			switch(parm1){
-			case C_RAWFILE_PEDESTAL:
-			{
+			switch (parm1) {
+			case C_RAWFILE_PEDESTAL: {
 				static TString dir(".");
 				TGFileInfo fi;
 				fi.fFileTypes = filetype;
 				fi.fIniDir = StrDup(dir);
 				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-				std::string filedir=(fi.fIniDir);
-				std::string filename=(fi.fFilename);
-				vPedestalName=filedir+filename;
+				std::string filedir = (fi.fIniDir);
+				std::string filename = (fi.fFilename);
+				vPedestalName = filedir + filename;
 				printf("Open file: %s \n", vPedestalName.c_str());
 			}
 				break;
@@ -301,11 +315,56 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				vRawDataList.push_back(FileFullName);
 			}
 				break;
+			case C_CONFIRM:
+				printf("printf\n");
+				break;
+			default:
+				break;
+			}
+			break;
+		case kCM_RADIOBUTTON:
+			switch (parm1) {
+			case C_WORKMODE_RAW:
+				vWorkMode = 'R';
+				printf("RAW mode selected \n");
+				break;
+			case C_WORKMODE_ZEROSUBTRACTION:
+				vWorkMode = 'Z';
+				printf("ZERO mode selected \n");
+				break;
+			case C_WORKMODE_PEDESTAL:
+				vWorkMode = 'P';
+				printf("PEDESTAL mode selected \n");
+				break;
+			case C_WORKMODE_HIT:
+				vWorkMode = 'H';
+				printf("HISTO mode selected \n");
+				break;
+			case C_WORKMODE_ANALYSIS:
+				vWorkMode = 'A';
+				printf("Analysis mode selected \n");
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	case kCM_CHECKBUTTON:
+			switch (parm1) {
+				case -1:
+					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
+					printf("Number of Entries is set to %d\n",vEventNumber);
+					break;
+				default:
+					break;
 			}
 			break;
 
-
-		}
+	default:
+		break;
 	}
 	return kTRUE;
 }
