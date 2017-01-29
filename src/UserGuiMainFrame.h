@@ -17,11 +17,32 @@
 #include "TGCanvas.h"
 #include "TCanvas.h"
 #include "TG3DLine.h"
+
 #include "TGButton.h"
 #include "TGButtonGroup.h"
+
 #include "TGSplitter.h"
 #include "TGCanvas.h"
+
 #include "TGLabel.h"
+
+#include "TGTextEntry.h"
+#include "TGFileBrowser.h"
+#include "TGFileDialog.h"
+
+#include "TGListBox.h"
+#include "TGString.h"
+#include "TGNumberEntry.h"
+#include "TGProgressBar.h"
+
+// dialog
+#include "TGClient.h"
+#include "TGFileDialog.h"
+
+#include "TDatime.h"
+
+#include "vector"
+#include "string.h"
 
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
@@ -45,23 +66,16 @@ enum ETestCommandIdentifiers {
 	M_HELP_SEARCH,
 	M_HELP_ABOUT,
 
-	M_CASCADE_1,
-	M_CASCADE_2,
-	M_CASCADE_3,
+	// workzone button key value
 
-	M_NEW_REMOVEMENU,
+	C_WORKMODE_RAW,
+	C_WORKMODE_ZEROSUBTRACTION,
+	C_WORKMODE_PEDESTAL,
+	C_WORKMODE_HIT,
+	C_WORKMODE_ANALYSIS,
 
-	VId1,
-	HId1,
-	VId2,
-	HId2,
-
-	VSId1,
-	HSId1,
-	VSId2,
-	HSId2,
-
-	ColorSel
+	C_RAWFILE_PEDESTAL,
+	C_RAWFILE_DAT
 };
 
 class UserGuiMainFrame: public TGMainFrame {
@@ -71,6 +85,20 @@ public:
 
 	virtual void CloseWindow();
 	virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
+
+///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
+public:
+	// Interaction functions
+	char GetWorkMode(char & WorkMode);
+	std::vector<std::string > GetProcessList();  // return the raw data list
+	std::string GetPedestalFileName();
+	int GetCurrentEventID();                      // Get the current Evnt id
+	int SetCurrentEventID();
+private:
+	std::string vPedestalName;
+	std::vector<std::string> vRawDataList;
+	char vWorkMode;
+	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:
 	TGDockableFrame *fMenuDock;
@@ -96,7 +124,28 @@ private:
 	TGCompositeFrame *fStatusFrame;
 	TGLayoutHints *fStatusFrameLayout;
 
+	// Control zone buttom layout
+	TGButtonGroup *bWorkModeButtonGroup;
 
+	// work mode control button
+	TGRadioButton *bWorkModeRAW;
+	TGRadioButton *bWorkModeZeroSubtraction;
+	TGRadioButton *bWorkModePedestal;
+	TGRadioButton *bWorkModeHit;
+	TGRadioButton *bWorkModeAnalysis;
+
+	// address and file control
+	TGGroupFrame *fDataInputFrame;
+
+	// file input control
+	TGTextEntry *tPedestalFileEntry;
+	TGTextButton *bPedestalFileButton;
+	TGListBox *tRawFileEntry;
+	TGTextButton *bRawFileButton;
+
+	// status bar display
+	TGLabel *nStatusBarTimeLabel;
+	TGHProgressBar * pStatusBarProcessBar;
 private:
 	// menu
 	void SetMenuFile();
@@ -106,7 +155,13 @@ private:
 
 private:
 	void SetWorkZone();    // set the workspace
+	void SetWorkZoneButton();
+	void SetWorkZoneDataInput();
+	void SetStatusBar();
 
+public:
+	void fFileBrowse();
+	void SetDataFileName();
 
 };
 

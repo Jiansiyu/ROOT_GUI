@@ -10,6 +10,15 @@
 #include "TApplication.h"
 #include "TGLayout.h"
 #include "TG3DLine.h"
+#include "TGFrame.h"
+
+const char *filetype[] = {
+			"ROOT files", "*.root",
+			"Data files", "*.dat",
+			"All files", "*",
+			0, 0
+	};
+
 UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 		TGMainFrame(p, w, h) {
 	// TODO Auto-generated constructor stub
@@ -60,8 +69,11 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	TGHorizontal3DLine *menu_seperator=new TGHorizontal3DLine(this);
 	AddFrame(menu_seperator,new TGLayoutHints(kLHintsExpandX));
 
+	// add the work zone frame
 	fWorkZoneFrame = new TGHorizontalFrame(this);
 	fWorkZoneControlFrame = new TGVerticalFrame(fWorkZoneFrame, 10,10);
+
+	SetWorkZoneButton();
 	//fWorkZoneControlFrame->SetBackgroundColor(33);
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	//fWorkZoneCanvasFrame -> SetBackgroundColor(1);
@@ -81,6 +93,7 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	TGHorizontal3DLine *StatusBar_separator= new TGHorizontal3DLine(this);
 	AddFrame(StatusBar_separator, new TGLayoutHints(kLHintsExpandX));
 	fStatusFrame = new TGCompositeFrame(this, 60, 20, kHorizontalFrame | kSunkenFrame);
+	SetStatusBar();
 	AddFrame(fStatusFrame , new TGLayoutHints(kLHintsBottom | kLHintsExpandX,0,0,1,0));
 
 	SetWindowName("UVa GEM analysis");
@@ -101,13 +114,14 @@ void UserGuiMainFrame::SetMenuFile() {
 	fMenuFile->AddEntry("P&rint setup...", M_FILE_PRINTSETUP);
 	fMenuFile->AddSeparator();
 	fMenuFile->AddEntry("E&xit", M_FILE_EXIT);
-
 	fMenuFile->DisableEntry(M_FILE_SAVEAS);
 	fMenuFile->HideEntry(M_FILE_PRINT);
+	fMenuFile->Associate(this);
 }
 void UserGuiMainFrame::SetMenuSet() {
 	fMenuSet->AddEntry("Load Pedestal(root)...", M_SET_LOADPEDESTAL);
 	fMenuSet->AddEntry("&Set...", M_SET_WORKMODE);
+	fMenuSet->Associate(this);
 }
 
 void UserGuiMainFrame::SetMenuView() {
@@ -119,19 +133,100 @@ void UserGuiMainFrame::SetMenuView() {
 
 	fMenuView->CheckEntry(M_VIEW_ENBL_DOCK);
 	fMenuView->CheckEntry(M_VIEW_ENBL_HIDE);
+	fMenuView->Associate(this);
 }
 void UserGuiMainFrame::SetMenuHelp() {
 	fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
 	fMenuHelp->AddEntry("&Search...", M_HELP_SEARCH);
 	fMenuHelp->AddSeparator();
 	fMenuHelp->AddEntry("&About", M_HELP_ABOUT);
+	fMenuHelp->Associate(this);
 }
 
 void UserGuiMainFrame::SetWorkZone(){
 
 }
 
+void UserGuiMainFrame::SetWorkZoneButton(){
 
+	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
+	bWorkModeButtonGroup -> SetTitlePos(TGGroupFrame::kCenter);
+	// add the button to the frame
+	TGLayoutHints *bWorkModeLayout= new TGLayoutHints(kLHintsTop);
+	//bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",kTextCenterY);
+	//bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",kTextTop);
+	//bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",kTextBottom);
+	bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
+	bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
+	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
+	bWorkModeHit = new TGRadioButton(bWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
+	bWorkModeAnalysis = new TGRadioButton(bWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
+	bWorkModeRAW->Associate(this);
+	bWorkModeZeroSubtraction ->Associate(this);
+	bWorkModePedestal ->Associate(this);
+	bWorkModeHit ->Associate(this);
+	bWorkModeAnalysis ->Associate(this);
+	bWorkModeButtonGroup ->AddFrame(bWorkModeRAW,new TGLayoutHints());
+	bWorkModeButtonGroup ->AddFrame(bWorkModeZeroSubtraction,bWorkModeLayout);
+	bWorkModeButtonGroup ->AddFrame(bWorkModePedestal,bWorkModeLayout);
+	bWorkModeButtonGroup ->AddFrame(bWorkModeHit,bWorkModeLayout);
+	bWorkModeButtonGroup ->AddFrame(bWorkModeAnalysis,bWorkModeLayout);
+
+	fWorkZoneControlFrame->AddFrame(bWorkModeButtonGroup , new TGLayoutHints(kLHintsExpandX));
+
+	TGGroupFrame * fDataInputFrame= new TGGroupFrame(fWorkZoneControlFrame,"Data Input");
+	fDataInputFrame->SetTitlePos(TGGroupFrame::kCenter);
+
+	tPedestalFileEntry  =  new TGTextEntry(fDataInputFrame);
+	tPedestalFileEntry->SetTitle("Pededestal(*.root/*.dat)");
+	bPedestalFileButton = new TGTextButton (fDataInputFrame,"Pedestal..",C_RAWFILE_PEDESTAL);
+	bPedestalFileButton->Associate(this);
+
+	fDataInputFrame->AddFrame(tPedestalFileEntry,new TGLayoutHints(kLHintsExpandX));
+	fDataInputFrame->AddFrame(bPedestalFileButton,new TGLayoutHints(kLHintsRight));
+	tRawFileEntry = new TGListBox(fDataInputFrame);
+	tRawFileEntry->Resize(150,80);
+	tRawFileEntry->AddEntry("test entry1",1);
+	tRawFileEntry->AddEntry("test entry2",2);
+	bRawFileButton = new TGTextButton (fDataInputFrame,"Data..",C_RAWFILE_DAT);
+	bRawFileButton -> Associate(this);
+
+	fDataInputFrame->AddFrame(tRawFileEntry,new TGLayoutHints(kLHintsLeft|kLHintsExpandX,5,5,5,5));
+	fDataInputFrame->AddFrame(bRawFileButton,new TGLayoutHints(kLHintsRight));
+	fWorkZoneControlFrame->AddFrame(fDataInputFrame,new TGLayoutHints(kLHintsCenterX));
+}
+
+void UserGuiMainFrame::SetStatusBar(){
+	TGLayoutHints *StatusBarLayout1=new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY,10,10);
+	TDatime *lSystemTime = new TDatime();
+	//TGString *time_string=new TGString(Form("%4d:%2d:%2d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDate()));
+	nStatusBarTimeLabel = new TGLabel(fStatusFrame,new TGString(Form("%4d : %02d : %02d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDay())));
+	nStatusBarTimeLabel->Set3DStyle(0);
+	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM GUI Author: Siyu Jian");
+	nStatusBarTimeLabel->Set3DStyle(0);
+	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+	TGVertical3DLine *lStatusbarSeparation1=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation1, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
+	pStatusBarProcessBar = new TGHProgressBar(fStatusFrame, TGProgressBar::kFancy,300);
+	pStatusBarProcessBar->SetBarColor("lightblue");
+	pStatusBarProcessBar->Increment(100);
+	pStatusBarProcessBar->ShowPosition(kTRUE,kFALSE,"%.0f events");
+	fStatusFrame->AddFrame(pStatusBarProcessBar,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+	fStatusFrame->AddFrame(nStatusBarTimeLabel,StatusBarLayout1);
+}
+void UserGuiMainFrame::fFileBrowse() {
+	printf("where am I \n");
+	static TString dir(".");
+	TGFileInfo file_infor;
+	file_infor.fFileTypes = filetype;
+	file_infor.fIniDir = StrDup(dir);
+	new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &file_infor);
+	printf(" try to open file %s\n", file_infor.fFilename);
+}
+
+void UserGuiMainFrame::SetDataFileName(){
+	printf("where am I \n");
+}
 UserGuiMainFrame::~UserGuiMainFrame() {
 // TODO Auto-generated destructor stub
 }
@@ -142,6 +237,75 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
+	printf("key pressed %d, %d\n",msg,parm1);
+	switch (GET_MSG(msg)) {
+	case kC_COMMAND:
+		switch (GET_SUBMSG(msg)) {
+		case kCM_MENU:
+			switch (parm1) {
+			case M_FILE_OPEN: {
+				printf("open files\n");
+				static TString dir(".");
+				TGFileInfo fi;
+				fi.fFileTypes = filetype;
+				fi.fIniDir = StrDup(dir);
+				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+				printf("Open file: %s (dir: %s)\n", fi.fFilename, fi.fIniDir);
+				dir = fi.fIniDir;
+			}
+				break;
+			case M_FILE_SAVE:
+				printf("file->save \n");
+				break;
+			case M_FILE_SAVEAS:
+				printf("file->saveas\n");
+				break;
+			case M_FILE_PRINT:
+				printf("file->print\n");
+				break;
+			case M_FILE_EXIT:
+				CloseWindow();
+				break;
+			case C_RAWFILE_PEDESTAL:
+				printf("pdestal detected\n");
+				break;
+			default:
+				break;
+			}
+			break;
+		case kCM_BUTTON:
+			switch(parm1){
+			case C_RAWFILE_PEDESTAL:
+			{
+				static TString dir(".");
+				TGFileInfo fi;
+				fi.fFileTypes = filetype;
+				fi.fIniDir = StrDup(dir);
+				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+				std::string filedir=(fi.fIniDir);
+				std::string filename=(fi.fFilename);
+				vPedestalName=filedir+filename;
+				printf("Open file: %s \n", vPedestalName.c_str());
+			}
+				break;
+			case C_RAWFILE_DAT: {
+				static TString dir(".");
+				TGFileInfo fi;
+				fi.fFileTypes = filetype;
+				fi.fIniDir = StrDup(dir);
+				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+				std::string filedir = (fi.fIniDir);
+				std::string filename = (fi.fFilename);
+				std::string FileFullName = filedir + filename;
+				printf("Open file: %s \n", FileFullName.c_str());
+				vRawDataList.push_back(FileFullName);
+			}
+				break;
+			}
+			break;
 
+
+		}
+	}
 	return kTRUE;
 }
