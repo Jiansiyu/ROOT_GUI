@@ -44,6 +44,8 @@
 #include "vector"
 #include "string.h"
 
+#include "TSystem.h"
+#include "TSystemDirectory.h"
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_SAVE,
@@ -90,6 +92,8 @@ public:
 	virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
 
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
+//UVa input handler mode
+
 public:
 	// Interaction functions
 	char GetWorkMode(char & WorkMode);
@@ -97,11 +101,15 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
+
 private:
 	std::string vPedestalName;
 	std::vector<std::string> vRawDataList;
 	char vWorkMode;
 	long int vEventNumber;
+
+private :
+	void fRawModeProcess(int entries, std::string rawfilename);
 
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
@@ -158,6 +166,7 @@ private:
 
 	// status bar display
 	TGLabel *nStatusBarTimeLabel;
+	TGLabel *nStatusBarInfor;
 	TGHProgressBar * pStatusBarProcessBar;
 private:
 	// menu

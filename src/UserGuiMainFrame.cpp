@@ -13,17 +13,33 @@
 #include "TGFrame.h"
 #include "TGNumberEntry.h"
 
+#include "libgen.h"
+#include "string"
+
+// main decoder lib
+#include "../GEMDecoder/input_handler.h"
+
 const char *filetype[] = {
 			"ROOT files", "*.root",
 			"Data files", "*.dat",
 			"All files", "*",
 			0, 0
 	};
-
+const char *datfiletype[]={
+		"Data files", "*.dat",
+		"All files", "*",
+					0, 0
+};
 UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 		TGMainFrame(p, w, h) {
 	// TODO Auto-generated constructor stub
 	SetCleanup(kDeepCleanup);
+
+	// oooooooooooOOOOOOOOOOO000000000000OOOOOOOOOooooooooooooooooo
+	// user variable initialize
+	vWorkMode=NULL;
+	// oooooooooooOOOOOOOOOOO000000000000OOOOOOOOOooooooooooooooooo
+
 
 	fMenuDock = new TGDockableFrame(this);
 	AddFrame(fMenuDock, new TGLayoutHints(kLHintsExpandX, 0, 0, 1, 0));
@@ -70,11 +86,13 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	TGHorizontal3DLine *menu_seperator=new TGHorizontal3DLine(this);
 	AddFrame(menu_seperator,new TGLayoutHints(kLHintsExpandX));
 
+
 	// add the work zone frame
 	fWorkZoneFrame = new TGHorizontalFrame(this);
 	fWorkZoneControlFrame = new TGVerticalFrame(fWorkZoneFrame, 10,10);
+	SetWorkZoneButton();   // set the control penal
 
-	SetWorkZoneButton();
+
 	//fWorkZoneControlFrame->SetBackgroundColor(33);
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	//fWorkZoneCanvasFrame -> SetBackgroundColor(1);
@@ -85,9 +103,11 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	fEmnbeddedCanvas->GetCanvas()->SetFrameFillColor(41);
 	fEmnbeddedCanvas->GetCanvas()->SetGrid();
 	fWorkZoneCanvasFrame->AddFrame(fEmnbeddedCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-	fWorkZoneFrame ->AddFrame(fWorkZoneCanvasFrame, new TGLayoutHints(kLHintsRight|kLHintsExpandY));
-	fWorkZoneFrame -> AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsRight|kLHintsExpandY));
-	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsRight | kLHintsExpandX |kLHintsExpandY));
+
+	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
+	fWorkZoneFrame -> AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
+	fWorkZoneFrame ->AddFrame(fWorkZoneCanvasFrame, new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsExpandY));
+
 	AddFrame(fWorkZoneFrame, new TGLayoutHints(kLHintsRight|kLHintsExpandX|kLHintsExpandY));
 
 	// statuts bar menu
@@ -154,9 +174,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModeButtonGroup -> SetTitlePos(TGGroupFrame::kCenter);
 	// add the button to the frame
 	TGLayoutHints *bWorkModeLayout= new TGLayoutHints(kLHintsTop);
-	//bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",kTextCenterY);
-	//bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",kTextTop);
-	//bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",kTextBottom);
 	bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
 	bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
 	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
@@ -167,11 +184,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModePedestal ->Associate(this);
 	bWorkModeHit ->Associate(this);
 	bWorkModeAnalysis ->Associate(this);
-	bWorkModeButtonGroup ->AddFrame(bWorkModeRAW,new TGLayoutHints());
-	bWorkModeButtonGroup ->AddFrame(bWorkModeZeroSubtraction,bWorkModeLayout);
-	bWorkModeButtonGroup ->AddFrame(bWorkModePedestal,bWorkModeLayout);
-	bWorkModeButtonGroup ->AddFrame(bWorkModeHit,bWorkModeLayout);
-	bWorkModeButtonGroup ->AddFrame(bWorkModeAnalysis,bWorkModeLayout);
 
 	fWorkZoneControlFrame->AddFrame(bWorkModeButtonGroup , new TGLayoutHints(kLHintsExpandX));
 
@@ -187,8 +199,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	fDataInputFrame->AddFrame(bPedestalFileButton,new TGLayoutHints(kLHintsRight));
 	tRawFileEntry = new TGListBox(fDataInputFrame);
 	tRawFileEntry->Resize(150,80);
-	tRawFileEntry->AddEntry("test entry1",1);
-	tRawFileEntry->AddEntry("test entry2",2);
+	tRawFileEntry->AddEntry("*.dat files to be process",0);
 	bRawFileButton = new TGTextButton (fDataInputFrame,"Data..",C_RAWFILE_DAT);
 	bRawFileButton -> Associate(this);
 
@@ -217,14 +228,22 @@ void UserGuiMainFrame::SetStatusBar(){
 	nStatusBarTimeLabel->Set3DStyle(0);
 	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM GUI Author: Siyu Jian");
 	nStatusBarTimeLabel->Set3DStyle(0);
-	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
 	TGVertical3DLine *lStatusbarSeparation1=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation1, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
 	pStatusBarProcessBar = new TGHProgressBar(fStatusFrame, TGProgressBar::kFancy,300);
 	pStatusBarProcessBar->SetBarColor("lightblue");
 	pStatusBarProcessBar->Increment(100);
 	pStatusBarProcessBar->ShowPosition(kTRUE,kFALSE,"%.0f events");
-	fStatusFrame->AddFrame(pStatusBarProcessBar,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+	fStatusFrame->AddFrame(pStatusBarProcessBar,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
+
+	TGVertical3DLine *lStatusbarSeparation2=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation2, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
+	nStatusBarInfor = new TGLabel(fStatusFrame,"Work mode/ pedestal / raw dat");
+	fStatusFrame->AddFrame(nStatusBarInfor, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+	TGVertical3DLine *lStatusbarSeparation3=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation3, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
+
 	fStatusFrame->AddFrame(nStatusBarTimeLabel,StatusBarLayout1);
 }
 void UserGuiMainFrame::fFileBrowse() {
@@ -251,7 +270,7 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
-	printf("transfer key pressed %d, %d, %d\n",kCM_CHECKBUTTON,GET_MSG(msg),parm1);
+	//printf("transfer key pressed %d, %d, %d\n",kCM_CHECKBUTTON,GET_MSG(msg),parm1);
 	switch (GET_MSG(msg)) {
 
 	case kC_COMMAND:
@@ -296,27 +315,128 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				fi.fFileTypes = filetype;
 				fi.fIniDir = StrDup(dir);
 				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-				std::string filedir = (fi.fIniDir);
-				std::string filename = (fi.fFilename);
-				vPedestalName = filedir + filename;
+				std::string filename=fi.fFilename;
+				vPedestalName=filename;
 				printf("Open file: %s \n", vPedestalName.c_str());
-			}
+				std::string filname=(basename(strdup(vPedestalName.c_str())));
+				tPedestalFileEntry->SetTitle(filename.c_str());
+			    }
 				break;
 			case C_RAWFILE_DAT: {
 				static TString dir(".");
 				TGFileInfo fi;
-				fi.fFileTypes = filetype;
+				fi.fFileTypes = datfiletype;
 				fi.fIniDir = StrDup(dir);
 				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-				std::string filedir = (fi.fIniDir);
+				//std::string filedir = (fi.fIniDir);
 				std::string filename = (fi.fFilename);
-				std::string FileFullName = filedir + filename;
-				printf("Open file: %s \n", FileFullName.c_str());
+				std::string FileFullName = filename;
+				//printf("Open file: %s \n", FileFullName.c_str());
 				vRawDataList.push_back(FileFullName);
+				tRawFileEntry->RemoveAll();
+				for(int i =0; i <vRawDataList.size();i++) {
+					//sprintf(stderr,"entry %d",vRawDataList.size());
+					string raw_filename(basename(strdup(vRawDataList[i].c_str())));
+
+					tRawFileEntry->AddEntry(Form("%s",raw_filename.c_str()),i);
+					tRawFileEntry->MapSubwindows();
+					tRawFileEntry->Layout();
+				}
+
 			}
 				break;
 			case C_CONFIRM:
-				printf("printf\n");
+				{
+					if (vWorkMode==NULL) {
+						printf("Please Set the work Mode\n");
+						// set the color
+						Pixel_t red;
+						gClient->GetColorByName("red",red);
+						nStatusBarInfor->SetBackgroundColor(red);
+						nStatusBarInfor->SetText("Please Set the work Mode");
+					}else {
+					switch (vWorkMode) {
+					case 'R':
+						printf("raw mode\n");
+						{
+							fRawModeProcess(10,"/home/newdriver/Research/SBS/Remote_Data/MPD_1380.dat");
+						}
+						break;
+					case 'Z':
+						printf("zero mode\n");
+						break;
+
+					case 'P':
+						printf("pedestal mode\n");
+						{
+
+							std::ifstream testfile(vPedestalName.c_str());
+							if (testfile.good()) {
+								printf("start pedestal mode\n");
+
+								InputHandler * decoder = new InputHandler(vPedestalName.c_str());
+								decoder->PedProcessAllEvents(vEventNumber,"SBS39_Pedestal.root");
+								delete decoder;
+							} else {
+								printf("Please input the Pedestal file\n");
+								// set the color
+								Pixel_t red;
+								gClient->GetColorByName("red", red);
+								nStatusBarInfor->SetBackgroundColor(red);
+								nStatusBarInfor->SetText(
+										"Please input the Pedestal file");
+								break;
+							}
+
+						}
+						break;
+
+					case 'H':
+						printf("histo mode\n");
+						if(vRawDataList.size()!=0){
+							std::ifstream testfile(vPedestalName.c_str());
+							if (!testfile.good()) {
+								printf("Please input the Pedestal file\n");
+								// set the color
+								Pixel_t red;
+								gClient->GetColorByName("red", red);
+								nStatusBarInfor->SetBackgroundColor(red);
+								nStatusBarInfor->SetText(
+										"Please input the Pedestal file");
+								break;
+							}
+							for(int i=0;i<vRawDataList.size();i++ ){
+								printf("Processing  %s\n", vRawDataList[i].c_str());
+								// set the color
+								Pixel_t yellow;
+								gClient->GetColorByName("yellow", yellow);
+								nStatusBarInfor->SetBackgroundColor(yellow);
+								nStatusBarInfor->SetText(Form("Processing  %s\n", vRawDataList[i].c_str()));
+
+								InputHandler * decoder = new InputHandler("/home/newdriver/Research/SBS/Remote_Data/MPD_1380.dat");//vRawDataList[i].c_str());
+								string raw_filename(basename(strdup(vRawDataList[i].c_str())));
+								string lGenetatedFilename=raw_filename.substr(0,raw_filename.find_last_of("."))+".root";
+
+								decoder->HitProcessAllEvents(1000,"/home/newdriver/Research/SBS/Remote_Data/SBS39_Pedestal.root","test.root");//vPedestalName.c_str(),lGenetatedFilename.c_str());
+								//delete decoder;
+
+								Pixel_t green;
+								gClient->GetColorByName("green", green);
+								nStatusBarInfor->SetBackgroundColor(green);
+								nStatusBarInfor->SetText(Form("Processing  %s\n",vRawDataList[i].c_str()));
+							}
+						}
+						break;
+
+					case 'A':
+						printf("analysis mode\n");
+						break;
+
+					default:
+						break;
+						}
+					}
+				}
 				break;
 			default:
 				break;
@@ -326,7 +446,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			switch (parm1) {
 			case C_WORKMODE_RAW:
 				vWorkMode = 'R';
-				printf("RAW mode selected \n");
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
@@ -368,3 +487,57 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	}
 	return kTRUE;
 }
+
+//ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
+void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+
+		printf("Filename: %s\n", rawfilename.c_str());
+		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
+
+		map<int, map<int, TH1F* > >  thisto;
+		map<int, map<int, TH1F* > > mAPVRawHistos = inputHandler->RawProcessAllEvents(10,  thisto);
+
+		map<int, map<int, TH1F *>>::iterator iter_mpd=mAPVRawHistos.begin();
+			for(;iter_mpd!=mAPVRawHistos.end();iter_mpd++){
+				printf("=>MPD = %d\n",iter_mpd->first);
+				map<int, TH1F *>::iterator itter_apv = (iter_mpd->second).begin();
+				for(;itter_apv!=(iter_mpd->second).end();itter_apv++){
+					printf("=>APV= %d\n", itter_apv->first);
+					TH1F *histo_temp=itter_apv->second;
+					for(int i=0 ; i < histo_temp->GetMaximumBin(); i ++){
+						printf("=> MPD=%d, APV=%d, i=%d  bin = %d\n",iter_mpd->first, itter_apv->first, i, histo_temp->GetBinContent(i));
+					}
+				}
+			}
+
+
+	TCanvas *RawCanvas = fEmnbeddedCanvas->GetCanvas();
+	RawCanvas->Modified();
+	RawCanvas->Update();
+	gSystem->ProcessEvents();
+
+
+		//TH1F *test_histo = new TH1F("histo", "histo", 100, 100, 200);
+		//test_histo->Draw();
+
+		RawCanvas->Modified();
+		RawCanvas->Update();
+		gSystem->ProcessEvents();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
