@@ -5,14 +5,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/ROOT_GUI.cpp \
+../src/UserGuiGeneralDialogProcess.cpp \
 ../src/UserGuiMainFrame.cpp 
 
 OBJS += \
 ./src/ROOT_GUI.o \
+./src/UserGuiGeneralDialogProcess.o \
 ./src/UserGuiMainFrame.o 
 
 CPP_DEPS += \
 ./src/ROOT_GUI.d \
+./src/UserGuiGeneralDialogProcess.d \
 ./src/UserGuiMainFrame.d 
 
 

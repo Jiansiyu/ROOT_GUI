@@ -44,7 +44,7 @@
 								<option id="gnu.cpp.link.option.other.1730600949" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList">
 									<listOptionValue builtIn="false" value="`${ROOTSYS}/bin/root-config --libs --glibs --cflags --ldflags --auxlibs --auxcflags` -pthread -lm -ldl"/>
 								</option>
-								<option id="gnu.cpp.link.option.flags.1452516361" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="-levioxx -levio -lexpat " valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.1452516361" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="-levioxx -levio -lexpat  -lMinuit" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1605910176" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

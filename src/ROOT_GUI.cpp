@@ -8,8 +8,6 @@
 #include "TApplication.h"
 #include "TROOT.h"
 
-
-
 // user defined classes
 #include "UserGuiMainFrame.h"
 

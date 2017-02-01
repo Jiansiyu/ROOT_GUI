@@ -11,7 +11,6 @@
 #include "TGFrame.h"
 #include "TGWindow.h"
 #include "TGDockableFrame.h"
-#include "TGFrame.h"
 #include "TGMenu.h"
 #include "TRootEmbeddedCanvas.h"
 #include "TGCanvas.h"
@@ -39,15 +38,23 @@
 #include "TGClient.h"
 #include "TGFileDialog.h"
 
+//
+#include "TBrowser.h"
+
 #include "TDatime.h"
 
 #include "vector"
 #include "string.h"
+#include "TObjString.h"
 
 #include "TSystem.h"
 #include "TSystemDirectory.h"
+#include "TH1F.h"
+#include "map"
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
+	M_FILE_NEWCANVAS,
+	M_FILE_TBROWER,
 	M_FILE_SAVE,
 	M_FILE_SAVEAS,
 	M_FILE_PRINT,
@@ -55,6 +62,7 @@ enum ETestCommandIdentifiers {
 	M_FILE_EXIT,
 
 	M_SET_WORKMODE,
+	M_SET_LOADMAPPING,
 	M_SET_LOADPEDESTAL,
 	M_SET_BATCH,
 
@@ -104,13 +112,17 @@ public:
 
 private:
 	std::string vPedestalName;
+	std::string vPedestalDataFileName;
+	std::string vPedestalROOTFileName;
 	std::vector<std::string> vRawDataList;
 	char vWorkMode;
 	long int vEventNumber;
-
+	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
 private :
 	void fRawModeProcess(int entries, std::string rawfilename);
-
+	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
+	void dMenuOpenFileDialog();
+	void dButtonPedestalOpenFileDialog();
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:
@@ -126,6 +138,9 @@ private:
 	TGHorizontalFrame *fWorkZoneFrame;
 	TGLayoutHints *fWorkZoneLayout;//, *fWorkZoneItemLayout;
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
+
+	TCanvas *cRawCanvas;
+
 
 	TGVerticalFrame *fWorkZoneControlFrame;
 	TGLayoutHints *fWorkZoneControlFrameLayout;
@@ -156,6 +171,8 @@ private:
 	TGListBox *tRawFileEntry;
 	TGTextButton *bRawFileButton;
 
+	// the out put file pattern
+	TGTextEntry *tOutPutfilePattern;
 
 	//number input button
 	TGGroupFrame *fNumberFrame;

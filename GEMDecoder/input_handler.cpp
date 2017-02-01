@@ -290,11 +290,13 @@ std::vector<TH1F *> InputHandler::RawProcessAllEvents(std::vector<TH1F*> Histo, 
 				Histo.push_back(h);
 			}
 		}
+		//Histo[0]->Draw();
+		//getchar();
 		return Histo;
 	}
 };
 
-map<int, map<int, TH1F*> > InputHandler::RawProcessAllEvents(int entries,map<int, map<int, TH1F*> >) {
+map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
 	try {
 		//  load the data
 		evioFileChannel chan(filename.c_str(), "r");
@@ -345,28 +347,40 @@ map<int, map<int, TH1F*> > InputHandler::RawProcessAllEvents(int entries,map<int
 
 	RawDecoder raw_decoder(vSRSSingleEventData);
 
-	mAPVRawHistos= raw_decoder.GetAPVRawHisto();
-
-	map<int, map<int, TH1F *>>::iterator iter_mpd=mAPVRawHistos.begin();
-	for(;iter_mpd!=mAPVRawHistos.end();iter_mpd++){
-		printf("MPD = %d\n",iter_mpd->first);
-		map<int, TH1F *>::iterator itter_apv = (iter_mpd->second).begin();
-		for(;itter_apv!=(iter_mpd->second).end();itter_apv++){
-			printf("APV= %d\n", itter_apv->first);
-			TH1F *histo_temp=itter_apv->second;
-			for(int i=1 ; i <= 128; i ++){
-				printf("MPD=%d, APV=%d, i=%d  bin = %d\n",iter_mpd->first, itter_apv->first, i, histo_temp->GetBinContent(i));
-			}
-		}
-	}
-
-	return mAPVRawHistos;
+	return raw_decoder.GetDecoded();
 }
+
 //________________________________________________
 int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 {
-  int entry = 0;
+	//Loading Mapping
+	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	string line;
+	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
+	map<int,map<int,vector<int> > > mMapping;
 
+	while (getline(filestream, line) ) {
+	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
+	    if( line.find("#") == 0 ) continue;
+	    char *tokens = strtok( (char *)line.data(), ",");
+	    if(tokens !=NULL){
+	      cout<<tokens<<" ";Mapping_mpdId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_GEMId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Xis=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_ADCId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_I2C=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Pos=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Invert=atoi(tokens);
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_GEMId);//0
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
+	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
+	    }
+	    cout<<endl;
+	  }
+  filestream.close();
+  int entry = 0;
   try{
 
     evioFileChannel chan(filename.c_str(), "r");
@@ -499,6 +513,12 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 	f = new TFile(PedFilename_temp, "RECREATE");
 	TH1F *mPedestalRMSall = new TH1F("APV Pedestal RMS distribution","APV Pedestal RMS distribution", 200, 0, 200);
 	TH1F *mPedestalMeanall = new TH1F("APV Pedestal Mean distribution","APV Pedestal Mean distribution", 200, 0, 200);
+
+	TH1F *mPedestalMeanx = new TH1F("APV Pedestal mean x","APV Pedestal mean x", 1600, 0, 1600);
+	TH1F *mPedestalMeany= new TH1F("APV Pedestal mean y","APV Pedestal mean y", 1280, 0, 1280);
+	TH1F *mPedestalRMSx = new TH1F("APV Pedestal RMS x","APV Pedestal RMS x", 1540, 0, 1540);
+	TH1F *mPedestalRMSy= new TH1F("APV Pedestal RMS y","APV Pedestal RMS y", 1280, 0, 1280);
+
 	delete[] PedFilename_temp;
 	map<int, map<int, map<int, TH1F*> > >::iterator it;
 	for (it = mPedestalHisto.begin(); it != mPedestalHisto.end(); ++it) {   // MPD loop
@@ -518,6 +538,21 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 				TH1F* Pedestal_temp = ittt->second;
 				float mean = Pedestal_temp->GetMean(); //cout<<"Mean:  "<<mean<<endl;
 				float rms = Pedestal_temp->GetRMS();
+
+				int RstripNb = 32 * (stripNb % 4) + 8 * (int) (stripNb / 4)
+						- 31 * (int) (stripNb / 16); //channel re-matching for apv25 chip
+
+						//stripNb=(8*(int)(stripNb/4)+3-stripNb)*((int)(stripNb/4)%2)+stripNb*(1-((int)(stripNb/4)%2));
+				RstripNb = RstripNb + 1 + RstripNb % 4
+						- 5 * (((int) (RstripNb / 4)) % 2); //channel re-matching for INFN type APV front-end card
+
+				//invert the address if needed
+				RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
+				int RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];            // calculate position
+
+				if(mMapping[mpd_id][adc_ch][1]==0){	mPedestalMeanx->Fill(RstripPos,mean);mPedestalRMSx->Fill(RstripPos,rms);}
+				if(mMapping[mpd_id][adc_ch][1]==1){ mPedestalMeany->Fill(RstripPos,mean);mPedestalRMSy->Fill(RstripPos,rms);}
+
 				mPedestalMean[mpd_id][adc_ch]->Fill(stripNb, mean);
 				mPedestalRMS[mpd_id][adc_ch]->Fill(stripNb, rms);
 				mPedestalMeanall->Fill(mean);
@@ -554,7 +589,208 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
   return entry;
 }
 
+map<int,map<int,int>> InputHandler::ZeroSProcessAllEvents(int entries, string gui, string pedestal_file_name){
 
+	map<int,map<int,int>> ZeroSReturn;  // 1 x before zero subression 2 x afterzerosubration, 3 after remove cross talk  4 cross talk
+										// 11       12                13
+	//Loading Mapping
+	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	string line;
+	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
+	map<int,map<int,vector<int> > > mMapping;
+
+	while (getline(filestream, line) ) {
+	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
+	    if( line.find("#") == 0 ) continue;
+	    char *tokens = strtok( (char *)line.data(), ",");
+	    if(tokens !=NULL){
+	      cout<<tokens<<" ";Mapping_mpdId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_GEMId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Xis=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_ADCId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_I2C=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Pos=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Invert=atoi(tokens);
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_GEMId);//0
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
+	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
+	    }
+	    cout<<endl;
+	  }
+	  filestream.close();
+	  //
+	  char *PedFilename_temp = new char[100];
+	 	  std::strcpy(PedFilename_temp,pedestal_file_name.c_str());    // load the pedestal file
+	 	  f = new TFile(PedFilename_temp,"READ" );
+	 	  delete[] PedFilename_temp;
+
+
+	  try {
+			//  load the data
+			evioFileChannel chan(filename.c_str(), "r");
+			chan.open();
+			printf("Looking for Event # %d\n", entries);
+			int current_entry = 0;
+			while (chan.read()) {
+				map<int, map<int, map<int, vector<int> > > > mmHit;
+				vSRSSingleEventData.clear();
+
+				evioDOMTree event(chan);
+				evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
+				if (current_entry == entries) { // get the target  entry, start decode the data
+					evioDOMNodeList::iterator iter;
+					for (iter = mpdEventList->begin(); iter != mpdEventList->end();
+							++iter) {
+						if ((*iter)->tag == 10) {
+							vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+							if (vec != NULL) {
+								vSRSSingleEventData.reserve(
+										vSRSSingleEventData.size() + vec->size());
+								vSRSSingleEventData.insert(
+										vSRSSingleEventData.end(), vec->begin(),
+										vec->end());
+							} else {
+								cout << "found NULL contents in mpd.." << endl;
+							}
+						}
+					}
+					cout << "Event ID: " << current_entry << endl;
+					if (vSRSSingleEventData.size() != 0) {
+						current_entry++;
+						break;
+					} else {
+						printf("Error accrue in this events, go to next event");
+						entries++;
+						current_entry++;
+						continue;
+					}
+				}
+				// here did not decode the data and check the data if the current event is not the target event
+				current_entry++;    //maybe this is not a good usage
+			}
+		} catch (evioException e) {
+			cerr << endl << e.toString() << endl << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		  RawDecoder raw_decoder(vSRSSingleEventData);
+		  //map<mpd_id, map<ch_id, vector<int> > >, vector: adc values (all time samples)
+		  mTsAdc = raw_decoder.GetStripTsAdcMap();//
+
+
+
+		  int mpd_id=0;
+		  int adc_ch=0;
+		  int stripNb=0;
+		  //MPD_ID,    ADC_channels stripsNB   six timesample
+	      for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it) {
+	    	  mpd_id=it->first;
+	    	  map<int, map<int, vector<int> > > temp=it->second;
+
+	    	  map<int, map<int,vector<int> > >::iterator itt;
+	    	  for(itt=temp.begin(); itt!=temp.end(); ++itt) {
+	    	      adc_ch = itt->first;
+	    	      map<int,vector<int> > tempp = itt->second;
+	    	      map<int,vector<int> >::iterator ittt;
+
+	    	      //loading pedestal information from root files
+	    	      TH1F* hMean = (TH1F*)f->Get(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd_id, adc_ch));  // read the pedestal
+	    	      TH1F* hRMS  = (TH1F*)f->Get(Form("PedestalRMS_mpd_%d_ch_%d",mpd_id, adc_ch));			  // read the pedestal
+	    	      // loop an all the Strips
+	    	      // added by Siyu, To be improve
+	    	      map<int,int> sEventCrossTalk_temp;
+	    	      map<int,int> AddressCorrelation;
+	    	      //printf("lalallalsals\n\n\n");
+	    	      for(ittt=tempp.begin();ittt!=tempp.end();++ittt) {
+	    			  stripNb = ittt->first;
+
+	    			  vector<int> adc_temp = ittt->second;   // buffer the six(or other) Timesample ADC value
+	    			  int adcSum_temp=0;
+	    			  int TSsize = adc_temp.size();
+	    			  for(int i=0; i<TSsize;i++)
+	    			    { adcSum_temp+=adc_temp[i];
+	    			    }
+	    			  adcSum_temp=adcSum_temp/TSsize;  // get the mean of the six time sample
+
+	    			  // convert the address to the real strips address
+	    			  int RstripNb=32*(stripNb%4)+8*(int)(stripNb/4)-31*(int)(stripNb/16);//channel re-matching for apv25 chip
+	    			  int RstripPos;
+
+	    			  //stripNb=(8*(int)(stripNb/4)+3-stripNb)*((int)(stripNb/4)%2)+stripNb*(1-((int)(stripNb/4)%2));
+	    			  RstripNb=RstripNb+1+RstripNb%4-5*(((int)(RstripNb/4))%2);//channel re-matching for INFN type APV front-end card, ???????
+	    			  //invert the address if needed
+	    			  RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
+	    			  RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];            // calculate position
+
+	    			  float fadcvalue_temp = adcSum_temp-hMean->GetBinContent(stripNb+1);   // zero subtraction
+	    			  float rms_temp=hRMS->GetBinContent(stripNb+1);
+	    			  if(mMapping[mpd_id][adc_ch][1]==0){
+	    				  ZeroSReturn[1][RstripPos]=fadcvalue_temp;
+	    				  //hhX->Fill(RstripPos,fadcvalue_temp);
+	    			  }
+	    			  if(mMapping[mpd_id][adc_ch][1]==1){
+	    				  //hhY->Fill(RstripPos,fadcvalue_temp);
+	    				  ZeroSReturn[11][RstripPos]=fadcvalue_temp;
+	    			  }
+
+	    			  // apply 5 sigma select the effective hit
+	    			  if(( fadcvalue_temp>5*rms_temp))
+	    			    {
+	    			      //int detID=mMapping[mpd_id][adc_ch][0];
+	    			      //int planeID=mMapping[mpd_id][adc_ch][1];
+	    			      if(mMapping[mpd_id][adc_ch][1]==0){
+	    			    	  //hX->Fill(RstripPos,fadcvalue_temp);
+	    			    	  ZeroSReturn[2][RstripPos]=fadcvalue_temp;
+
+	    			      }
+	    			      if(mMapping[mpd_id][adc_ch][1]==1){
+	    			    	  //hY->Fill(RstripPos,fadcvalue_temp);
+	    			    	  ZeroSReturn[12][RstripPos]=fadcvalue_temp;
+	    			      }
+	    			      cout<<"orginal strip: "<<stripNb<<" hit in MPD:"<<mpd_id<<" adc:"<<adc_ch<<" strip: "<<RstripNb+1<<"Position: "<<RstripPos<<" adc value:"<<fadcvalue_temp<<" RMS:"<<rms_temp<<endl;
+	    			      sEventCrossTalk_temp[stripNb]=fadcvalue_temp;
+	    			      AddressCorrelation[stripNb]=RstripPos;
+	    			    }
+	    			  //hhh->Delete();
+	    	      }
+	    	      map<int,int> sRemoveCrossTalk;
+	    	      map<int,int> sCrossTalk;
+	    	      FindCrossTalk(AddressCorrelation,sEventCrossTalk_temp,&sRemoveCrossTalk,&sCrossTalk);
+	    	      //cout<<" crosstalk size="<<sRemoveCrossTalk.size()<<" crosstalk size="<<sCrossTalk.size()<<endl;
+	    	      map<int,int>::iterator iter_rmcttemp=sRemoveCrossTalk.begin();
+	    	      while(iter_rmcttemp!=sRemoveCrossTalk.end()){
+	    	    	  if(mMapping[mpd_id][adc_ch][1]==0){
+	    	    		  ZeroSReturn[3][iter_rmcttemp->first]=iter_rmcttemp->second;
+	    	    		  //hX_rmCt->Fill(iter_rmcttemp->first,iter_rmcttemp->second);
+	    	    	  }
+	    	    	  if(mMapping[mpd_id][adc_ch][1]==1){
+	    	    		  ZeroSReturn[13][iter_rmcttemp->first]=iter_rmcttemp->second;
+	    	    		  //hY_rmCt->Fill(iter_rmcttemp->first,iter_rmcttemp->second);
+	    	    	  }
+	    	    	  iter_rmcttemp++;
+	    	      }
+	    	      map<int,int>::iterator iter_cttemp=sCrossTalk.begin();
+	    	      while(iter_cttemp!= sCrossTalk.end()) {
+	    	    	  if(mMapping[mpd_id][adc_ch][1]==0){
+	    	    		  ZeroSReturn[4][iter_cttemp->first]=iter_cttemp->second;
+	    	    		  //hX_Ct->Fill(iter_cttemp->first,iter_cttemp->second);
+	    	    	  }
+	    	    	  if(mMapping[mpd_id][adc_ch][1]==1){
+	    	    		  ZeroSReturn[14][iter_cttemp->first]=iter_cttemp->second;
+	    	    		  //hY_Ct->Fill(iter_cttemp->first,iter_cttemp->second);
+	    	    	  }
+	    	    	  iter_cttemp++;
+	    	      }
+	    	      hMean -> Delete();
+	    	      hRMS  -> Delete();
+	    	  }
+
+	      }
+
+return ZeroSReturn;
+}
 
 
 int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, string root_file_name) {
@@ -598,7 +834,7 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 	//end of initialize root tree to store hits
 
 	//Loading Mapping
-	ifstream filestream ("Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
@@ -707,10 +943,11 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 		    			 adcSum_temp=adcSum_temp/TSsize;
 
 		    			 int RstripNb=32*(stripNb%4)+8*(int)(stripNb/4)-31*(int)(stripNb/16);//channel re-matching for apv25 chip
-		    			 int RstripPos;
+
 		    			 //stripNb=(8*(int)(stripNb/4)+3-stripNb)*((int)(stripNb/4)%2)+stripNb*(1-((int)(stripNb/4)%2));
 		    			 RstripNb=RstripNb+1+RstripNb%4-5*(((int)(RstripNb/4))%2);//channel re-matching for INFN type APV front-end card
 		    			 RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
+		    			 int RstripPos;
 		    			 RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];// calculate position
 
 		    			 float fadcvalue_temp =adcSum_temp-hMean->GetBinContent(stripNb+1);
@@ -1239,5 +1476,5 @@ InputHandler::~InputHandler() {
 int InputHandler::TestFunction() {
 	cout<<"asa"<<endl;
 	//HitProcessAllEvents(100000,"/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS35/Pedestal/SBS35_Pedestal_1110.root","test.root");
-	ZeroSProcessAllEvents(10000,"/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS35/Pedestal/SBS35_Pedestal_1110.root");
+	//ZeroSProcessAllEvents(10000,"/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS35/Pedestal/SBS35_Pedestal_1110.root");
 };
