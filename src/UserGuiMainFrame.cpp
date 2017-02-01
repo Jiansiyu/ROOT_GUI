@@ -352,41 +352,42 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 				break;
 			case C_RAWFILE_DAT: {
-				static TString dir(".");
-				TGFileInfo fi;
-				fi.fFileTypes = datfiletype;
-				fi.fIniDir = StrDup(dir);
-				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-				if (fi.fMultipleSelection && fi.fFileNamesList) {
-					TObjString *el;
-					TIter next(fi.fFileNamesList);
-					while ((el = (TObjString *) next())) {
-						string filename(el->GetString().Data());
-						vRawDataList.push_back(filename);
-						tRawFileEntry->RemoveAll();
-						for (int i = 0; i < vRawDataList.size(); i++) {
-							string raw_filename(
-							basename(strdup(vRawDataList[i].c_str())));
-							tRawFileEntry->AddEntry(
-									Form("%s", raw_filename.c_str()), i);
-							tRawFileEntry->MapSubwindows();
-							tRawFileEntry->Layout();
-						}
-					}
-				} else if (fi.fFilename != NULL) {
-					std::string filename = (fi.fFilename);
-					std::string FileFullName = filename;
-					vRawDataList.push_back(FileFullName);
-					tRawFileEntry->RemoveAll();
-					for (int i = 0; i < vRawDataList.size(); i++) {
-						string raw_filename(
-						basename(strdup(vRawDataList[i].c_str())));
-						tRawFileEntry->AddEntry(
-								Form("%s", raw_filename.c_str()), i);
-						tRawFileEntry->MapSubwindows();
-						tRawFileEntry->Layout();
-					}
-				}
+				dButtonRawOpenFileDialog();
+//				static TString dir(".");
+//				TGFileInfo fi;
+//				fi.fFileTypes = datfiletype;
+//				fi.fIniDir = StrDup(dir);
+//				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+//				if (fi.fMultipleSelection && fi.fFileNamesList) {
+//					TObjString *el;
+//					TIter next(fi.fFileNamesList);
+//					while ((el = (TObjString *) next())) {
+//						string filename(el->GetString().Data());
+//						vRawDataList.push_back(filename);
+//						tRawFileEntry->RemoveAll();
+//						for (int i = 0; i < vRawDataList.size(); i++) {
+//							string raw_filename(
+//							basename(strdup(vRawDataList[i].c_str())));
+//							tRawFileEntry->AddEntry(
+//									Form("%s", raw_filename.c_str()), i);
+//							tRawFileEntry->MapSubwindows();
+//							tRawFileEntry->Layout();
+//						}
+//					}
+//				} else if (fi.fFilename != NULL) {
+//					std::string filename = (fi.fFilename);
+//					std::string FileFullName = filename;
+//					vRawDataList.push_back(FileFullName);
+//					tRawFileEntry->RemoveAll();
+//					for (int i = 0; i < vRawDataList.size(); i++) {
+//						string raw_filename(
+//						basename(strdup(vRawDataList[i].c_str())));
+//						tRawFileEntry->AddEntry(
+//								Form("%s", raw_filename.c_str()), i);
+//						tRawFileEntry->MapSubwindows();
+//						tRawFileEntry->Layout();
+//					}
+//				}
 			}
 				break;
 			case C_CONFIRM:
@@ -417,73 +418,70 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 
 					case 'P':
 						printf("pedestal mode\n");
-						{
-
-							std::ifstream testfile(vPedestalName.c_str());
-							string Pedestal_name= vPedestalName;
-							if (testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
-								printf("start pedestal mode\n");
-
-								string raw_filename(basename(strdup(vPedestalName.c_str()))); // get the basename
-								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
-								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
-								std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
-
-								InputHandler * decoder = new InputHandler(vPedestalName.c_str());
-								decoder->PedProcessAllEvents(vEventNumber,Pedestal_outname.c_str());
-								printf("Pedestal file is saved as: %s\n",Pedestal_outname.c_str());
-								delete decoder;
-							} else {
-								printf("Please input the Pedestal file\n");
-								// set the color
-								Pixel_t red;
-								gClient->GetColorByName("red", red);
-								nStatusBarInfor->SetBackgroundColor(red);
-								nStatusBarInfor->SetText(
-										"Please input the Pedestal file");
-								break;
-							}
-
-						}
+						fPedestalModeProcess(vEventNumber,vPedestalDataFileName);
+						//						{
+//
+//							std::ifstream testfile(vPedestalName.c_str());
+//							string Pedestal_name= vPedestalName;
+//							if (testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
+//								printf("start pedestal mode\n");
+//
+//								string raw_filename(basename(strdup(vPedestalName.c_str()))); // get the basename
+//								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
+//								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
+//								std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
+//
+//								InputHandler * decoder = new InputHandler(vPedestalName.c_str());
+//								decoder->PedProcessAllEvents(vEventNumber,Pedestal_outname.c_str());
+//								printf("Pedestal file is saved as: %s\n",Pedestal_outname.c_str());
+//								delete decoder;
+//							} else {
+//								printf("Please input the Pedestal file\n");
+//								// set the color
+//								Pixel_t red;
+//								gClient->GetColorByName("red", red);
+//								nStatusBarInfor->SetBackgroundColor(red);
+//								nStatusBarInfor->SetText(
+//										"Please input the Pedestal file");
+//							}
+//
+//						}
 						break;
 
 					case 'H':
 						printf("histo mode\n");
-						if(vRawDataList.size()!=0){
-							std::ifstream testfile(vPedestalName.c_str());
-							if (!testfile.good()) {
-								printf("Please input the Pedestal file\n");
-								// set the color
-								Pixel_t red;
-								gClient->GetColorByName("red", red);
-								nStatusBarInfor->SetBackgroundColor(red);
-								nStatusBarInfor->SetText(
-										"Please input the Pedestal file");
-								break;
-							}
-							for(int i=0;i<vRawDataList.size();i++ ){
-								printf("Processing  %s\n", vRawDataList[i].c_str());
-								// set the color
-								Pixel_t yellow;
-								gClient->GetColorByName("yellow", yellow);
-								nStatusBarInfor->SetBackgroundColor(yellow);
-								nStatusBarInfor->SetText(Form("Processing  %s\n", vRawDataList[i].c_str()));
-
-								InputHandler * decoder = new InputHandler(vRawDataList[i].c_str());
-								string raw_filename(basename(strdup(vRawDataList[i].c_str())));// get the basename
-								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
-								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
-								std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(),"",atoi(number_index.c_str())));
-								decoder->HitProcessAllEvents(1000,vPedestalName.c_str(),Hit_outname.c_str());
-								printf("OutPut file is save as %s\n",Hit_outname.c_str());
-								//delete decoder;
-								delete decoder;
-//								Pixel_t green;
-//								gClient->GetColorByName("green", green);
-//								nStatusBarInfor->SetBackgroundColor(green);
-//								nStatusBarInfor->SetText(Form("Processing  %s\n",vRawDataList[i].c_str()));
-							}
-						}
+						fHitModeProcess(vEventNumber,vPedestalROOTFileName,vRawDataList);
+//						if(vRawDataList.size()!=0){
+//							std::ifstream testfile(vPedestalName.c_str());
+//							if (!testfile.good()) {
+//								printf("Please input the Pedestal file\n");
+//								// set the color
+//								Pixel_t red;
+//								gClient->GetColorByName("red", red);
+//								nStatusBarInfor->SetBackgroundColor(red);
+//								nStatusBarInfor->SetText(
+//										"Please input the Pedestal file");
+//								break;
+//							}
+//							for(int i=0;i<vRawDataList.size();i++ ){
+//								printf("Processing  %s\n", vRawDataList[i].c_str());
+//								// set the color
+//								Pixel_t yellow;
+//								gClient->GetColorByName("yellow", yellow);
+//								nStatusBarInfor->SetBackgroundColor(yellow);
+//								nStatusBarInfor->SetText(Form("Processing  %s\n", vRawDataList[i].c_str()));
+//
+//								InputHandler * decoder = new InputHandler(vRawDataList[i].c_str());
+//								string raw_filename(basename(strdup(vRawDataList[i].c_str())));// get the basename
+//								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
+//								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
+//								std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(),"",atoi(number_index.c_str())));
+//								decoder->HitProcessAllEvents(1000,vPedestalName.c_str(),Hit_outname.c_str());
+//								printf("OutPut file is save as %s\n",Hit_outname.c_str());
+//								//delete decoder;
+//								delete decoder;
+//							}
+//						}
 						break;
 
 					case 'A':
@@ -577,7 +575,7 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 			}
 
 		dRawHistoBuffer.clear();
-//		map<int,map<int,vector<int>>>::iterator iter_mpd=dSingleEventData.begin();
+		//map<int,map<int,vector<int>>>::iterator iter_mpd=dSingleEventData.begin();
 		for(map<int,map<int,vector<int>>>::iterator iter_mpd=dSingleEventData.begin();iter_mpd!=dSingleEventData.end();iter_mpd++){
 			map<int,vector<int>>::iterator itter_apv=iter_mpd->second.begin();
 			for(;itter_apv!=iter_mpd->second.end();itter_apv++){
@@ -632,7 +630,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
 		map<int,map<int,int>> sSingleEventData=inputHandler->ZeroSProcessAllEvents(vEventNumber,"gui",Pedestal_name.c_str());
 		//home/newdriver/SBS39_Pedestal_temp1356.root
-	// LOAD THE DAta
+	   // LOAD THE DAta
 		for(map<int,int>::iterator iter=sSingleEventData[1].begin(); iter!= sSingleEventData[1].end();iter++){
 			histox->Fill(iter->first,iter->second);
 		}
@@ -679,14 +677,6 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 		cRawCanvas->Update();
 		gSystem->ProcessEvents();
 
-	/*	delete histox;
-		delete histoy;
-		delete histo_zerox;
-		delete histo_zeroy;
-		delete histo_rmtakx;
-		delete histo_rmtaky;
-		delete histo_talkx;
-		delete histo_talky;*/
 
 	}else{
 		printf("Pedestal File structure unrecgnized, only .root allowed\n");
@@ -696,7 +686,6 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 
 void UserGuiMainFrame::dMenuOpenFileDialog(){
-	try {
 		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 		std::string inputfilename=dialog->Browser_file();
 		if(inputfilename!=NULL){
@@ -704,13 +693,10 @@ void UserGuiMainFrame::dMenuOpenFileDialog(){
 		}else{
 			printf("on file inputed");
 		}
-	} catch (exception e){
-
-	}
+		delete dialog;
 }
 
 void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
-	try {
 		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 		std::string inputfilename=dialog->Browser_file();
 		if(inputfilename!=NULL){
@@ -729,16 +715,131 @@ void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
 			std::string filebasename=basename(strdup(vPedestalName.c_str()));
 			tPedestalFileEntry->SetTitle(filebasename.c_str());
 		}
-	} catch (exception e) {
+		delete dialog;
+}
+
+void UserGuiMainFrame::dButtonRawOpenFileDialog(){
+	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+	std::vector<std::string> RawFilenames=dialog->Browser_files();
+	if(RawFilenames.size()){
+		for(unsigned int file_counter=0; file_counter<RawFilenames.size();file_counter++){
+			if(dialog->CheckAppendix(RawFilenames[file_counter],"root")){
+				vRootDataList.push_back(RawFilenames[file_counter]);
+			}else{
+				if(dialog->CheckAppendix(RawFilenames[file_counter],"dat")){
+					vRawDataList.push_back(RawFilenames[file_counter]);
+				}
+			}
+		}
+	}
+	if (vRawDataList.size() || vRootDataList.size()) {
+		tRawFileEntry->RemoveAll();
+		for (unsigned int file_counter = 0; file_counter < vRawDataList.size();
+				file_counter++) {
+			tRawFileEntry->AddEntry(
+					(dialog->GetBaseFileName(vRawDataList[file_counter])).c_str(),
+					dialog->GetNumberFromFilename(vRawDataList[file_counter]));
+			//printf("%d\n",dialog->GetNumberFromFilename(vRawDataList[file_counter]));
+		}
+		for (unsigned int file_counter = 0; file_counter < vRootDataList.size();
+				file_counter++) {
+			tRawFileEntry->AddEntry(
+					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
+					dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+			//printf("%d\n",dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+		}
+
+		tRawFileEntry->MapSubwindows();
+		tRawFileEntry->Layout();
 	}
 }
 
+void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
+	std::ifstream testfile(rawfilename.c_str());
+	string Pedestal_name= rawfilename;
+	if ((!Pedestal_name.empty())&&testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
+		printf("start pedestal mode\n");
 
-//std::string filname = (basename(
-//							strdup(vPedestalName.c_str())));
-//					tPedestalFileEntry->SetTitle(filename.c_str());
+		string raw_filename(basename(strdup(vPedestalName.c_str()))); // get the basename
+		string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
+		string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
+		std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
 
+		InputHandler * decoder = new InputHandler(vPedestalName.c_str());
+		if (entries > 1) {
+			decoder->PedProcessAllEvents(entries, Pedestal_outname.c_str());
+		} else {
+			decoder->PedProcessAllEvents(Pedestal_outname.c_str());
+		}
+		printf("Pedestal file is saved as: %s\n",Pedestal_outname.c_str());
+		delete decoder;
+	} else {
+		printf("Please input the Pedestal file\n");
+		// set the color
+		Pixel_t red;
+		gClient->GetColorByName("red", red);
+		nStatusBarInfor->SetBackgroundColor(red);
+		nStatusBarInfor->SetText(
+				"Please input the Pedestal file");
+	}
+}
 
+void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
+	UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
+	if (rawfilename.size() != 0) {
+		std::ifstream testfile(Pedestal_name.c_str());
+		if ((!testfile.good())
+				|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
+			printf("Please input the Pedestal file\n");
+			// set the color
+			Pixel_t red;
+			gClient->GetColorByName("red", red);
+			nStatusBarInfor->SetBackgroundColor(red);
+			nStatusBarInfor->SetText("Please input the Pedestal file");
+		} else {
 
+			for (int i = 0; i < rawfilename.size(); i++) {
+				std::ifstream testfile(rawfilename[i].c_str());
+				if (testfile.good()) {
+					printf("Processing  %s\n", rawfilename[i].c_str());
+					// set the color
+					Pixel_t yellow;
+					gClient->GetColorByName("yellow", yellow);
+					nStatusBarInfor->SetBackgroundColor(yellow);
+					nStatusBarInfor->SetText(
+							Form("Processing  %s\n", rawfilename[i].c_str()));
 
+					InputHandler * decoder = new InputHandler(
+							rawfilename[i].c_str());
+					string raw_filename(
+							basename(strdup(rawfilename[i].c_str()))); // get the basename
+					string filename_noappendix = raw_filename.substr(0,
+							raw_filename.find_last_of("."));
+					string number_index = filename_noappendix.substr(
+							filename_noappendix.find_last_not_of("0123456789")
+									+ 1);
+					std::string Hit_outname(
+							Form(tOutPutfilePattern->GetTitle(), "",
+									atoi(number_index.c_str())));
+					if (entries > 2) {
+						decoder->HitProcessAllEvents(entries,
+								vPedestalName.c_str(), Hit_outname.c_str());
+					} else {
+						decoder->HitProcessAllEvents(vPedestalName.c_str(),
+								Hit_outname.c_str());
+					}
+					printf("OutPut file is save as %s\n", Hit_outname.c_str());
+					Pixel_t green;
+					gClient->GetColorByName("green", green);
+					nStatusBarInfor->SetBackgroundColor(green);
+					nStatusBarInfor->SetText(
+							Form("OutPut file is save as %s\n",
+									Hit_outname.c_str()));
 
+					//delete decoder;
+					delete decoder;
+				}
+			}
+		}
+	}
+}

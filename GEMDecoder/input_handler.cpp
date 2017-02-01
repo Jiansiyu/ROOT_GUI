@@ -427,14 +427,6 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
           vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
 	  if(vec!=NULL)
 	  {
-	    //for debug
-	    //  for(unsigned int i=0;i<vec->size();i++)
-	    // {
-	    //   cout<<hex<<(*vec)[i]<<"  ";//<<endl;
-	      //cout<<(vec)->size()<<endl;
-	    // }
-	    //
-	    //vec->pop_back(); //remove the last 0xfafafafa word
 	    vSRSSingleEventData.reserve(vSRSSingleEventData.size() + vec->size() );
 	    vSRSSingleEventData.insert(vSRSSingleEventData.end(), vec->begin(), vec->end() );
 	  }
@@ -584,10 +576,224 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 	    }
 	}
     }
-  //end of delete histograms
-
   return entry;
 }
+
+int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
+
+	//Loading Mapping
+	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	string line;
+	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
+	map<int,map<int,vector<int> > > mMapping;
+
+	while (getline(filestream, line) ) {
+	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
+	    if( line.find("#") == 0 ) continue;
+	    char *tokens = strtok( (char *)line.data(), ",");
+	    if(tokens !=NULL){
+	      cout<<tokens<<" ";Mapping_mpdId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_GEMId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Xis=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_ADCId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_I2C=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Pos=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Invert=atoi(tokens);
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_GEMId);//0
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
+	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
+	    }
+	    cout<<endl;
+	  }
+  filestream.close();
+  int entry = 0;
+  try{
+
+    evioFileChannel chan(filename.c_str(), "r");
+
+    chan.open();
+
+    while(chan.read())
+    {
+      map<int, map<int, map<int, vector<int> > > >  mmHit;
+      //vector<uint32_t> srsSingleEvent;
+      vSRSSingleEventData.clear();
+
+      evioDOMTree event(chan);
+      evioDOMNodeListP mpdEventList = event.getNodeList( isLeaf() );
+
+      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+      cout<<"number of banks: "<<mpdEventList->size()<<endl;
+      #endif
+
+      int n_bank = mpdEventList->size();
+      //if(n_bank)
+
+      evioDOMNodeList::iterator iter;
+      for(iter=mpdEventList->begin(); iter!=mpdEventList->end(); ++iter)
+      {
+       // cout<<"bank #:"<< (*iter)->tag<<endl;
+
+	if( ( (*iter)->tag == 10))
+	{
+          vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+	  if(vec!=NULL)
+	  {
+	    vSRSSingleEventData.reserve(vSRSSingleEventData.size() + vec->size() );
+	    vSRSSingleEventData.insert(vSRSSingleEventData.end(), vec->begin(), vec->end() );
+	  }
+	  else
+	  {
+	    cout<<"found NULL contents in mpd.."<<endl;
+	  }
+	}
+      }
+
+      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+      cout<<"Event ID: "<<entry<<endl;
+      #endif
+      if(vSRSSingleEventData.size()!=0){entry++;}
+      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+      cout<<"Event Size [uint_32 in number of words]:"<<vSRSSingleEventData.size()<<endl;
+      #endif
+
+      if (vSRSSingleEventData.size() == 0 ) continue; // if no srs event found, go to next event
+
+      RawDecoder raw_decoder(vSRSSingleEventData);
+      mTsAdc = raw_decoder.GetStripTsAdcMap();//
+
+      //Fill strip average ADC Histogram for calculating pedestal
+      int mpd_id=0;
+      int adc_ch=0;
+      int stripNb=0;
+      for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)
+	{
+	  mpd_id = it->first;
+	  map<int, map<int,vector<int> > > temp = it->second;
+
+	  map<int, map<int,vector<int> > >::iterator itt;
+	  for(itt=temp.begin(); itt!=temp.end(); ++itt)
+	    {
+	      adc_ch = itt->first;
+	      map<int,vector<int> > tempp = itt->second;
+	      map<int,vector<int> >::iterator ittt;
+	      for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt)
+		{
+		  stripNb = ittt->first;
+		  vector<int> adc_temp = ittt->second;
+		  int adcSum_temp=0;
+		  int TSsize = adc_temp.size();
+
+		  if (entry==1) mPedestalHisto[mpd_id][adc_ch][stripNb] = new TH1F(Form("mpd_%d_ch_%d_Strip_%d",mpd_id, adc_ch,stripNb), Form("mpd_%d_ch_%d_Strip_%d_pedestal_data",mpd_id, adc_ch,stripNb), 3500, -500, 3000);
+
+		  for(int i=0; i<TSsize;i++)
+		    { adcSum_temp+=adc_temp[i];
+		      //mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
+		      //cout<<"mean: "<<adc_temp[i]<<endl;
+		    }
+		  adcSum_temp=adcSum_temp/TSsize;
+		  mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adcSum_temp);
+
+		}
+	    }
+	}
+      //end of preparation for calculating pedestal
+    }
+    chan.close();
+  } catch (evioException e) {
+    cerr <<endl <<e.toString() <<endl <<endl;
+    exit(EXIT_FAILURE);
+  }
+
+  //
+  int mpd_id=0;
+  int adc_ch=0;
+  int stripNb=0;
+  //
+  //Calculating pedestal
+  char *PedFilename_temp = new char[100];
+  std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
+
+	f = new TFile(PedFilename_temp, "RECREATE");
+	TH1F *mPedestalRMSall = new TH1F("APV Pedestal RMS distribution","APV Pedestal RMS distribution", 200, 0, 200);
+	TH1F *mPedestalMeanall = new TH1F("APV Pedestal Mean distribution","APV Pedestal Mean distribution", 200, 0, 200);
+
+	TH1F *mPedestalMeanx = new TH1F("APV Pedestal mean x","APV Pedestal mean x", 1600, 0, 1600);
+	TH1F *mPedestalMeany= new TH1F("APV Pedestal mean y","APV Pedestal mean y", 1280, 0, 1280);
+	TH1F *mPedestalRMSx = new TH1F("APV Pedestal RMS x","APV Pedestal RMS x", 1540, 0, 1540);
+	TH1F *mPedestalRMSy= new TH1F("APV Pedestal RMS y","APV Pedestal RMS y", 1280, 0, 1280);
+
+	delete[] PedFilename_temp;
+	map<int, map<int, map<int, TH1F*> > >::iterator it;
+	for (it = mPedestalHisto.begin(); it != mPedestalHisto.end(); ++it) {   // MPD loop
+		mpd_id = it->first;
+		map<int, map<int, TH1F*> > temp = it->second;
+
+		map<int, map<int, TH1F*> >::iterator itt;
+		for (itt = temp.begin(); itt != temp.end(); ++itt) {     // ADC(apv)loop
+			adc_ch = itt->first;
+			map<int, TH1F*> tempp = itt->second;
+			map<int, TH1F*>::iterator ittt;
+			mPedestalMean[mpd_id][adc_ch] = new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d", mpd_id, adc_ch),Form("PedestalMean(offset)_mpd_%d_ch_%d", mpd_id, adc_ch), 128, 0, 128);
+			mPedestalRMS[mpd_id][adc_ch] = new TH1F(Form("PedestalRMS_mpd_%d_ch_%d", mpd_id, adc_ch),Form("PedestalRMS_mpd_%d_ch_%d", mpd_id, adc_ch),128, 0, 128);
+			// add the overall RMS and mean histo
+			for (ittt = tempp.begin(); ittt != tempp.end(); ++ittt) {     // strips loop
+				stripNb = ittt->first;
+				TH1F* Pedestal_temp = ittt->second;
+				float mean = Pedestal_temp->GetMean(); //cout<<"Mean:  "<<mean<<endl;
+				float rms = Pedestal_temp->GetRMS();
+
+				int RstripNb = 32 * (stripNb % 4) + 8 * (int) (stripNb / 4)
+						- 31 * (int) (stripNb / 16); //channel re-matching for apv25 chip
+
+						//stripNb=(8*(int)(stripNb/4)+3-stripNb)*((int)(stripNb/4)%2)+stripNb*(1-((int)(stripNb/4)%2));
+				RstripNb = RstripNb + 1 + RstripNb % 4
+						- 5 * (((int) (RstripNb / 4)) % 2); //channel re-matching for INFN type APV front-end card
+
+				//invert the address if needed
+				RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
+				int RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];            // calculate position
+
+				if(mMapping[mpd_id][adc_ch][1]==0){	mPedestalMeanx->Fill(RstripPos,mean);mPedestalRMSx->Fill(RstripPos,rms);}
+				if(mMapping[mpd_id][adc_ch][1]==1){ mPedestalMeany->Fill(RstripPos,mean);mPedestalRMSy->Fill(RstripPos,rms);}
+
+				mPedestalMean[mpd_id][adc_ch]->Fill(stripNb, mean);
+				mPedestalRMS[mpd_id][adc_ch]->Fill(stripNb, rms);
+				mPedestalMeanall->Fill(mean);
+				mPedestalRMSall->Fill(rms);
+			}
+		}
+	}
+	f->Write();
+	f->Close();
+  //end of Calculating pedestal
+  //exit(EXIT_SUCCESS);
+
+  //delete histograms
+  for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)
+    {
+      mpd_id = it->first;
+      map<int, map<int,vector<int> > > temp = it->second;
+
+      map<int, map<int,vector<int> > >::iterator itt;
+      for(itt=temp.begin(); itt!=temp.end(); ++itt)
+	{
+	  adc_ch = itt->first;
+	  map<int,vector<int> > tempp = itt->second;
+	  map<int,vector<int> >::iterator ittt;
+	  for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt)
+	    {
+	      stripNb = ittt->first;
+	      mPedestalHisto[mpd_id][adc_ch][stripNb]->Delete();
+	    }
+	}
+    }
+  return entry;
+
+}
+
 
 map<int,map<int,int>> InputHandler::ZeroSProcessAllEvents(int entries, string gui, string pedestal_file_name){
 
@@ -1084,6 +1290,253 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 	//exit(EXIT_SUCCESS);
 	return entry;
 }
+
+int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_file_name) {
+
+	int entry=0;
+	Int_t EvtID,nch,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
+	Vstrip =new Int_t[2000];
+	VdetID =new Int_t[2000];
+	VplaneID =new Int_t[2000];
+	adc0  = new Int_t[2000];
+	adc1  = new Int_t[2000];
+	adc2  = new Int_t[2000];
+	adc3  = new Int_t[2000];
+	adc4  = new Int_t[2000];
+	adc5  = new Int_t[2000];
+	// create the files that used for save the data
+	char *HitFilename_temp = new char[100];
+	std::strcpy(HitFilename_temp,root_file_name.c_str());
+	TFile *Hit_rootfile = new TFile(HitFilename_temp,"RECREATE");
+	delete[] HitFilename_temp;
+
+	TTree *Hit = new TTree("GEMHit","Hit list");
+	Hit->Branch("evtID",&EvtID,"evtID/I");	     // event ID, start from 1
+	Hit->Branch("nch",&nch,"nch/I");                   // how many channels been fired at one time
+	Hit->Branch("strip",Vstrip,"strip[nch]/I");	     // number of strips that been fired
+	Hit->Branch("detID",VdetID,"detID[nch]/I");        // detector ID ? used for multi-detector case ?  always 0 in this case
+	Hit->Branch("planeID",VplaneID,"planeID[nch]/I");  // plan ID
+
+	Hit->Branch("adc0",adc0,"adc0[nch]/I");            // six samples
+	Hit->Branch("adc1",adc1,"adc1[nch]/I");
+	Hit->Branch("adc2",adc2,"adc2[nch]/I");
+	Hit->Branch("adc3",adc3,"adc3[nch]/I");
+	Hit->Branch("adc4",adc4,"adc4[nch]/I");
+	Hit->Branch("adc5",adc5,"adc5[nch]/I");
+	//end of initialize root tree to store hits
+	//Loading Mapping
+	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	string line;
+	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
+	map<int,map<int,vector<int> > > mMapping;
+
+	while (getline(filestream, line) ) {
+	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
+	    if( line.find("#") == 0 ) continue;
+	    char *tokens = strtok( (char *)line.data(), ",");
+	    if(tokens !=NULL){
+	      cout<<tokens<<" ";Mapping_mpdId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_GEMId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Xis=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_ADCId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_I2C=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Pos=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Invert=atoi(tokens);
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_GEMId);//0
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
+	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
+	    }
+	    cout<<endl;
+	  }
+	 filestream.close();
+	 //end of load Mapping
+	 char *PedFilename_temp = new char[100];
+	 std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
+	 f = new TFile(PedFilename_temp,"READ" );
+	 delete[] PedFilename_temp;
+	 try {
+		 evioFileChannel chan(filename.c_str(),"r");
+		 chan.open();
+		 while(chan.read()) {
+			 // detID   PlaneID  N-strips  SixTimpleSample
+			 map<int,map<int,map<int,vector<int> > > >mmHit;
+			 vSRSSingleEventData.clear(); // single events data
+			 evioDOMTree event(chan);
+			 evioDOMNodeListP mpdEventList = event.getNodeList( isLeaf() );
+		     evioDOMNodeList::iterator iter;
+			 for(iter=mpdEventList->begin();iter!=mpdEventList->end();++iter) {
+				 if((*iter)->tag==10) {
+					 vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+					 if(vec!=NULL) {
+						 vSRSSingleEventData.reserve(vSRSSingleEventData.size() + vec->size() );
+						 vSRSSingleEventData.insert(vSRSSingleEventData.end(), vec->begin(), vec->end() );
+					 }
+					 else {
+						 cout<<"found NULL contents in mpd.."<<endl;
+					 }
+				 }
+			 }
+
+			 if(vSRSSingleEventData.size()!=0) {
+				 entry++;
+			 }
+			 else {
+				 continue;
+			 }
+
+			 RawDecoder raw_decoder(vSRSSingleEventData);
+		     mTsAdc = raw_decoder.GetStripTsAdcMap();//
+
+		     int mpd_id=0;
+		     int adc_ch=0;
+		     int stripNb=0;
+
+		     map<int,map<int,map<int, vector<int> > > >::iterator it=mTsAdc.begin();
+		     for(;it!=mTsAdc.end();++it) {   // loop on all the MPDs
+		    	 mpd_id=it->first;
+		    	 map<int, map<int, vector<int> > > temp=it->second;
+		    	 map<int, map<int, vector<int> > >::iterator itt;
+
+		    	 for(itt=temp.begin();itt!=temp.end();++itt) {      // loop on all the APVs that attached on thi MPD
+		    		 adc_ch=itt->first;
+		    		 map<int, vector<int> > tempp=itt->second;
+		    		 map<int, vector<int> >::iterator ittt;
+
+		    		 //lood the pedestal information fron the root file
+		    		 TH1F* hMean = (TH1F*)f->Get(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd_id, adc_ch));
+		    		 TH1F* hRMS  = (TH1F*)f->Get(Form("PedestalRMS_mpd_%d_ch_%d",mpd_id, adc_ch));
+
+		    		 // used for identify the crosstalk issues
+		    		 //timeSample  POsition ADC
+		    		 map<int, map <int, int> > sAPVCrossTalk_temp;    // raw data,
+		    		 map<int, map <int, int> > sAPVAddressCorrelation_temp;	// address correlation
+		    		 map<int,int> sAPVCrossTalk_aver_temp;
+		    		 map<int,int> sAPVAddressCorrelation_aver_temp;
+
+		    		 for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt) {
+		    			 stripNb=ittt->first;
+		    			 vector<int> adc_temp = ittt->second;
+
+		    			 int adcSum_temp=0;
+		    			 int TSsize = adc_temp.size();  // sum over the six timesamples
+		    			 for(int i =0; i < TSsize; i++) {
+		    				 adcSum_temp+=adc_temp[i];
+		    			 }
+		    			 adcSum_temp=adcSum_temp/TSsize;
+
+		    			 int RstripNb=32*(stripNb%4)+8*(int)(stripNb/4)-31*(int)(stripNb/16);//channel re-matching for apv25 chip
+
+		    			 //stripNb=(8*(int)(stripNb/4)+3-stripNb)*((int)(stripNb/4)%2)+stripNb*(1-((int)(stripNb/4)%2));
+		    			 RstripNb=RstripNb+1+RstripNb%4-5*(((int)(RstripNb/4))%2);//channel re-matching for INFN type APV front-end card
+		    			 RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
+		    			 int RstripPos;
+		    			 RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];// calculate position
+
+		    			 float fadcvalue_temp =adcSum_temp-hMean->GetBinContent(stripNb+1);
+		    			 float rms_temp=hRMS->GetBinContent(stripNb+1); // get the sigma for this channels
+
+		    			 if(fadcvalue_temp>5*rms_temp) {
+
+		    				 int detID=mMapping[mpd_id][adc_ch][0];
+		    			     int planeID=mMapping[mpd_id][adc_ch][1];
+		    			     for(int i=0; i<TSsize;i++)
+		    			      	{
+		    			    	 	 sAPVCrossTalk_temp[i].insert(make_pair(RstripPos,adc_temp[i]-hMean->GetBinContent(stripNb+1)));
+		    			      	 }
+		    			     sAPVCrossTalk_aver_temp[stripNb]=fadcvalue_temp;
+		    			     sAPVAddressCorrelation_aver_temp[stripNb]=RstripPos;
+
+		    			 }
+		    		 }
+		    		 // finish decode one APv
+		    		 // save the data and remove the cross talk
+		    		 map<int,int> sRemoveCrossTalk;
+		    		 map<int,int> sCrossTalk;
+		    		 FindCrossTalk(sAPVAddressCorrelation_aver_temp,sAPVCrossTalk_aver_temp,&sRemoveCrossTalk,&sCrossTalk);
+		    		 map<int,int>::iterator iter_rmctsave=sRemoveCrossTalk.begin();
+		    		 int detID=mMapping[mpd_id][adc_ch][0];
+		    		 int planeID=mMapping[mpd_id][adc_ch][1];
+		    		 while(iter_rmctsave!=sRemoveCrossTalk.end()) {
+
+		    			 int NtimeSample_temp=sAPVCrossTalk_temp.size();
+		    			 for(int i =0; i < NtimeSample_temp ; i++) {
+		    				 mmHit[detID][planeID][iter_rmctsave->first].push_back(sAPVCrossTalk_temp[i][iter_rmctsave->first]);
+		    			 }
+		    			 iter_rmctsave++;
+		    		 }
+		    		 sAPVCrossTalk_temp.clear();
+		    		 sAPVAddressCorrelation_temp.clear();
+		    		 sAPVCrossTalk_aver_temp.clear();
+		    		 sAPVAddressCorrelation_aver_temp.clear();
+		    		 //finish save the data
+		    		 hMean->Delete();
+		    		 hRMS->Delete();
+		    	 }  // end of loop on APVs
+		     }      // end of loop on MPDs -finish decode one event
+		     int detid,planeid;
+		     Int_t nstrip=0;
+		     for(map<int, map<int, map<int, vector<int> > > >::iterator it = mmHit.begin(); it!=mmHit.end(); ++it) {
+		    	 detid = it->first;
+		    	 map<int, map<int, vector<int> > >temp = it->second;
+		    	 map<int, map<int, vector<int> > >::iterator itt;
+		    	 for(itt=temp.begin(); itt!=temp.end(); ++itt) {
+		    		 planeid = itt->first;
+		    		 vector<int> stripVector;//cout<<"planeid: "<<planeid<<"  "<<stripVector.size()<<"DDDDD"<<endl;
+		    		 map<int, vector<int> > tempp = itt->second;
+		    		 map<int, vector<int> > ::iterator ittt;
+		    		 for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt) { //cout<<"HHH"<<ittt->first<<endl;
+		    			 stripVector.push_back(ittt->first);
+		    		 }
+		    		 //cout<<"planeid: "<<planeid<<"  "<<stripVector.size()<<"asdasd"<<endl;
+		    		 sort(stripVector.begin(),stripVector.end());
+		    		 for(unsigned int i=0;i<stripVector.size();i++) {
+		    			 Vstrip[nstrip]=stripVector[i];
+		    			 adc0[nstrip]=mmHit[detid][planeid][stripVector[i]][0];
+		    			 adc1[nstrip]=mmHit[detid][planeid][stripVector[i]][1];
+		    			 adc2[nstrip]=mmHit[detid][planeid][stripVector[i]][2];
+		    			 adc3[nstrip]=mmHit[detid][planeid][stripVector[i]][3];
+		    			 adc4[nstrip]=mmHit[detid][planeid][stripVector[i]][4];
+		    			 adc5[nstrip]=mmHit[detid][planeid][stripVector[i]][5];
+		    			 //cout<<"ADC:"<<stripVector[i]<<" "<<adc0[nstrip]<<" "<<adc1[nstrip]<<" "<<adc2[nstrip]<<" "<<adc3[nstrip]<<" "<<adc4[nstrip]<<" "<<adc5[nstrip]<<endl;
+		    			 VdetID[nstrip]=detid;
+		    			 VplaneID[nstrip]=planeid;
+		    			 nstrip++;
+		    		 }
+		    	 }
+		     }
+		     nch=nstrip;//cout<<nch<<"HHHHHHH"<<endl;
+		     EvtID=entry;
+		     Hit->Fill();
+		 }
+		 chan.close();
+	} catch (evioException e) {
+		cerr<<endl<<e.toString()<<endl<<endl;
+		exit(EXIT_FAILURE);
+	}
+	f->Close();
+
+	int mpd_id=0;
+	int adc_ch=0;
+	int stripNb=0;
+
+	Hit->Write();
+	Hit_rootfile->Write();
+	Hit_rootfile->Close();
+	delete[] Vstrip;
+	delete[] VdetID;
+	delete[] VplaneID;
+	delete[] adc0 ;
+	delete[] adc1 ;
+	delete[] adc2 ;
+	delete[] adc3 ;
+	delete[] adc4 ;
+	delete[] adc5 ;
+	//exit(EXIT_SUCCESS);
+	return entry;
+}
+
 
 int InputHandler::ZeroSProcessAllEvents(int entries, string pedestal_file_name) {
 	cout<<pedestal_file_name.data()<<endl;

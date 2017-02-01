@@ -98,7 +98,6 @@ public:
 
 	virtual void CloseWindow();
 	virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
-
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
 
@@ -115,14 +114,21 @@ private:
 	std::string vPedestalDataFileName;
 	std::string vPedestalROOTFileName;
 	std::vector<std::string> vRawDataList;
+	std::vector<std::string> vRootDataList;
 	char vWorkMode;
 	long int vEventNumber;
 	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
 private :
+
 	void fRawModeProcess(int entries, std::string rawfilename);
+	void fPedestalModeProcess(int entries, std::string rawfilename);
 	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
+	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
+// dialog process
+private:
 	void dMenuOpenFileDialog();
 	void dButtonPedestalOpenFileDialog();
+	void dButtonRawOpenFileDialog();
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:
@@ -132,7 +138,6 @@ private:
 	TGMenuBar *fMenuBar;
 	TGPopupMenu *fMenuFile, *fMenuSet, *fMenuView, *fMenuHelp;
 	TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
-
 
 	// set the work zone variables
 	TGHorizontalFrame *fWorkZoneFrame;

@@ -39,6 +39,7 @@ public:
 	std::vector<TH1F *> RawProcessAllEvents(std::vector<TH1F*> ,int entries);				// gui mode or batch mode
 	map<int, map<int, std::vector<int>>> RawProcessAllEvents(int entries, string a="gui");  // used for gui mode
 
+
 	int PedProcessAllEvents(int entries=0, string pedestal_file_name="");			// process certain number data
 	int PedProcessAllEvents(string pedestal_file_name="");							// process all data
 
@@ -46,7 +47,8 @@ public:
 	map<int,map<int,int>> ZeroSProcessAllEvents(int entries,string gui,string pedestal_file_name="");  // used for GUI mode
 
 	int HitProcessAllEvents(int entries=0, string pedestal_file_name="", string root_file_name="");
-	//bool MPDEventChooser(const evioDOMNodeP pNode);
+	int HitProcessAllEvents(string pedestal_file_name="", string root_file_name="");
+
 	int RMS_Mean_ProcessAllEvents(int entries,string pedestal_file_name="",string root_file_name="");  //used for calculate the RMS and Means of each chennals of the raw data
 
 	// add the test functions

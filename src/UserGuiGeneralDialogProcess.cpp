@@ -54,7 +54,7 @@ std::string UserGuiGeneralDialogProcess::Browser_file() {
 	fi.fFileTypes = filetype;
 	fi.fIniDir = StrDup(dir);
 	new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-
+	printf("where am I 0\n");
 	if (fi.fMultipleSelection && fi.fFileNamesList) {
 		TObjString *el;
 		TIter next(fi.fFileNamesList);
@@ -63,19 +63,21 @@ std::string UserGuiGeneralDialogProcess::Browser_file() {
 			tRawFileList.push_back(filename);
 
 		}
-	}else {
-		if(fi.fFilename != NULL) {
-		std::string filename = (fi.fFilename);
-		std::string FileFullName = filename;
-		tRawFileList.push_back(FileFullName);
-	}else{
-		return NULL;
+	} else {
+		printf("where am I 2\n");
+		if (fi.fFilename != NULL) {
+			printf("where am I 3\n");
+			std::string filename = (fi.fFilename);
+			std::string FileFullName = filename;
+			tRawFileList.push_back(FileFullName);
+		}
 	}
-	}
-	if(tRawFileList.size()){
+	if (tRawFileList.size()) {
 		return tRawFileList[0];
-	}else{
-		return NULL;
+	} else {
+		std::string temp;
+		temp.clear();
+		return temp;
 	}
 }
 
@@ -107,10 +109,12 @@ std::string UserGuiGeneralDialogProcess::Browser_file(std::string path) {
 		std::string FileFullName = filename;
 		tRawFileList.push_back(FileFullName);
 	}
-	if(tRawFileList.size()){
+	if (tRawFileList.size()) {
 		return tRawFileList[0];
-	}else{
-		return NULL;
+	} else {
+		std::string temp;
+		temp.clear();
+		return temp;
 	}
 }
 std::string UserGuiGeneralDialogProcess::Browser_file(const char *filetype_in[]) {
@@ -134,10 +138,12 @@ std::string UserGuiGeneralDialogProcess::Browser_file(const char *filetype_in[])
 		std::string FileFullName = filename;
 		tRawFileList.push_back(FileFullName);
 	}
-	if(tRawFileList.size()){
+	if (tRawFileList.size()) {
 		return tRawFileList[0];
-	}else{
-		return NULL;
+	} else {
+		std::string temp;
+		temp.clear();
+		return temp;
 	}
 }
 
@@ -162,10 +168,12 @@ std::string UserGuiGeneralDialogProcess::Browser_file(std::string path,const cha
 		std::string FileFullName = filename;
 		tRawFileList.push_back(FileFullName);
 	}
-	if(tRawFileList.size()){
+	if (tRawFileList.size()) {
 		return tRawFileList[0];
-	}else{
-		return NULL;
+	} else {
+		std::string temp;
+		temp.clear();
+		return temp;
 	}
 };
 
@@ -195,10 +203,12 @@ std::string UserGuiGeneralDialogProcess::Browser_file(std::string path,std::stri
 		std::string FileFullName = filename;
 		tRawFileList.push_back(FileFullName);
 	}
-	if(tRawFileList.size()){
+	if (tRawFileList.size()) {
 		return tRawFileList[0];
-	}else{
-		return NULL;
+	} else {
+		std::string temp;
+		temp.clear();
+		return temp;
 	}
 
 };
@@ -319,8 +329,8 @@ std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string 
 	const char *filetype[4];
 	filetype[0] = (fileformate+" File").c_str();
 	filetype[1] =("*."+fileformate).c_str();
+	filetype[2]=0;
 	filetype[3]=0;
-	filetype[4]=0;
 	std::vector<std::string>tRawFileList;
 	static TString dir(path.c_str());
 	TGFileInfo fi;
@@ -343,6 +353,22 @@ std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string 
 	}
 	return tRawFileList;
 };
+
+std::string UserGuiGeneralDialogProcess::GetBaseFileName(std::string filename){
+	std::string filebasename=basename(strdup(filename.c_str()));
+	return filebasename;
+}
+
+std::string UserGuiGeneralDialogProcess::GetAppendixLess_FileName(std::string filename) {
+	std::string filebasename=basename(strdup(filename.c_str()));
+	return filebasename.substr(0,filebasename.find_last_of("."));
+
+}
+int UserGuiGeneralDialogProcess::GetNumberFromFilename(std::string filename){
+	std::string filebasename=GetAppendixLess_FileName(filename);
+	return atoi(filebasename.substr(filebasename.find_last_not_of("0123456789")+1).c_str());
+
+}
 
 Bool_t UserGuiGeneralDialogProcess::CheckAppendix(std::string filename, std::string appendix) {
 	if(filename.substr(filename.find_last_of(".")+1)==appendix){

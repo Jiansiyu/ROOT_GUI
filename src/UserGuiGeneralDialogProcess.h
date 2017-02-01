@@ -46,7 +46,7 @@ public:
 	std::string GetBaseFileName(std::string filename);
 	std::string GetAppendixLess_FileName(std::string);  // get the filename with out appendix
 	std::string GetFileNameAppendix(std::string);
-	std::vector<int> GetNumberFromFilename(std::string filename);
+	int GetNumberFromFilename(std::string filename);
 	Bool_t CheckAppendix(std::string filename, std::string appendix);
 
 private:
