@@ -118,6 +118,7 @@ private:
 	char vWorkMode;
 	long int vEventNumber;
 	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
+	std::string vMappingName;
 private :
 
 	void fRawModeProcess(int entries, std::string rawfilename);
@@ -129,6 +130,7 @@ private:
 	void dMenuOpenFileDialog();
 	void dButtonPedestalOpenFileDialog();
 	void dButtonRawOpenFileDialog();
+	void dMenuSetLoadMapping();
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:

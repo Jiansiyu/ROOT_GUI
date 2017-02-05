@@ -177,7 +177,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
 	bWorkModeButtonGroup -> SetTitlePos(TGGroupFrame::kCenter);
 	// add the button to the frame
-	TGLayoutHints *bWorkModeLayout= new TGLayoutHints(kLHintsTop);
 	bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
 	bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
 	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
@@ -224,6 +223,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	fNumberFrame->SetTitlePos(TGGroupFrame::kCenter);
 	tNumberEntry = new TGNumberEntry(fNumberFrame);
 	tNumberEntry->SetUniqueID(V_NUMBERINPUT);
+	tNumberEntry->SetNumber(0);
 	tNumberEntry->Associate(this);
 	fNumberFrame->AddFrame(tNumberEntry,new TGLayoutHints(kLHintsExpandX));
 	fWorkZoneControlFrame->AddFrame(fNumberFrame,new TGLayoutHints(kLHintsExpandX));
@@ -236,9 +236,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 }
 
 void UserGuiMainFrame::SetStatusBar(){
-
-	//TGVertical3DLine *lStatusbarSeparation0=new TGVertical3DLine(fStatusFrame);
-	//fStatusFrame->AddFrame(lStatusbarSeparation0, new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY));
 
 	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM Analysis Framework Author: Siyu Jian");
 	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
@@ -263,7 +260,7 @@ void UserGuiMainFrame::SetStatusBar(){
 	TGLayoutHints *StatusBarLayout1=new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY,10,10);
 	TDatime *lSystemTime = new TDatime();
 	//TGString *time_string=new TGString(Form("%4d:%2d:%2d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDate()));
-	nStatusBarTimeLabel = new TGLabel(fStatusFrame,new TGString(Form("%4d : %02d : %02d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDay(),lSystemTime->GetSecond())));
+	nStatusBarTimeLabel = new TGLabel(fStatusFrame,new TGString(Form("%4d : %02d : %02d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDay())));
 	nStatusBarTimeLabel->Set3DStyle(0);
 	fStatusFrame->AddFrame(nStatusBarTimeLabel,StatusBarLayout1);
 	TGVertical3DLine *lStatusbarSeparation3=new TGVertical3DLine(fStatusFrame);
@@ -293,7 +290,6 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
-	//printf("transfer key pressed %d, %d, %d\n",kCM_CHECKBUTTON,GET_MSG(msg),parm1);
 	switch (GET_MSG(msg)) {
 
 	case kC_COMMAND:
@@ -305,12 +301,14 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 				break;
 			case M_FILE_NEWCANVAS:{
-				TCanvas *Canvas= new TCanvas("UVa GEM Analysis Framework--NewCanvas","UVa GEM Analysis Framework--NewCanvas",400,400);
+				//TCanvas *Canvas= ;
+				new TCanvas("UVa GEM Analysis Framework--NewCanvas","UVa GEM Analysis Framework--NewCanvas",400,400);
 			}
 			break;
 
 			case M_FILE_TBROWER: {
-				TBrowser *tBrowser=new TBrowser("UVa GEM Analysis Framework--TBrowser","UVa GEM Analysis Framework--Root Tree Browser");
+				//TBrowser *tBrowser=;
+				new TBrowser("UVa GEM Analysis Framework--TBrowser","UVa GEM Analysis Framework--Root Tree Browser");
 			}
 			break;
 			case M_FILE_SAVE:
@@ -328,6 +326,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case C_RAWFILE_PEDESTAL:
 				printf("pdestal detected\n");
 				break;
+
+			case M_SET_LOADMAPPING:
+				dMenuSetLoadMapping();
+				 break;
 			default:
 				break;
 			}
@@ -336,58 +338,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			switch (parm1) {
 			case C_RAWFILE_PEDESTAL: {
 				dButtonPedestalOpenFileDialog();
-//				static TString dir(".");
-//				TGFileInfo fi;
-//				fi.fFileTypes = filetype;
-//				fi.fIniDir = StrDup(dir);
-//				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-//				if (fi.fFilename != NULL) {
-//					std::string filename = fi.fFilename;
-//					vPedestalName = filename;
-//					printf("Open file: %s \n", vPedestalName.c_str());
-//					std::string filname = (basename(
-//							strdup(vPedestalName.c_str())));
-//					tPedestalFileEntry->SetTitle(filename.c_str());
-//				}
 			}
 				break;
 			case C_RAWFILE_DAT: {
 				dButtonRawOpenFileDialog();
-//				static TString dir(".");
-//				TGFileInfo fi;
-//				fi.fFileTypes = datfiletype;
-//				fi.fIniDir = StrDup(dir);
-//				new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-//				if (fi.fMultipleSelection && fi.fFileNamesList) {
-//					TObjString *el;
-//					TIter next(fi.fFileNamesList);
-//					while ((el = (TObjString *) next())) {
-//						string filename(el->GetString().Data());
-//						vRawDataList.push_back(filename);
-//						tRawFileEntry->RemoveAll();
-//						for (int i = 0; i < vRawDataList.size(); i++) {
-//							string raw_filename(
-//							basename(strdup(vRawDataList[i].c_str())));
-//							tRawFileEntry->AddEntry(
-//									Form("%s", raw_filename.c_str()), i);
-//							tRawFileEntry->MapSubwindows();
-//							tRawFileEntry->Layout();
-//						}
-//					}
-//				} else if (fi.fFilename != NULL) {
-//					std::string filename = (fi.fFilename);
-//					std::string FileFullName = filename;
-//					vRawDataList.push_back(FileFullName);
-//					tRawFileEntry->RemoveAll();
-//					for (int i = 0; i < vRawDataList.size(); i++) {
-//						string raw_filename(
-//						basename(strdup(vRawDataList[i].c_str())));
-//						tRawFileEntry->AddEntry(
-//								Form("%s", raw_filename.c_str()), i);
-//						tRawFileEntry->MapSubwindows();
-//						tRawFileEntry->Layout();
-//					}
-//				}
 			}
 				break;
 			case C_CONFIRM:
@@ -410,8 +364,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'Z':
 						printf("zero mode\n");
 						{
-							//InputHandler *inputHandler= new InputHandler("/home/newdriver/Research/SBS/Remote_Data/MPD_1380.dat");
-							//	map<int,map<int,int>> sSingleEventData=inputHandler->ZeroSProcessAllEvents(10,"gui","/home/newdriver/SBS39_Pedestal_temp1356.root");
 							fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[0].c_str());
 						}
 						break;
@@ -419,69 +371,11 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'P':
 						printf("pedestal mode\n");
 						fPedestalModeProcess(vEventNumber,vPedestalDataFileName);
-						//						{
-//
-//							std::ifstream testfile(vPedestalName.c_str());
-//							string Pedestal_name= vPedestalName;
-//							if (testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
-//								printf("start pedestal mode\n");
-//
-//								string raw_filename(basename(strdup(vPedestalName.c_str()))); // get the basename
-//								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
-//								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
-//								std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
-//
-//								InputHandler * decoder = new InputHandler(vPedestalName.c_str());
-//								decoder->PedProcessAllEvents(vEventNumber,Pedestal_outname.c_str());
-//								printf("Pedestal file is saved as: %s\n",Pedestal_outname.c_str());
-//								delete decoder;
-//							} else {
-//								printf("Please input the Pedestal file\n");
-//								// set the color
-//								Pixel_t red;
-//								gClient->GetColorByName("red", red);
-//								nStatusBarInfor->SetBackgroundColor(red);
-//								nStatusBarInfor->SetText(
-//										"Please input the Pedestal file");
-//							}
-//
-//						}
 						break;
 
 					case 'H':
 						printf("histo mode\n");
 						fHitModeProcess(vEventNumber,vPedestalROOTFileName,vRawDataList);
-//						if(vRawDataList.size()!=0){
-//							std::ifstream testfile(vPedestalName.c_str());
-//							if (!testfile.good()) {
-//								printf("Please input the Pedestal file\n");
-//								// set the color
-//								Pixel_t red;
-//								gClient->GetColorByName("red", red);
-//								nStatusBarInfor->SetBackgroundColor(red);
-//								nStatusBarInfor->SetText(
-//										"Please input the Pedestal file");
-//								break;
-//							}
-//							for(int i=0;i<vRawDataList.size();i++ ){
-//								printf("Processing  %s\n", vRawDataList[i].c_str());
-//								// set the color
-//								Pixel_t yellow;
-//								gClient->GetColorByName("yellow", yellow);
-//								nStatusBarInfor->SetBackgroundColor(yellow);
-//								nStatusBarInfor->SetText(Form("Processing  %s\n", vRawDataList[i].c_str()));
-//
-//								InputHandler * decoder = new InputHandler(vRawDataList[i].c_str());
-//								string raw_filename(basename(strdup(vRawDataList[i].c_str())));// get the basename
-//								string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
-//								string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
-//								std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(),"",atoi(number_index.c_str())));
-//								decoder->HitProcessAllEvents(1000,vPedestalName.c_str(),Hit_outname.c_str());
-//								printf("OutPut file is save as %s\n",Hit_outname.c_str());
-//								//delete decoder;
-//								delete decoder;
-//							}
-//						}
 						break;
 
 					case 'A':
@@ -505,7 +399,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				//delete cRawCanvas;
 				cRawCanvas->Clear();
 				cRawCanvas->ResetAttPad();
-				cRawCanvas->Divide(5,5);
+				cRawCanvas->Divide(7,7);
 
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
@@ -546,7 +440,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					if((vWorkMode=='Z')&&(vRawDataList.size()!=0)&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root")){
 						fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[0].c_str());
 					};
-					//printf("Number of Entries is set to %d\n",vEventNumber);
 					}
 					break;
 				default:
@@ -565,6 +458,7 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 
 		printf("Filename: %s\n", rawfilename.c_str());
 		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
+		if(!vMappingName.empty())inputHandler->SetMapping(vMappingName.c_str());
 		map<int,map<int,vector<int>>> dSingleEventData=inputHandler->RawProcessAllEvents(entries,"gui");
 
 			for (map<int, map<int, vector<int>>> ::iterator iter_mpd=dSingleEventData.begin();iter_mpd!=dSingleEventData.end();iter_mpd++) {
@@ -628,6 +522,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 		if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
 
 		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
+		if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
 		map<int,map<int,int>> sSingleEventData=inputHandler->ZeroSProcessAllEvents(vEventNumber,"gui",Pedestal_name.c_str());
 		//home/newdriver/SBS39_Pedestal_temp1356.root
 	   // LOAD THE DAta
@@ -766,6 +661,7 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 		std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
 
 		InputHandler * decoder = new InputHandler(vPedestalName.c_str());
+		if(!vMappingName.empty()) decoder->SetMapping(vMappingName.c_str());
 		if (entries > 1) {
 			decoder->PedProcessAllEvents(entries, Pedestal_outname.c_str());
 		} else {
@@ -811,6 +707,8 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 
 					InputHandler * decoder = new InputHandler(
 							rawfilename[i].c_str());
+					if(!vMappingName.empty()) decoder->SetMapping(vMappingName.c_str());
+
 					string raw_filename(
 							basename(strdup(rawfilename[i].c_str()))); // get the basename
 					string filename_noappendix = raw_filename.substr(0,
@@ -842,4 +740,20 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 			}
 		}
 	}
+}
+
+void UserGuiMainFrame::dMenuSetLoadMapping(){
+	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+	const char *datfiletype[]={
+				"Mapping files", "*.cfg",
+				"All files", "*",
+							0, 0
+		};
+	std::string inputfilename=dialog->Browser_file("",datfiletype);
+
+	if((!inputfilename.empty()&&(dialog->CheckAppendix(inputfilename,"cfg")))){
+		vMappingName=inputfilename;
+		printf("%s\n",vMappingName.c_str());
+	}
+	delete dialog;
 }

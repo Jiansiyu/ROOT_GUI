@@ -178,11 +178,13 @@ std::string UserGuiGeneralDialogProcess::Browser_file(std::string path,const cha
 };
 
 std::string UserGuiGeneralDialogProcess::Browser_file(std::string path,std::string fileformate){
-	const char *filetype[4];
-	filetype[0] = (fileformate+" File").c_str();
-	filetype[1] =("*."+fileformate).c_str();
-	filetype[3]=0;
-	filetype[4]=0;
+	const char *filetype[6];
+		filetype[0] = (fileformate+" File").c_str();
+		filetype[1] =("*."+fileformate).c_str();
+		filetype[2] ="All files";
+		filetype[2] ="*";
+		filetype[4]=0;
+		filetype[5]=0;
 	std::vector<std::string>tRawFileList;
 	static TString dir(path.c_str());
 	TGFileInfo fi;
@@ -326,11 +328,13 @@ std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string 
 };
 
 std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string path,std::string fileformate){
-	const char *filetype[4];
+	const char *filetype[6];
 	filetype[0] = (fileformate+" File").c_str();
 	filetype[1] =("*."+fileformate).c_str();
-	filetype[2]=0;
-	filetype[3]=0;
+	filetype[2] ="All files";
+	filetype[2] ="*";
+	filetype[4]=0;
+	filetype[5]=0;
 	std::vector<std::string>tRawFileList;
 	static TString dir(path.c_str());
 	TGFileInfo fi;

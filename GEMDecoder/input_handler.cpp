@@ -34,6 +34,15 @@ InputHandler::InputHandler(string str) {
 	  vSRSSingleEventData.clear();// vector parameter
 }
 
+std::string InputHandler::SetMapping(string mappingfile){
+	if(mappingfile.empty()){
+		return vDefaultMappingPath;
+	}else{
+		vDefaultMappingPath=mappingfile;
+		return vDefaultMappingPath;
+	}
+}
+
 int InputHandler::RawProcessAllEvents(int entries){
 
 	int entry = 0;
@@ -354,12 +363,13 @@ map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entr
 int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 {
 	//Loading Mapping
-	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
+	printf("%s, Loading Mapping %s\n",__FUNCTION__,vDefaultMappingPath.c_str());
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
-	while (getline(filestream, line) ) {
+	if(filestream.good()){
+	  while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
 	    char *tokens = strtok( (char *)line.data(), ",");
@@ -380,6 +390,10 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 	    cout<<endl;
 	  }
   filestream.close();
+	}else{
+		printf("Cannot Loading Mapping\n");
+		return -1;
+	}
   int entry = 0;
   try{
 
@@ -582,11 +596,12 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 
 	//Loading Mapping
-	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
+
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
+if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -608,6 +623,11 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	    cout<<endl;
 	  }
   filestream.close();
+	}else{
+		printf("Can not loading mapping file\n");
+		return -1;
+	}
+
   int entry = 0;
   try{
 
@@ -800,11 +820,11 @@ map<int,map<int,int>> InputHandler::ZeroSProcessAllEvents(int entries, string gu
 	map<int,map<int,int>> ZeroSReturn;  // 1 x before zero subression 2 x afterzerosubration, 3 after remove cross talk  4 cross talk
 										// 11       12                13
 	//Loading Mapping
-	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
+if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -826,6 +846,10 @@ map<int,map<int,int>> InputHandler::ZeroSProcessAllEvents(int entries, string gu
 	    cout<<endl;
 	  }
 	  filestream.close();
+}else{
+	printf("Cannot loading Mapping\n");
+	return ZeroSReturn;
+}
 	  //
 	  char *PedFilename_temp = new char[100];
 	 	  std::strcpy(PedFilename_temp,pedestal_file_name.c_str());    // load the pedestal file
@@ -1040,11 +1064,11 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 	//end of initialize root tree to store hits
 
 	//Loading Mapping
-	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
+if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -1066,6 +1090,10 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 	    cout<<endl;
 	  }
 	 filestream.close();
+}else{
+	printf("Cannot Loading Mapping\n");
+	return -1;
+}
 	 //end of load Mapping
 	 char *PedFilename_temp = new char[100];
 	 std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
@@ -1325,11 +1353,11 @@ int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_fil
 	Hit->Branch("adc5",adc5,"adc5[nch]/I");
 	//end of initialize root tree to store hits
 	//Loading Mapping
-	ifstream filestream ("/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
+if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -1351,6 +1379,10 @@ int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_fil
 	    cout<<endl;
 	  }
 	 filestream.close();
+}else{
+	printf("Cannot loading Mapping\n");
+	return -1;
+}
 	 //end of load Mapping
 	 char *PedFilename_temp = new char[100];
 	 std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
@@ -1551,11 +1583,11 @@ int InputHandler::ZeroSProcessAllEvents(int entries, string pedestal_file_name) 
 	Int_t EvtID,nch,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
 	//end of initialize root tree to store hits
 	//Loading Mapping
-	ifstream filestream ("Mapping/temp_Mapping.cfg", ifstream::in);
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-
+	if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -1577,6 +1609,11 @@ int InputHandler::ZeroSProcessAllEvents(int entries, string pedestal_file_name) 
 	    cout<<endl;
 	  }
 	  filestream.close();
+	}else{
+		printf("Cannot Loading Mapping\n");
+		return -1;
+	}
+
 	  //end of load Mapping
 
 	  char *PedFilename_temp = new char[100];
