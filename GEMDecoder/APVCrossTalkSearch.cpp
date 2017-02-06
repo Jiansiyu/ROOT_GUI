@@ -6,12 +6,20 @@
  */
 
 #include "APVCrossTalkSearch.h"
+#include "time.h"
+//APVCrossTalkSearch::APVCrossTalkSearch() {
+//	// TODO Auto-generated constructor stub
+//
+//}
 
-APVCrossTalkSearch::APVCrossTalkSearch() {
-	// TODO Auto-generated constructor stub
-
+int APVCrossTalkSearch::Run(){
+	std::map<int,int> a;
+	APVMapping(a);    		//set the defult mapping
+	if (cRemoveTalkMethod == "regular") {        // apply the crssponding method get the result
+		fRemoveCrosstalk(); // apply the regular peocess method to calculate the
+	}
+	return 1;
 }
-
 APVCrossTalkSearch::~APVCrossTalkSearch() {
 	// TODO Auto-generated destructor stub
 }
@@ -22,6 +30,7 @@ APVCrossTalkSearch::APVCrossTalkSearch(TH1F * Raw_data) {
 	for(int Strips_counter =1; Strips_counter<=Raw_data->GetXaxis()->GetXmax();Strips_counter++){
 		vAPVInputData[Strips_counter-1]=Raw_data->GetBinContent(Strips_counter);
 	}
+
 }
 
 APVCrossTalkSearch::APVCrossTalkSearch(std::vector<int> Raw_data) {
@@ -83,6 +92,10 @@ std::map<int,int>APVCrossTalkSearch::APVMapping(std::map<int,int> Mapping_Data) 
 			}
 		}
 	}else{
+		// clean the old mapping data, and loading the new data infor
+		cAPVMapping.clear();
+		Pos_str_mapping.clear();
+
 		cAPVMapping=Mapping_Data;
 		std::map<int,int>::iterator iter_strips=Mapping_Data.begin();
 		for(;iter_strips!=Mapping_Data.begin();iter_strips++){
@@ -128,7 +141,6 @@ int APVCrossTalkSearch::fRemoveCrosstalk(){
 	}else return -1;
 	//+++++ select the crosstalk and the effective events+++++
 	// write the cross talk and non-talk in the buffer
-
 	std::vector<std::map<int,int> >::iterator iter_allevents=AllEvent_buffer.begin();  //
 	for(;iter_allevents!=AllEvent_buffer.end();iter_allevents++) {
 		if((*iter_allevents).size()==1) {	// if no raw strips is connected, it cannot be a cross talk

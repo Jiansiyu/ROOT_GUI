@@ -84,8 +84,6 @@ int InputHandler::RawProcessAllEvents(int entries){
 					}
 				}
 			}
-
-      //
 			cout<<"Event ID: "<<entry<<endl;
 			if(vSRSSingleEventData.size()!=0){entry++;}   					  // next
 			cout<<"Event Size [uint_32 in number of words]:"<<vSRSSingleEventData.size()<<endl;
@@ -118,7 +116,6 @@ int InputHandler::RawProcessAllEvents(int entries){
 			getchar();
 		}
 		chan.close();
-
 	} catch (evioException e)
     {
       cerr <<endl <<e.toString() <<endl <<endl;
@@ -128,186 +125,187 @@ int InputHandler::RawProcessAllEvents(int entries){
   return entry;
 }
 
-// if  entries = minus, this will display the event one by one, if specify certain number, this will return the histo used for future GUI
-// add ahead and back function to the display function
-// this is just a simple demo, maybe there is  better way to do this with evio lab function.
-std::vector<TH1F *> InputHandler::RawProcessAllEvents(std::vector<TH1F*> Histo, int entries) {
-
-	printf("LOL where am I?\n");
-	if (entries < -1) {		// batch mode
-		TCanvas *cRaw = new TCanvas("cRaw", "APV Raw Signal", 10, 10, 1000, 800);
-		cRaw->Divide(5,5);
-		int target_entry = 0;
-		while (1) {
-			try {
-				//  load the data
-				evioFileChannel chan(filename.c_str(),"r");
-				chan.open();
-				printf("Looking for Event # %d\n", target_entry);
-				int current_entry=0;
-
-				while(chan.read()){
-					map<int, map<int, map<int, vector<int> > > > mmHit;
-					vSRSSingleEventData.clear();
-
-					evioDOMTree event(chan);
-					evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-					if(current_entry==target_entry){   // get the target  entry, start decode the data
-						evioDOMNodeList::iterator iter;
-						for(iter=mpdEventList->begin();iter!=mpdEventList->end();++iter){
-							//cout << "bank #:" << (*iter)->tag << endl;
-							if ((*iter)->tag == 10) {
-								vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-								if (vec != NULL) {
-									vSRSSingleEventData.reserve(vSRSSingleEventData.size()+ vec->size());
-									vSRSSingleEventData.insert(vSRSSingleEventData.end(),vec->begin(), vec->end());
-								} else {
-									cout << "found NULL contents in mpd.."<< endl;
-								}
-							}
-						}
-						cout << "Event ID: " << current_entry << endl;
-						if (vSRSSingleEventData.size() != 0) {
-							current_entry++;
-							break;
-						}else {
-							printf("Error accrue in this events, go to next event");
-							target_entry++;
-							current_entry++;
-							continue;
-						}
-					}
-					// here did not decode the data and check the data if the current event is not the target event
-					current_entry++;    //maybe this is not a good usage
-				}
-			} catch (evioException e) {
-				cerr << endl << e.toString() << endl << endl;
-				exit(EXIT_FAILURE);
-			}
-			// finish finding the event, ready to decode the data and buffer it in the display histo
-			RawDecoder raw_decoder(vSRSSingleEventData);
-			mAPVRawHistos=raw_decoder.GetAPVRawHisto();
-			map<int,map<int,TH1F*> >::iterator it;
-			Histo.clear();
-			for(it=mAPVRawHistos.begin();it!=mAPVRawHistos.end();++it){
-				map<int,TH1F*>temp=it->second;
-				map<int,TH1F*>::iterator itt;
-				for(itt=temp.begin();itt!=temp.end();++itt) {
-					TH1F *h=itt->second;
-					Histo.push_back(h);
-				}
-			}
-			int nn = Histo.size();
-			for (int i = 0; i < nn; i++) {
-				cRaw->cd(i + 1);
-				Histo[i]->SetMaximum(2000);
-				Histo[i]->SetMinimum(0);
-				Histo[i]->Draw();
-			}
-			cRaw->Update();
-			char key = getchar();
-			if (key == '\033') { // if the first value is esc
-				getchar(); // skip the [
-				switch (getchar()) { // the real value
-				case 'A':
-					// code for arrow up
-					printf(" arrow up is detected\n");
-					target_entry++;
-					break;
-				case 'B':
-					printf(" arrow down is detected\n");
-					// code for arrow down
-					target_entry--;
-					break;
-				case 'C':
-					printf(" arrow right is detected\n");
-					target_entry++;
-					// code for arrow right
-					break;
-				case 'D':
-					printf(" arrow left is detected\n");
-					target_entry--;
-					// code for arrow left
-					break;
-				}
-			} else {
-				printf("%d\n", key);
-			}
-		}
-
-	} else {   // single event mode, used for GUI function
-		try {
-			//  load the data
-			evioFileChannel chan(filename.c_str(), "r");
-			chan.open();
-			printf("Looking for Event # %d\n", entries);
-			int current_entry = 0;
-			while (chan.read()) {
-				map<int, map<int, map<int, vector<int> > > > mmHit;
-				vSRSSingleEventData.clear();
-
-				evioDOMTree event(chan);
-				evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-				if (current_entry == entries) { // get the target  entry, start decode the data
-					evioDOMNodeList::iterator iter;
-					for (iter = mpdEventList->begin();
-							iter != mpdEventList->end(); ++iter) {
-						if ((*iter)->tag == 10) {
-							vector<uint32_t> *vec =
-									(*iter)->getVector<uint32_t>();
-							if (vec != NULL) {
-								vSRSSingleEventData.reserve(
-										vSRSSingleEventData.size()
-												+ vec->size());
-								vSRSSingleEventData.insert(
-										vSRSSingleEventData.end(), vec->begin(),
-										vec->end());
-							} else {
-								cout << "found NULL contents in mpd.." << endl;
-							}
-						}
-					}
-					cout << "Event ID: " << current_entry << endl;
-					if (vSRSSingleEventData.size() != 0) {
-						current_entry++;
-						break;
-					} else {
-						printf("Error accrue in this events, go to next event");
-						entries++;
-						current_entry++;
-						continue;
-					}
-				}
-				// here did not decode the data and check the data if the current event is not the target event
-				current_entry++;    //maybe this is not a good usage
-			}
-		} catch (evioException e) {
-			cerr << endl << e.toString() << endl << endl;
-			exit(EXIT_FAILURE);
-		}
-
-		// finish finding the event, ready to decode the data and buffer it in the display histo
-		RawDecoder raw_decoder(vSRSSingleEventData);
-		mAPVRawHistos = raw_decoder.GetAPVRawHisto();
-		map<int, map<int, TH1F*> >::iterator it;
-		Histo.clear();
-		for (it = mAPVRawHistos.begin(); it != mAPVRawHistos.end(); ++it) {
-			map<int, TH1F*> temp = it->second;
-			map<int, TH1F*>::iterator itt;
-			for (itt = temp.begin(); itt != temp.end(); ++itt) {
-				TH1F *h = itt->second;
-				Histo.push_back(h);
-			}
-		}
-		//Histo[0]->Draw();
-		//getchar();
-		return Histo;
-	}
-};
+//
+//// if  entries = minus, this will display the event one by one, if specify certain number, this will return the histo used for future GUI
+//// add ahead and back function to the display function
+//// this is just a simple demo, maybe there is  better way to do this with evio lab function.
+//std::vector<TH1F *> InputHandler::RawProcessAllEvents(std::vector<TH1F*> Histo, int entries) {
+//
+//	printf("LOL where am I?\n");
+//	if (entries < -1) {		// batch mode
+//		TCanvas *cRaw = new TCanvas("cRaw", "APV Raw Signal", 10, 10, 1000, 800);
+//		cRaw->Divide(5,5);
+//		int target_entry = 0;
+//		while (1) {
+//			try {
+//				//  load the data
+//				evioFileChannel chan(filename.c_str(),"r");
+//				chan.open();
+//				printf("Looking for Event # %d\n", target_entry);
+//				int current_entry=0;
+//
+//				while(chan.read()){
+//					map<int, map<int, map<int, vector<int> > > > mmHit;
+//					vSRSSingleEventData.clear();
+//
+//					evioDOMTree event(chan);
+//					evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
+//					if(current_entry==target_entry){   // get the target  entry, start decode the data
+//						evioDOMNodeList::iterator iter;
+//						for(iter=mpdEventList->begin();iter!=mpdEventList->end();++iter){
+//							//cout << "bank #:" << (*iter)->tag << endl;
+//							if ((*iter)->tag == 10) {
+//								vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+//								if (vec != NULL) {
+//									vSRSSingleEventData.reserve(vSRSSingleEventData.size()+ vec->size());
+//									vSRSSingleEventData.insert(vSRSSingleEventData.end(),vec->begin(), vec->end());
+//								} else {
+//									cout << "found NULL contents in mpd.."<< endl;
+//								}
+//							}
+//						}
+//						cout << "Event ID: " << current_entry << endl;
+//						if (vSRSSingleEventData.size() != 0) {
+//							current_entry++;
+//							break;
+//						}else {
+//							printf("Error accrue in this events, go to next event");
+//							target_entry++;
+//							current_entry++;
+//							continue;
+//						}
+//					}
+//					// here did not decode the data and check the data if the current event is not the target event
+//					current_entry++;    //maybe this is not a good usage
+//				}
+//			} catch (evioException e) {
+//				cerr << endl << e.toString() << endl << endl;
+//				exit(EXIT_FAILURE);
+//			}
+//			// finish finding the event, ready to decode the data and buffer it in the display histo
+//			RawDecoder raw_decoder(vSRSSingleEventData);
+//			mAPVRawHistos=raw_decoder.GetAPVRawHisto();
+//			map<int,map<int,TH1F*> >::iterator it;
+//			Histo.clear();
+//			for(it=mAPVRawHistos.begin();it!=mAPVRawHistos.end();++it){
+//				map<int,TH1F*>temp=it->second;
+//				map<int,TH1F*>::iterator itt;
+//				for(itt=temp.begin();itt!=temp.end();++itt) {
+//					TH1F *h=itt->second;
+//					Histo.push_back(h);
+//				}
+//			}
+//			int nn = Histo.size();
+//			for (int i = 0; i < nn; i++) {
+//				cRaw->cd(i + 1);
+//				Histo[i]->SetMaximum(2000);
+//				Histo[i]->SetMinimum(0);
+//				Histo[i]->Draw();
+//			}
+//			cRaw->Update();
+//			char key = getchar();
+//			if (key == '\033') { // if the first value is esc
+//				getchar(); // skip the [
+//				switch (getchar()) { // the real value
+//				case 'A':
+//					// code for arrow up
+//					printf(" arrow up is detected\n");
+//					target_entry++;
+//					break;
+//				case 'B':
+//					printf(" arrow down is detected\n");
+//					// code for arrow down
+//					target_entry--;
+//					break;
+//				case 'C':
+//					printf(" arrow right is detected\n");
+//					target_entry++;
+//					// code for arrow right
+//					break;
+//				case 'D':
+//					printf(" arrow left is detected\n");
+//					target_entry--;
+//					// code for arrow left
+//					break;
+//				}
+//			} else {
+//				printf("%d\n", key);
+//			}
+//		}
+//
+//	} else {   // single event mode, used for GUI function
+//		try {
+//			//  load the data
+//			evioFileChannel chan(filename.c_str(), "r");
+//			chan.open();
+//			printf("Looking for Event # %d\n", entries);
+//			int current_entry = 0;
+//			while (chan.read()) {
+//				map<int, map<int, map<int, vector<int> > > > mmHit;
+//				vSRSSingleEventData.clear();
+//
+//				evioDOMTree event(chan);
+//				evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
+//				if (current_entry == entries) { // get the target  entry, start decode the data
+//					evioDOMNodeList::iterator iter;
+//					for (iter = mpdEventList->begin();
+//							iter != mpdEventList->end(); ++iter) {
+//						if ((*iter)->tag == 10) {
+//							vector<uint32_t> *vec =
+//									(*iter)->getVector<uint32_t>();
+//							if (vec != NULL) {
+//								vSRSSingleEventData.reserve(
+//										vSRSSingleEventData.size()
+//												+ vec->size());
+//								vSRSSingleEventData.insert(
+//										vSRSSingleEventData.end(), vec->begin(),
+//										vec->end());
+//							} else {
+//								cout << "found NULL contents in mpd.." << endl;
+//							}
+//						}
+//					}
+//					cout << "Event ID: " << current_entry << endl;
+//					if (vSRSSingleEventData.size() != 0) {
+//						current_entry++;
+//						break;
+//					} else {
+//						printf("Error accrue in this events, go to next event");
+//						entries++;
+//						current_entry++;
+//						continue;
+//					}
+//				}
+//				// here did not decode the data and check the data if the current event is not the target event
+//				current_entry++;    //maybe this is not a good usage
+//			}
+//		} catch (evioException e) {
+//			cerr << endl << e.toString() << endl << endl;
+//			exit(EXIT_FAILURE);
+//		}
+//
+//		// finish finding the event, ready to decode the data and buffer it in the display histo
+//		RawDecoder raw_decoder(vSRSSingleEventData);
+//		mAPVRawHistos = raw_decoder.GetAPVRawHisto();
+//		map<int, map<int, TH1F*> >::iterator it;
+//		Histo.clear();
+//		for (it = mAPVRawHistos.begin(); it != mAPVRawHistos.end(); ++it) {
+//			map<int, TH1F*> temp = it->second;
+//			map<int, TH1F*>::iterator itt;
+//			for (itt = temp.begin(); itt != temp.end(); ++itt) {
+//				TH1F *h = itt->second;
+//				Histo.push_back(h);
+//			}
+//		}
+//		//Histo[0]->Draw();
+//		//getchar();
+//		return Histo;
+//	}
+// };
 
 map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
 	try {
-		//  load the data
+		//load the data
 		evioFileChannel chan(filename.c_str(), "r");
 		chan.open();
 		printf("Looking for Event # %d\n", entries);
@@ -359,6 +357,58 @@ map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entr
 	return raw_decoder.GetDecoded();
 }
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+std::map<int,std::map<int, std::map<int, std::vector<int> > > > InputHandler::RawProcessAllEvents(int entries , map<int,map<int, map<int, std::vector<int> > > > & vRaw_Data) {
+
+	// loading the mapping
+	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
+	printf("%s, Loading Mapping %s\n",__FUNCTION__,vDefaultMappingPath.c_str());
+	string line;
+	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
+	map<int,map<int,vector<int> > > mMapping;
+	if(filestream.good()){
+	  while (getline(filestream, line) ) {
+	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
+	    if( line.find("#") == 0 ) continue;
+	    char *tokens = strtok( (char *)line.data(), ",");
+	    if(tokens !=NULL){
+	      cout<<tokens<<" ";Mapping_mpdId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_GEMId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Xis=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_ADCId=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_I2C=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Pos=atoi(tokens);
+	      tokens = strtok(NULL, " ,");cout<<tokens<<" ";Mapping_Invert=atoi(tokens);
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_GEMId);//0  detector-ID
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1    x or y
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2    position
+	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3 invert or not
+	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
+	    }
+	    cout<<endl;
+	  }
+  filestream.close();
+	}else{
+		printf("Cannot Loading Mapping\n");
+		std::map<int,std::map<int, std::map<int, std::vector<int> > > > Return_data;
+		Return_data.clear();
+		return Return_data;
+	}
+	// finnish loading the mapping
+
+	// start loading the raw files
+	std::map<int,std::map<int, std::map<int, std::vector<int> > > > Return_data;
+	if(entries<=-1) {
+		printf("[%s--line %d]Batch Mode Enabled, currently not support\n",__FUNCTION__, __LINE__);
+	}else{
+		try {
+
+		} catch (evioException e) {
+		}
+	}
+	return Return_data;
+}
 //________________________________________________
 int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 {
@@ -601,7 +651,7 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	string line;
 	int Mapping_mpdId,Mapping_ADCId,Mapping_I2C,Mapping_GEMId,Mapping_Xis,Mapping_Pos,Mapping_Invert;
 	map<int,map<int,vector<int> > > mMapping;
-if(filestream.good()){
+	if(filestream.good()){
 	while (getline(filestream, line) ) {
 	    line.erase( remove_if(line.begin(), line.end(), ::isspace), line.end() );
 	    if( line.find("#") == 0 ) continue;
@@ -788,8 +838,6 @@ if(filestream.good()){
 	}
 	f->Write();
 	f->Close();
-  //end of Calculating pedestal
-  //exit(EXIT_SUCCESS);
 
   //delete histograms
   for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)

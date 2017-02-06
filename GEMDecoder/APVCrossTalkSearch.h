@@ -15,7 +15,7 @@
 class APVCrossTalkSearch {
 public:
 	// single APV crosstalk search function
-	APVCrossTalkSearch();
+	//APVCrossTalkSearch();
 	APVCrossTalkSearch(TH1F *);
 	APVCrossTalkSearch(std::vector<int>);
 	APVCrossTalkSearch(std::map<int,int>);
@@ -23,11 +23,14 @@ public:
 	virtual ~APVCrossTalkSearch();
 	// data return
 public:
+	// those set the raw data function will erease all the data before, and load the new data,
+	// but all those function will keep all the old mappings until set the new mapping with APVMapping function
 	void SetRawAPVData(TH1F *);
 	void SetRawAPVData(std::vector<int>);
 	void SetRawAPVData(std::map<int,int>);
 	std::map<int,int> APVMapping(std::map<int,int>);    // initial strips, real strips
 
+	int Run();								// after set new calculation method. this function must call afterword to get the result
 	int CrossTalkRemoveMethod(std::string); //method
 	//int APVMapping(std::map<int,int>);
 
@@ -44,8 +47,6 @@ private:
 private:
 
 	std::vector<std::map<int,int>> FindPeaks(std::map<int,int>);   // find the connected peaks from the data after zerosubtraction
-
-
 	//Intermediate data
 private:
 
