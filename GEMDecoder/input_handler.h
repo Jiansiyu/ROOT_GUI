@@ -48,9 +48,9 @@ public:
 	// zero subtraction method
 	int ZeroSProcessAllEvents(int entries=0, string pedestal_file_name="");
 	map<int,map<int,int>> ZeroSProcessAllEvents(int entries,string gui,string pedestal_file_name="");  // used for GUI mode
-	map<int,map<int,map<int,int> > > ZeroSProcessSingleEvents(int entries);   // used for multi-detector mode
+	std::map<int,std::map<int,std::map<int,int> > > ZeroSProcessSingleEvents(int entries,std::map<int,std::map<int,std::map<int,int> > > & , string pedestal_file_name="");   // used for multi-detector mode
 
-	// hit process functions
+//	 hit process functions
 	int HitProcessAllEvents(int entries=0, string pedestal_file_name="", string root_file_name="");
 	int HitProcessAllEvents(string pedestal_file_name="", string root_file_name="");
 
@@ -58,7 +58,7 @@ public:
 	int RMS_Mean_ProcessAllEvents(int entries,string pedestal_file_name="",string root_file_name="");  //used for calculate the RMS and Means of each chennals of the raw data
 
 	string SetMapping(string);
-	// add the test functions
+	//add the test functions
 	int TestFunction();
 
 private:
