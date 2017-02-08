@@ -95,15 +95,18 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 
 	//fWorkZoneControlFrame->SetBackgroundColor(33);
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
-	//fWorkZoneCanvasFrame -> SetBackgroundColor(1);
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
-	fEmnbeddedCanvas = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneCanvasFrame, 600,600);
-	fEmnbeddedCanvas->GetCanvas()->SetBorderMode(0);
-	fEmnbeddedCanvas->GetCanvas()->SetFillColor(0);
-	fEmnbeddedCanvas->GetCanvas()->SetFrameFillColor(41);
-	fEmnbeddedCanvas->GetCanvas()->SetGrid();
-	fWorkZoneCanvasFrame->AddFrame(fEmnbeddedCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-	cRawCanvas=fEmnbeddedCanvas->GetCanvas();
+
+	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
+	SetWorkZoneTab();
+	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+	//fEmnbeddedCanvas = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneCanvasFrame, 600,600);
+	//fEmnbeddedCanvas->GetCanvas()->SetBorderMode(0);
+	//fEmnbeddedCanvas->GetCanvas()->SetFillColor(0);
+	//fEmnbeddedCanvas->GetCanvas()->SetFrameFillColor(41);
+	//fEmnbeddedCanvas->GetCanvas()->SetGrid();
+	//fWorkZoneCanvasFrame->AddFrame(fEmnbeddedCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+	//cRawCanvas=fEmnbeddedCanvas->GetCanvas();
 
 	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
 	fWorkZoneFrame -> AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
@@ -172,6 +175,20 @@ void UserGuiMainFrame::SetWorkZone(){
 
 }
 
+void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
+	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
+	for(unsigned int counter=0;counter<NTabs;counter++){
+		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
+		// attach the embeded canvas
+		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFillColor(38);
+		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFrameFillColor(41);
+		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+	}
+}
 void UserGuiMainFrame::SetWorkZoneButton(){
 
 	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
@@ -358,7 +375,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'R':
 						printf("raw mode\n");
 						{
-							fRawModeProcess(vEventNumber,vRawDataList[0].c_str());
+							fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
 						}
 						break;
 					case 'Z':
@@ -396,17 +413,13 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			switch (parm1) {
 			case C_WORKMODE_RAW:
 				vWorkMode = 'R';
-				//delete cRawCanvas;
-				cRawCanvas->Clear();
-				cRawCanvas->ResetAttPad();
-				cRawCanvas->Divide(7,7);
-
+				printf("Raw mode selected \n");
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
-				cRawCanvas->Clear();
-				cRawCanvas->ResetAttPad();
-				cRawCanvas->Divide(2,3);
+				//cRawCanvas->Clear();
+				//cRawCanvas->ResetAttPad();
+				//cRawCanvas->Divide(2,3);
 				printf("ZERO mode selected \n");
 				break;
 			case C_WORKMODE_PEDESTAL:
@@ -434,7 +447,8 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				case -1:{
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
-						fRawModeProcess(vEventNumber,vRawDataList[0].c_str());
+						//fRawModeProcess(vEventNumber,vRawDataList[0].c_str());
+						fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
 					}
 					string Pedestal_name= vPedestalName;
 					if((vWorkMode=='Z')&&(vRawDataList.size()!=0)&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root")){
@@ -456,123 +470,140 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 
-		printf("Filename: %s\n", rawfilename.c_str());
-		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
-		if(!vMappingName.empty())inputHandler->SetMapping(vMappingName.c_str());
-		map<int,map<int,vector<int>>> dSingleEventData=inputHandler->RawProcessAllEvents(entries,"gui");
+	printf("Filename: %s\n", rawfilename.c_str());
+	InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
+	if (!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
+	map<int,map<int, map<int, std::vector<int> > > > a;
+	map<int,map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent=inputHandler->RawProcessAllEvents(entries, a);
 
-			for (map<int, map<int, vector<int>>> ::iterator iter_mpd=dSingleEventData.begin();iter_mpd!=dSingleEventData.end();iter_mpd++) {
-				map<int,vector<int>>::iterator itter_apv=iter_mpd->second.begin();
-				for(;itter_apv!=iter_mpd->second.end();itter_apv++) {
-					delete dRawHistoBuffer[iter_mpd->first][itter_apv->first];
-				}
+	for(std::map<int,std::map<int,std::map<int,TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++){
+		for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++){
+			for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++){
+				delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
 			}
-
-		dRawHistoBuffer.clear();
-		//map<int,map<int,vector<int>>>::iterator iter_mpd=dSingleEventData.begin();
-		for(map<int,map<int,vector<int>>>::iterator iter_mpd=dSingleEventData.begin();iter_mpd!=dSingleEventData.end();iter_mpd++){
-			map<int,vector<int>>::iterator itter_apv=iter_mpd->second.begin();
-			for(;itter_apv!=iter_mpd->second.end();itter_apv++){
-				//printf("%d.\n",itter_apv->second.size());
-				dRawHistoBuffer[iter_mpd->first][itter_apv->first]=new TH1F(Form("MPD%d_APV%d",iter_mpd->first,itter_apv->first),Form("MPD%d_APV%d",iter_mpd->first,itter_apv->first),800,0,800);
-				for(unsigned int i =0; i<(itter_apv->second.size());i++){
-					//printf("strips=%d, ADC=%d\n",i,(itter_apv->second)[i]);
-					dRawHistoBuffer[iter_mpd->first][itter_apv->first]->Fill(i,(itter_apv->second)[i]);
-				}
-			}
-		}
-
-	int canvas_counter=1;
-	for(map<int,map<int,TH1F*>>::iterator iter_mpd=dRawHistoBuffer.begin();iter_mpd!=dRawHistoBuffer.end();iter_mpd++){
-
-		for(map<int,TH1F*>::iterator itter_apv=iter_mpd->second.begin();itter_apv!=iter_mpd->second.end();itter_apv++){
-			cRawCanvas->cd(canvas_counter++);
-			itter_apv->second->SetMaximum(2000);
-			itter_apv->second->SetMinimum(0);
-			itter_apv->second->Draw();
 		}
 	}
-	cRawCanvas->Modified();
-	cRawCanvas->Update();
+
+	dMultiGEMHistoBuffer.clear();
+	// test functions
+	for(map<int,map<int, map<int, std::vector<int> > > >::iterator iter_detectorID=dMultiGEMSingleEvent.begin(); iter_detectorID!=dMultiGEMSingleEvent.end(); iter_detectorID++){
+		for(map<int, map<int, std::vector<int> > >::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end(); itter_mpd++){
+			for(map<int, std::vector<int> >::iterator ittter_apv=itter_mpd->second.begin(); ittter_apv!=itter_mpd->second.end(); ittter_apv++){
+				dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
+										new TH1F(
+												Form("MPD%d_ADC%d", itter_mpd->first,
+														ittter_apv->first),
+												Form("MPD%d_ADC%d", itter_mpd->first,
+														ittter_apv->first), 800, 0, 800);
+				for(unsigned int i =0; i<(ittter_apv->second).size(); i++){
+					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(i,(ittter_apv->second)[i]);
+					}
+				}
+			}
+		}
+
+	unsigned int Canvas_counter=0;
+	for(std::map<int,std::map<int,std::map<int,TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++){
+		cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+		cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+		cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
+		int canvaspad_counter=0;
+		for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++){
+			for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++){
+				cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
+				ittter_apv->second->SetMaximum(2500);
+				ittter_apv->second->SetMinimum(0);
+				ittter_apv->second->Draw();
+				canvaspad_counter++;
+			}
+		}
+		cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+		cfWorkZoneTabCanvas[Canvas_counter]->Update();
+		Canvas_counter++;
+	}
+	delete[] inputHandler;
+	//printf("%d\n",tRawFileEntry->GetSelected());
 	gSystem->ProcessEvents();
-
-
 }
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
 
 	printf("=>Raw Filename: %s\n", rawfilename.c_str());
 	printf("=>Pedestal Filename: %s\n",Pedestal_name.c_str());
-	TH1F *histox=new TH1F("BeforeZeroSupression_X","BeforeZeroSupression_X",1600,0,1600);
-	TH1F *histoy=new TH1F("BeforeZeroSupression_Y","BeforeZeroSupression_Y",1600,0,1600);
 
-	TH1F *histo_zerox=new TH1F("AfterZeroSupression_X","AfterZeroSupression_X",1600,0,1600);
-	TH1F *histo_zeroy=new TH1F("AfterZeroSupression_Y","AfterZeroSupression_Y",1600,0,1600);
+	std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
 
-	TH1F *histo_rmtakx=new TH1F("AfterRemoveCrosstalk_X","AfterRemoveCrosstalkX",1600,0,1600);
-	TH1F *histo_rmtaky=new TH1F("AfterRemoveCrosstalk_Y","AfterRemoveCrosstalk_Y",1600,0,1600);
+//	//std::map<int,std::map<std::string, map<>>>
+//	TH1F *histox=new TH1F("BeforeZeroSupression_X","BeforeZeroSupression_X",1600,0,1600);
+//	TH1F *histoy=new TH1F("BeforeZeroSupression_Y","BeforeZeroSupression_Y",1600,0,1600);
+//
+//	TH1F *histo_zerox=new TH1F("AfterZeroSupression_X","AfterZeroSupression_X",1600,0,1600);
+//	TH1F *histo_zeroy=new TH1F("AfterZeroSupression_Y","AfterZeroSupression_Y",1600,0,1600);
+//
+//	TH1F *histo_rmtakx=new TH1F("AfterRemoveCrosstalk_X","AfterRemoveCrosstalkX",1600,0,1600);
+//	TH1F *histo_rmtaky=new TH1F("AfterRemoveCrosstalk_Y","AfterRemoveCrosstalk_Y",1600,0,1600);
+//
+//	TH1F *histo_talkx=new TH1F("CrossTalk_X","CrossTalk_X",1600,0,1600);
+//	histo_talkx->SetLineColor(2);
+//	TH1F *histo_talky=new TH1F("CrossTalk_Y","CrossTalk_Y",1600,0,1600);
+//	histo_talky->SetLineColor(2);
 
-	TH1F *histo_talkx=new TH1F("CrossTalk_X","CrossTalk_X",1600,0,1600);
-	histo_talkx->SetLineColor(2);
-	TH1F *histo_talky=new TH1F("CrossTalk_Y","CrossTalk_Y",1600,0,1600);
-	histo_talky->SetLineColor(2);
 
 
+	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
 
-		if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
+			InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
+			if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
+			std::map<int,std::map<int,std::map<int,int> > > a;
+			std::map<int,std::map<int,std::map<int,int> > > ZeroSubRawBuffer=inputHandler->ZeroSProcessSingleEvents(vEventNumber,a,Pedestal_name.c_str(),-1);
 
-		InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
-		if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
-		map<int,map<int,int>> sSingleEventData=inputHandler->ZeroSProcessAllEvents(vEventNumber,"gui",Pedestal_name.c_str());
-		//home/newdriver/SBS39_Pedestal_temp1356.root
-	   // LOAD THE DAta
-		for(map<int,int>::iterator iter=sSingleEventData[1].begin(); iter!= sSingleEventData[1].end();iter++){
-			histox->Fill(iter->first,iter->second);
+			for(std::map<int,std::map<int,std::map<int,int> > > ::iterator iter_detectorID=ZeroSubRawBuffer.begin(); iter_detectorID!=ZeroSubRawBuffer.end();iter_detectorID++){
+				ZeroSubHistoBuffer[iter_detectorID->first][1]=new TH1F(Form("GEM_%d_BeforeZeroSupression_X",iter_detectorID->first),"BeforeZeroSupression_X",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][11]=new TH1F(Form("GEM_%d_BeforeZeroSupression_Y",iter_detectorID->first),"BeforeZeroSupression_Y",1600,0,1600);
+
+				ZeroSubHistoBuffer[iter_detectorID->first][2]=new TH1F(Form("GEM_%d_AfterZeroSupression_X",iter_detectorID->first),"AfterZeroSupression_X",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][12]=new TH1F(Form("GEM_%d_AfterZeroSupression_Y",iter_detectorID->first),"AfterZeroSupression_Y",1600,0,1600);
+
+				ZeroSubHistoBuffer[iter_detectorID->first][3]=new TH1F(Form("GEM_%d_AfterRemoveCrosstalk_X",iter_detectorID->first),"AfterRemoveCrosstalk_X",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][13]=new TH1F(Form("GEM_%d_AfterRemoveCrosstalk_Y",iter_detectorID->first),"AfterRemoveCrosstalk_Y",1600,0,1600);
+
+				ZeroSubHistoBuffer[iter_detectorID->first][4]=new TH1F(Form("GEM_%d_CrossTalk_X",iter_detectorID->first),"CrossTalk_X",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][14]=new TH1F(Form("GEM_%d_CrossTalk_Y",iter_detectorID->first),"CrossTalk_Y",1600,0,1600);
+
+				for(std::map<int,std::map<int,int> >::iterator itter_dimension=iter_detectorID->second.begin();itter_dimension!=iter_detectorID->second.end();itter_dimension++){
+					for(std::map<int,int>::iterator ittter_strips=itter_dimension->second.begin(); ittter_strips!=itter_dimension->second.end();ittter_strips++) {
+						ZeroSubHistoBuffer[iter_detectorID->first][itter_dimension->first]->Fill(ittter_strips->first,ittter_strips->second);
+					}
+				}
+			}
+		unsigned int Canvas_counter = 0;
+		for(std::map<int,std::map<int,TH1F *>>::iterator iter_detectorID=ZeroSubHistoBuffer.begin();iter_detectorID!=ZeroSubHistoBuffer.end();iter_detectorID++){
+			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+			cfWorkZoneTabCanvas[Canvas_counter]->Divide(2, 3);
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(1);
+			iter_detectorID->second[1]->Draw();
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(3);
+			iter_detectorID->second[2]->Draw();
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(5);
+			iter_detectorID->second[3]->Draw();
+			iter_detectorID->second[4]->SetLineColor(2);
+			iter_detectorID->second[4]->Draw("same");
+
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(2);
+			iter_detectorID->second[11]->Draw();
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(4);
+			iter_detectorID->second[12]->Draw();
+			cfWorkZoneTabCanvas[Canvas_counter]->cd(6);
+			iter_detectorID->second[13]->Draw();
+			iter_detectorID->second[14]->SetLineColor(2);
+			iter_detectorID->second[14]->Draw("same");
+
+			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+			Canvas_counter++;
 		}
-		for(map<int,int>::iterator iter=sSingleEventData[11].begin(); iter!= sSingleEventData[11].end();iter++){
-				histoy->Fill(iter->first,iter->second);
-		}
-
-		for(map<int,int>::iterator iter=sSingleEventData[2].begin(); iter!= sSingleEventData[2].end();iter++){
-			histo_zerox->Fill(iter->first,iter->second);
-		}
-		for(map<int,int>::iterator iter=sSingleEventData[12].begin(); iter!= sSingleEventData[12].end();iter++){
-			histo_zeroy->Fill(iter->first,iter->second);
-		}
-
-		for(map<int,int>::iterator iter=sSingleEventData[3].begin(); iter!= sSingleEventData[3].end();iter++){
-			histo_rmtakx->Fill(iter->first,iter->second);
-		}
-		for(map<int,int>::iterator iter=sSingleEventData[13].begin(); iter!= sSingleEventData[13].end();iter++){
-			histo_rmtaky->Fill(iter->first,iter->second);
-		}
-
-		for(map<int,int>::iterator iter=sSingleEventData[4].begin(); iter!= sSingleEventData[4].end();iter++){
-			histo_talkx->Fill(iter->first,iter->second);
-		}
-		for(map<int,int>::iterator iter=sSingleEventData[14].begin(); iter!= sSingleEventData[14].end();iter++){
-			histo_talky->Fill(iter->first,iter->second);
-		}
-		cRawCanvas->cd(1);
-		histox->Draw();
-		cRawCanvas->cd(2);
-		histoy->Draw();
-		cRawCanvas->cd(3);
-		histo_zerox->Draw();
-		cRawCanvas->cd(4);
-		histo_zeroy->Draw();
-		cRawCanvas->cd(5);
-		histo_rmtakx->Draw();
-		histo_talkx->Draw("same");
-		cRawCanvas->cd(6);
-		histo_rmtaky->Draw();
-		histo_talky->Draw("same");
-
-		cRawCanvas->Modified();
-		cRawCanvas->Update();
 		gSystem->ProcessEvents();
-
-
 	}else{
 		printf("Pedestal File structure unrecgnized, only .root allowed\n");
 	}
@@ -633,17 +664,17 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 				file_counter++) {
 			tRawFileEntry->AddEntry(
 					(dialog->GetBaseFileName(vRawDataList[file_counter])).c_str(),
-					dialog->GetNumberFromFilename(vRawDataList[file_counter]));
+					file_counter);//dialog->GetNumberFromFilename(vRawDataList[file_counter]));
 			//printf("%d\n",dialog->GetNumberFromFilename(vRawDataList[file_counter]));
 		}
 		for (unsigned int file_counter = 0; file_counter < vRootDataList.size();
 				file_counter++) {
 			tRawFileEntry->AddEntry(
 					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
-					dialog->GetNumberFromFilename(vRootDataList[file_counter]));
-			//printf("%d\n",dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+					//printf("%d\n",dialog->GetNumberFromFilename(vRootDataList[file_counter]));
 		}
-
+		tRawFileEntry->Select(0);
 		tRawFileEntry->MapSubwindows();
 		tRawFileEntry->Layout();
 	}

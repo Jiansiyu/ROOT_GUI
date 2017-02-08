@@ -34,6 +34,9 @@
 #include "TGNumberEntry.h"
 #include "TGProgressBar.h"
 
+//used for the tab
+#include "TGTab.h"
+
 // dialog
 #include "TGClient.h"
 #include "TGFileDialog.h"
@@ -117,7 +120,11 @@ private:
 	std::vector<std::string> vRootDataList;
 	char vWorkMode;
 	long int vEventNumber;
+
+	// display buffer
 	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
+	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
+
 	std::string vMappingName;
 private :
 
@@ -144,8 +151,14 @@ private:
 	// set the work zone variables
 	TGHorizontalFrame *fWorkZoneFrame;
 	TGLayoutHints *fWorkZoneLayout;//, *fWorkZoneItemLayout;
-	TRootEmbeddedCanvas *fEmnbeddedCanvas;
+	// set the workzone tab
+	TGTab *fWorkZoneTab;
+	TGCompositeFrame *fWorkZoneTabDefultFrame;
+	TGCompositeFrame *fWorkZoneTabSubFrame[50];
+	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
+	TCanvas *cfWorkZoneTabCanvas[50];
 
+	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;
 
 
@@ -154,6 +167,7 @@ private:
 	TGVerticalFrame *fWorkZoneCanvasFrame;
 	TGLayoutHints *fWorkZoneCanvasFrameLayout;
 	TGVertical3DLine *fWorkZoneSeparation;
+
 
 	// set the status bar variables
 	TGCompositeFrame *fStatusFrame;
@@ -201,6 +215,7 @@ private:
 
 private:
 	void SetWorkZone();    // set the workspace
+	void SetWorkZoneTab(unsigned int NTabs=3);
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
 	void SetStatusBar();
