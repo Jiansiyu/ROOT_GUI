@@ -41,6 +41,10 @@
 #include "TGClient.h"
 #include "TGFileDialog.h"
 
+// used for the color wheel
+#include <TGColorSelect.h>
+#include <TColor.h>
+
 //
 #include "TBrowser.h"
 
@@ -91,7 +95,9 @@ enum ETestCommandIdentifiers {
 	C_RAWFILE_DAT,
 
 	V_NUMBERINPUT,
-	C_CONFIRM
+	C_CONFIRM,
+
+	COLORSEL
 };
 
 class UserGuiMainFrame: public TGMainFrame {
@@ -157,6 +163,7 @@ private:
 	TGCompositeFrame *fWorkZoneTabSubFrame[50];
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
+	int NTabs=2;
 
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;
@@ -206,6 +213,8 @@ private:
 	TGLabel *nStatusBarTimeLabel;
 	TGLabel *nStatusBarInfor;
 	TGHProgressBar * pStatusBarProcessBar;
+	TGColorSelect      *fColorSel;
+
 private:
 	// menu
 	void SetMenuFile();

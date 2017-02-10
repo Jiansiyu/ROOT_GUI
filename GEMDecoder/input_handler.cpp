@@ -121,187 +121,8 @@ int InputHandler::RawProcessAllEvents(int entries){
       cerr <<endl <<e.toString() <<endl <<endl;
       exit(EXIT_FAILURE);
     }
-  //exit(EXIT_SUCCESS);
   return entry;
 }
-
-//
-//// if  entries = minus, this will display the event one by one, if specify certain number, this will return the histo used for future GUI
-//// add ahead and back function to the display function
-//// this is just a simple demo, maybe there is  better way to do this with evio lab function.
-//std::vector<TH1F *> InputHandler::RawProcessAllEvents(std::vector<TH1F*> Histo, int entries) {
-//
-//	printf("LOL where am I?\n");
-//	if (entries < -1) {		// batch mode
-//		TCanvas *cRaw = new TCanvas("cRaw", "APV Raw Signal", 10, 10, 1000, 800);
-//		cRaw->Divide(5,5);
-//		int target_entry = 0;
-//		while (1) {
-//			try {
-//				//  load the data
-//				evioFileChannel chan(filename.c_str(),"r");
-//				chan.open();
-//				printf("Looking for Event # %d\n", target_entry);
-//				int current_entry=0;
-//
-//				while(chan.read()){
-//					map<int, map<int, map<int, vector<int> > > > mmHit;
-//					vSRSSingleEventData.clear();
-//
-//					evioDOMTree event(chan);
-//					evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-//					if(current_entry==target_entry){   // get the target  entry, start decode the data
-//						evioDOMNodeList::iterator iter;
-//						for(iter=mpdEventList->begin();iter!=mpdEventList->end();++iter){
-//							//cout << "bank #:" << (*iter)->tag << endl;
-//							if ((*iter)->tag == 10) {
-//								vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-//								if (vec != NULL) {
-//									vSRSSingleEventData.reserve(vSRSSingleEventData.size()+ vec->size());
-//									vSRSSingleEventData.insert(vSRSSingleEventData.end(),vec->begin(), vec->end());
-//								} else {
-//									cout << "found NULL contents in mpd.."<< endl;
-//								}
-//							}
-//						}
-//						cout << "Event ID: " << current_entry << endl;
-//						if (vSRSSingleEventData.size() != 0) {
-//							current_entry++;
-//							break;
-//						}else {
-//							printf("Error accrue in this events, go to next event");
-//							target_entry++;
-//							current_entry++;
-//							continue;
-//						}
-//					}
-//					// here did not decode the data and check the data if the current event is not the target event
-//					current_entry++;    //maybe this is not a good usage
-//				}
-//			} catch (evioException e) {
-//				cerr << endl << e.toString() << endl << endl;
-//				exit(EXIT_FAILURE);
-//			}
-//			// finish finding the event, ready to decode the data and buffer it in the display histo
-//			RawDecoder raw_decoder(vSRSSingleEventData);
-//			mAPVRawHistos=raw_decoder.GetAPVRawHisto();
-//			map<int,map<int,TH1F*> >::iterator it;
-//			Histo.clear();
-//			for(it=mAPVRawHistos.begin();it!=mAPVRawHistos.end();++it){
-//				map<int,TH1F*>temp=it->second;
-//				map<int,TH1F*>::iterator itt;
-//				for(itt=temp.begin();itt!=temp.end();++itt) {
-//					TH1F *h=itt->second;
-//					Histo.push_back(h);
-//				}
-//			}
-//			int nn = Histo.size();
-//			for (int i = 0; i < nn; i++) {
-//				cRaw->cd(i + 1);
-//				Histo[i]->SetMaximum(2000);
-//				Histo[i]->SetMinimum(0);
-//				Histo[i]->Draw();
-//			}
-//			cRaw->Update();
-//			char key = getchar();
-//			if (key == '\033') { // if the first value is esc
-//				getchar(); // skip the [
-//				switch (getchar()) { // the real value
-//				case 'A':
-//					// code for arrow up
-//					printf(" arrow up is detected\n");
-//					target_entry++;
-//					break;
-//				case 'B':
-//					printf(" arrow down is detected\n");
-//					// code for arrow down
-//					target_entry--;
-//					break;
-//				case 'C':
-//					printf(" arrow right is detected\n");
-//					target_entry++;
-//					// code for arrow right
-//					break;
-//				case 'D':
-//					printf(" arrow left is detected\n");
-//					target_entry--;
-//					// code for arrow left
-//					break;
-//				}
-//			} else {
-//				printf("%d\n", key);
-//			}
-//		}
-//
-//	} else {   // single event mode, used for GUI function
-//		try {
-//			//  load the data
-//			evioFileChannel chan(filename.c_str(), "r");
-//			chan.open();
-//			printf("Looking for Event # %d\n", entries);
-//			int current_entry = 0;
-//			while (chan.read()) {
-//				map<int, map<int, map<int, vector<int> > > > mmHit;
-//				vSRSSingleEventData.clear();
-//
-//				evioDOMTree event(chan);
-//				evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-//				if (current_entry == entries) { // get the target  entry, start decode the data
-//					evioDOMNodeList::iterator iter;
-//					for (iter = mpdEventList->begin();
-//							iter != mpdEventList->end(); ++iter) {
-//						if ((*iter)->tag == 10) {
-//							vector<uint32_t> *vec =
-//									(*iter)->getVector<uint32_t>();
-//							if (vec != NULL) {
-//								vSRSSingleEventData.reserve(
-//										vSRSSingleEventData.size()
-//												+ vec->size());
-//								vSRSSingleEventData.insert(
-//										vSRSSingleEventData.end(), vec->begin(),
-//										vec->end());
-//							} else {
-//								cout << "found NULL contents in mpd.." << endl;
-//							}
-//						}
-//					}
-//					cout << "Event ID: " << current_entry << endl;
-//					if (vSRSSingleEventData.size() != 0) {
-//						current_entry++;
-//						break;
-//					} else {
-//						printf("Error accrue in this events, go to next event");
-//						entries++;
-//						current_entry++;
-//						continue;
-//					}
-//				}
-//				// here did not decode the data and check the data if the current event is not the target event
-//				current_entry++;    //maybe this is not a good usage
-//			}
-//		} catch (evioException e) {
-//			cerr << endl << e.toString() << endl << endl;
-//			exit(EXIT_FAILURE);
-//		}
-//
-//		// finish finding the event, ready to decode the data and buffer it in the display histo
-//		RawDecoder raw_decoder(vSRSSingleEventData);
-//		mAPVRawHistos = raw_decoder.GetAPVRawHisto();
-//		map<int, map<int, TH1F*> >::iterator it;
-//		Histo.clear();
-//		for (it = mAPVRawHistos.begin(); it != mAPVRawHistos.end(); ++it) {
-//			map<int, TH1F*> temp = it->second;
-//			map<int, TH1F*>::iterator itt;
-//			for (itt = temp.begin(); itt != temp.end(); ++itt) {
-//				TH1F *h = itt->second;
-//				Histo.push_back(h);
-//			}
-//		}
-//		//Histo[0]->Draw();
-//		//getchar();
-//		return Histo;
-//	}
-// };
 
 map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
 	try {
@@ -465,6 +286,7 @@ std::map<int,std::map<int, std::map<int, std::vector<int> > > > InputHandler::Ra
 	vRaw_Data=Return_data;
 	return Return_data;
 }
+
 //________________________________________________
 int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 {
@@ -514,8 +336,6 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
       Double_t ratio = entry/(Double_t)entries;
       cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
       }
-
-
       map<int, map<int, map<int, vector<int> > > >  mmHit;
       //vector<uint32_t> srsSingleEvent;
       vSRSSingleEventData.clear();
@@ -528,83 +348,85 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
       #endif
 
       int n_bank = mpdEventList->size();
-      //if(n_bank)
 
       // process bar
       if((entry%200)==0){				// using this function to decrease display refresh interval, increase the process speed
       Double_t ratio = entry/(Double_t)entries;
       cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
       }
-      // process bar
+			evioDOMNodeList::iterator iter;
+			for (iter = mpdEventList->begin(); iter != mpdEventList->end();
+					++iter) {
 
-      evioDOMNodeList::iterator iter;
-      for(iter=mpdEventList->begin(); iter!=mpdEventList->end(); ++iter)
-      {
-       // cout<<"bank #:"<< (*iter)->tag<<endl;
+				if (((*iter)->tag == 10)) {
+					vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+					if (vec != NULL) {
+						vSRSSingleEventData.reserve(
+								vSRSSingleEventData.size() + vec->size());
+						vSRSSingleEventData.insert(vSRSSingleEventData.end(),
+								vec->begin(), vec->end());
+					} else {
+						cout << "found NULL contents in mpd.." << endl;
+					}
+				}
+			}
 
-	if( ( (*iter)->tag == 10))
-	{
-          vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-	  if(vec!=NULL)
-	  {
-	    vSRSSingleEventData.reserve(vSRSSingleEventData.size() + vec->size() );
-	    vSRSSingleEventData.insert(vSRSSingleEventData.end(), vec->begin(), vec->end() );
-	  }
-	  else
-	  {
-	    cout<<"found NULL contents in mpd.."<<endl;
-	  }
-	}
-      }
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "Event ID: " << entry << endl;
+#endif
+			if (vSRSSingleEventData.size() != 0) {
+				entry++;
+			}
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "Event Size [uint_32 in number of words]:"
+					<< vSRSSingleEventData.size() << endl;
+#endif
+			if (vSRSSingleEventData.size() == 0)
+				continue; // if no srs event found, go to next event
 
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"Event ID: "<<entry<<endl;
-      #endif
-      if(vSRSSingleEventData.size()!=0){entry++;}
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"Event Size [uint_32 in number of words]:"<<vSRSSingleEventData.size()<<endl;
-      #endif
+			RawDecoder raw_decoder(vSRSSingleEventData);
+			mTsAdc = raw_decoder.GetStripTsAdcMap(); //
 
-      if (vSRSSingleEventData.size() == 0 ) continue; // if no srs event found, go to next event
+			//Fill strip average ADC Histogram for calculating pedestal
+			int mpd_id = 0;
+			int adc_ch = 0;
+			int stripNb = 0;
+			for (map<int, map<int, map<int, vector<int> > > >::iterator it =
+					mTsAdc.begin(); it != mTsAdc.end(); ++it) {
+				mpd_id = it->first;
+				map<int, map<int, vector<int> > > temp = it->second;
 
-      RawDecoder raw_decoder(vSRSSingleEventData);
-      mTsAdc = raw_decoder.GetStripTsAdcMap();//
+				map<int, map<int, vector<int> > >::iterator itt;
+				for (itt = temp.begin(); itt != temp.end(); ++itt) {
+					adc_ch = itt->first;
+					map<int, vector<int> > tempp = itt->second;
+					map<int, vector<int> >::iterator ittt;
+					for (ittt = tempp.begin(); ittt != tempp.end(); ++ittt) {
+						stripNb = ittt->first;
+						vector<int> adc_temp = ittt->second;
+						int adcSum_temp = 0;
+						int TSsize = adc_temp.size();
 
-      //Fill strip average ADC Histogram for calculating pedestal
-      int mpd_id=0;
-      int adc_ch=0;
-      int stripNb=0;
-      for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)
-	{
-	  mpd_id = it->first;
-	  map<int, map<int,vector<int> > > temp = it->second;
+						if (entry == 1)
+							mPedestalHisto[mpd_id][adc_ch][stripNb] = new TH1F(
+									Form("mpd_%d_ch_%d_Strip_%d", mpd_id,
+											adc_ch, stripNb),
+									Form("mpd_%d_ch_%d_Strip_%d_pedestal_data",
+											mpd_id, adc_ch, stripNb), 3500,
+									-500, 3000);
 
-	  map<int, map<int,vector<int> > >::iterator itt;
-	  for(itt=temp.begin(); itt!=temp.end(); ++itt)
-	    {
-	      adc_ch = itt->first;
-	      map<int,vector<int> > tempp = itt->second;
-	      map<int,vector<int> >::iterator ittt;
-	      for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt)
-		{
-		  stripNb = ittt->first;
-		  vector<int> adc_temp = ittt->second;
-		  int adcSum_temp=0;
-		  int TSsize = adc_temp.size();
+						for (int i = 0; i < TSsize; i++) {
+							adcSum_temp += adc_temp[i];
+							//mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
+							//cout<<"mean: "<<adc_temp[i]<<endl;
+						}
+						adcSum_temp = adcSum_temp / TSsize;
+						mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(
+								adcSum_temp);
 
-		  if (entry==1) mPedestalHisto[mpd_id][adc_ch][stripNb] = new TH1F(Form("mpd_%d_ch_%d_Strip_%d",mpd_id, adc_ch,stripNb), Form("mpd_%d_ch_%d_Strip_%d_pedestal_data",mpd_id, adc_ch,stripNb), 3500, -500, 3000);
-
-		  for(int i=0; i<TSsize;i++)
-		    { adcSum_temp+=adc_temp[i];
-		      //mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
-		      //cout<<"mean: "<<adc_temp[i]<<endl;
-		    }
-		  adcSum_temp=adcSum_temp/TSsize;
-		  mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adcSum_temp);
-
-		}
-	    }
-	}
+					}
+				}
+			}
       //end of preparation for calculating pedestal
     }
     chan.close();
@@ -623,15 +445,38 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
   std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
 
 	f = new TFile(PedFilename_temp, "RECREATE");
-	TH1F *mPedestalRMSall = new TH1F("APV Pedestal RMS distribution","APV Pedestal RMS distribution", 200, 0, 200);
-	TH1F *mPedestalMeanall = new TH1F("APV Pedestal Mean distribution","APV Pedestal Mean distribution", 200, 0, 200);
-
-	TH1F *mPedestalMeanx = new TH1F("APV Pedestal mean x","APV Pedestal mean x", 1600, 0, 1600);
-	TH1F *mPedestalMeany= new TH1F("APV Pedestal mean y","APV Pedestal mean y", 1280, 0, 1280);
-	TH1F *mPedestalRMSx = new TH1F("APV Pedestal RMS x","APV Pedestal RMS x", 1540, 0, 1540);
-	TH1F *mPedestalRMSy= new TH1F("APV Pedestal RMS y","APV Pedestal RMS y", 1280, 0, 1280);
-
 	delete[] PedFilename_temp;
+
+
+	std::map<int,TH1F*> mPedestalRMSall;
+	std::map<int,TH1F*> mPedestalMeanall;
+	std::map<int,TH1F*> mPedestalMeanx;
+	std::map<int,TH1F*> mPedestalMeany;
+	std::map<int,TH1F*> mPedestalRMSx;
+	std::map<int,TH1F*> mPedestalRMSy;
+
+	std::vector<int> vChamberID;
+	// check the number of Detector attached
+	for(std::map<int, std::map<int, std::map<int, TH1F*> > >::iterator iter_mpd=mPedestalHisto.begin(); iter_mpd!=mPedestalHisto.end();iter_mpd++){
+		for(std::map<int, std::map<int, TH1F*> >::iterator itter_apv=iter_mpd->second.begin(); itter_apv!=iter_mpd->second.end();itter_apv++){
+			vChamberID.push_back(mMapping[iter_mpd->first][itter_apv->first][0]);
+		}
+	}
+	sort(vChamberID.begin(),vChamberID.end());
+	vChamberID.erase(unique(vChamberID.begin(),vChamberID.end()),vChamberID.end());
+	// find the chamberID, initilize the histo
+	for(unsigned int i=0; i < vChamberID.size();i++){
+		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),200,0,200);
+		mPedestalMeanall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),200,0,200);
+
+		mPedestalMeanx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),1600,0,1600);
+		mPedestalMeany[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),1280,0,1280);
+
+		mPedestalRMSx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),1600,0,1600);
+		mPedestalRMSy[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),1280,0,1280);
+	}
+
+	// save the files
 	map<int, map<int, map<int, TH1F*> > >::iterator it;
 	for (it = mPedestalHisto.begin(); it != mPedestalHisto.end(); ++it) {   // MPD loop
 		mpd_id = it->first;
@@ -662,20 +507,25 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 				RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
 				int RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];            // calculate position
 
-				if(mMapping[mpd_id][adc_ch][1]==0){	mPedestalMeanx->Fill(RstripPos,mean);mPedestalRMSx->Fill(RstripPos,rms);}
-				if(mMapping[mpd_id][adc_ch][1]==1){ mPedestalMeany->Fill(RstripPos,mean);mPedestalRMSy->Fill(RstripPos,rms);}
+				if(mMapping[mpd_id][adc_ch][1]==0){
+					mPedestalMeanx[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,mean);
+					mPedestalRMSx[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,rms);
+				}
+				if(mMapping[mpd_id][adc_ch][1]==1){
+					mPedestalMeany[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,mean);
+					mPedestalRMSy[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,rms);
+				}
 
 				mPedestalMean[mpd_id][adc_ch]->Fill(stripNb, mean);
 				mPedestalRMS[mpd_id][adc_ch]->Fill(stripNb, rms);
-				mPedestalMeanall->Fill(mean);
-				mPedestalRMSall->Fill(rms);
+
+				mPedestalMeanall[mMapping[mpd_id][adc_ch][0]]->Fill(mean);
+				mPedestalRMSall[mMapping[mpd_id][adc_ch][0]]->Fill(rms);
 			}
 		}
 	}
 	f->Write();
 	f->Close();
-  //end of Calculating pedestal
-  //exit(EXIT_SUCCESS);
 
   //delete histograms
   for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)
@@ -698,6 +548,8 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
     }
   return entry;
 }
+
+
 
 int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 
@@ -724,7 +576,6 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
-	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
 	    }
 	    cout<<endl;
 	  }
@@ -735,103 +586,108 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	}
 
   int entry = 0;
-  try{
+	try {
 
-    evioFileChannel chan(filename.c_str(), "r");
+		evioFileChannel chan(filename.c_str(), "r");
 
-    chan.open();
+		chan.open();
 
-    while(chan.read())
-    {
-      map<int, map<int, map<int, vector<int> > > >  mmHit;
-      //vector<uint32_t> srsSingleEvent;
-      vSRSSingleEventData.clear();
+		while (chan.read()) {
+			map<int, map<int, map<int, vector<int> > > > mmHit;
+			//vector<uint32_t> srsSingleEvent;
+			vSRSSingleEventData.clear();
 
-      evioDOMTree event(chan);
-      evioDOMNodeListP mpdEventList = event.getNodeList( isLeaf() );
+			evioDOMTree event(chan);
+			evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
 
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"number of banks: "<<mpdEventList->size()<<endl;
-      #endif
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "number of banks: " << mpdEventList->size() << endl;
+#endif
 
-      int n_bank = mpdEventList->size();
-      //if(n_bank)
+			int n_bank = mpdEventList->size();
+			//if(n_bank)
 
-      evioDOMNodeList::iterator iter;
-      for(iter=mpdEventList->begin(); iter!=mpdEventList->end(); ++iter)
-      {
-       // cout<<"bank #:"<< (*iter)->tag<<endl;
+			evioDOMNodeList::iterator iter;
+			for (iter = mpdEventList->begin(); iter != mpdEventList->end();
+					++iter) {
 
-	if( ( (*iter)->tag == 10))
-	{
-          vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-	  if(vec!=NULL)
-	  {
-	    vSRSSingleEventData.reserve(vSRSSingleEventData.size() + vec->size() );
-	    vSRSSingleEventData.insert(vSRSSingleEventData.end(), vec->begin(), vec->end() );
-	  }
-	  else
-	  {
-	    cout<<"found NULL contents in mpd.."<<endl;
-	  }
-	}
-      }
+				if (((*iter)->tag == 10)) {
+					vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+					if (vec != NULL) {
+						vSRSSingleEventData.reserve(
+								vSRSSingleEventData.size() + vec->size());
+						vSRSSingleEventData.insert(vSRSSingleEventData.end(),
+								vec->begin(), vec->end());
+					} else {
+						cout << "found NULL contents in mpd.." << endl;
+					}
+				}
+			}
 
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"Event ID: "<<entry<<endl;
-      #endif
-      if(vSRSSingleEventData.size()!=0){entry++;}
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"Event Size [uint_32 in number of words]:"<<vSRSSingleEventData.size()<<endl;
-      #endif
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "Event ID: " << entry << endl;
+#endif
+			if (vSRSSingleEventData.size() != 0) {
+				entry++;
+			}
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "Event Size [uint_32 in number of words]:"
+					<< vSRSSingleEventData.size() << endl;
+#endif
 
-      if (vSRSSingleEventData.size() == 0 ) continue; // if no srs event found, go to next event
+			if (vSRSSingleEventData.size() == 0)
+				continue; // if no srs event found, go to next event
 
-      RawDecoder raw_decoder(vSRSSingleEventData);
-      mTsAdc = raw_decoder.GetStripTsAdcMap();//
+			RawDecoder raw_decoder(vSRSSingleEventData);
+			mTsAdc = raw_decoder.GetStripTsAdcMap(); //
 
-      //Fill strip average ADC Histogram for calculating pedestal
-      int mpd_id=0;
-      int adc_ch=0;
-      int stripNb=0;
-      for(map<int, map<int, map<int,vector<int> > > >::iterator it = mTsAdc.begin(); it!=mTsAdc.end(); ++it)
-	{
-	  mpd_id = it->first;
-	  map<int, map<int,vector<int> > > temp = it->second;
+			//Fill strip average ADC Histogram for calculating pedestal
+			int mpd_id = 0;
+			int adc_ch = 0;
+			int stripNb = 0;
+			for (map<int, map<int, map<int, vector<int> > > >::iterator it =
+					mTsAdc.begin(); it != mTsAdc.end(); ++it) {
+				mpd_id = it->first;
+				map<int, map<int, vector<int> > > temp = it->second;
 
-	  map<int, map<int,vector<int> > >::iterator itt;
-	  for(itt=temp.begin(); itt!=temp.end(); ++itt)
-	    {
-	      adc_ch = itt->first;
-	      map<int,vector<int> > tempp = itt->second;
-	      map<int,vector<int> >::iterator ittt;
-	      for(ittt=tempp.begin(); ittt!=tempp.end(); ++ittt)
-		{
-		  stripNb = ittt->first;
-		  vector<int> adc_temp = ittt->second;
-		  int adcSum_temp=0;
-		  int TSsize = adc_temp.size();
+				map<int, map<int, vector<int> > >::iterator itt;
+				for (itt = temp.begin(); itt != temp.end(); ++itt) {
+					adc_ch = itt->first;
+					map<int, vector<int> > tempp = itt->second;
+					map<int, vector<int> >::iterator ittt;
+					for (ittt = tempp.begin(); ittt != tempp.end(); ++ittt) {
+						stripNb = ittt->first;
+						vector<int> adc_temp = ittt->second;
+						int adcSum_temp = 0;
+						int TSsize = adc_temp.size();
 
-		  if (entry==1) mPedestalHisto[mpd_id][adc_ch][stripNb] = new TH1F(Form("mpd_%d_ch_%d_Strip_%d",mpd_id, adc_ch,stripNb), Form("mpd_%d_ch_%d_Strip_%d_pedestal_data",mpd_id, adc_ch,stripNb), 3500, -500, 3000);
+						if (entry == 1)
+							mPedestalHisto[mpd_id][adc_ch][stripNb] = new TH1F(
+									Form("mpd_%d_ch_%d_Strip_%d", mpd_id,
+											adc_ch, stripNb),
+									Form("mpd_%d_ch_%d_Strip_%d_pedestal_data",
+											mpd_id, adc_ch, stripNb), 3500,
+									-500, 3000);
 
-		  for(int i=0; i<TSsize;i++)
-		    { adcSum_temp+=adc_temp[i];
-		      //mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
-		      //cout<<"mean: "<<adc_temp[i]<<endl;
-		    }
-		  adcSum_temp=adcSum_temp/TSsize;
-		  mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adcSum_temp);
+						for (int i = 0; i < TSsize; i++) {
+							adcSum_temp += adc_temp[i];
+							//mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
+							//cout<<"mean: "<<adc_temp[i]<<endl;
+						}
+						adcSum_temp = adcSum_temp / TSsize;
+						mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(
+								adcSum_temp);
 
+					}
+				}
+			}
+			//end of preparation for calculating pedestal
 		}
-	    }
+		chan.close();
+	} catch (evioException e) {
+		cerr << endl << e.toString() << endl << endl;
+		exit(EXIT_FAILURE);
 	}
-      //end of preparation for calculating pedestal
-    }
-    chan.close();
-  } catch (evioException e) {
-    cerr <<endl <<e.toString() <<endl <<endl;
-    exit(EXIT_FAILURE);
-  }
 
   //
   int mpd_id=0;
@@ -843,15 +699,37 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
   std::strcpy(PedFilename_temp,pedestal_file_name.c_str());
 
 	f = new TFile(PedFilename_temp, "RECREATE");
-	TH1F *mPedestalRMSall = new TH1F("APV Pedestal RMS distribution","APV Pedestal RMS distribution", 200, 0, 200);
-	TH1F *mPedestalMeanall = new TH1F("APV Pedestal Mean distribution","APV Pedestal Mean distribution", 200, 0, 200);
-
-	TH1F *mPedestalMeanx = new TH1F("APV Pedestal mean x","APV Pedestal mean x", 1600, 0, 1600);
-	TH1F *mPedestalMeany= new TH1F("APV Pedestal mean y","APV Pedestal mean y", 1280, 0, 1280);
-	TH1F *mPedestalRMSx = new TH1F("APV Pedestal RMS x","APV Pedestal RMS x", 1540, 0, 1540);
-	TH1F *mPedestalRMSy= new TH1F("APV Pedestal RMS y","APV Pedestal RMS y", 1280, 0, 1280);
-
 	delete[] PedFilename_temp;
+
+
+	std::map<int,TH1F*> mPedestalRMSall;
+	std::map<int,TH1F*> mPedestalMeanall;
+	std::map<int,TH1F*> mPedestalMeanx;
+	std::map<int,TH1F*> mPedestalMeany;
+	std::map<int,TH1F*> mPedestalRMSx;
+	std::map<int,TH1F*> mPedestalRMSy;
+
+	std::vector<int> vChamberID;
+	// check the number of Detector attached
+	for(std::map<int, std::map<int, std::map<int, TH1F*> > >::iterator iter_mpd=mPedestalHisto.begin(); iter_mpd!=mPedestalHisto.end();iter_mpd++){
+		for(std::map<int, std::map<int, TH1F*> >::iterator itter_apv=iter_mpd->second.begin(); itter_apv!=iter_mpd->second.end();itter_apv++){
+			vChamberID.push_back(mMapping[iter_mpd->first][itter_apv->first][0]);
+		}
+	}
+	sort(vChamberID.begin(),vChamberID.end());
+	vChamberID.erase(unique(vChamberID.begin(),vChamberID.end()),vChamberID.end());
+	// find the chamberID, initilize the histo
+	for(unsigned int i=0; i < vChamberID.size();i++){
+		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),200,0,200);
+		mPedestalMeanall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),200,0,200);
+
+		mPedestalMeanx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),1600,0,1600);
+		mPedestalMeany[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),1280,0,1280);
+
+		mPedestalRMSx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),1600,0,1600);
+		mPedestalRMSy[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),1280,0,1280);
+	}
+	// save the files
 	map<int, map<int, map<int, TH1F*> > >::iterator it;
 	for (it = mPedestalHisto.begin(); it != mPedestalHisto.end(); ++it) {   // MPD loop
 		mpd_id = it->first;
@@ -882,13 +760,20 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 				RstripNb=RstripNb+(127-2*RstripNb)*mMapping[mpd_id][adc_ch][3];//re-matching for inverted strips Nb
 				int RstripPos=RstripNb+128*mMapping[mpd_id][adc_ch][2];            // calculate position
 
-				if(mMapping[mpd_id][adc_ch][1]==0){	mPedestalMeanx->Fill(RstripPos,mean);mPedestalRMSx->Fill(RstripPos,rms);}
-				if(mMapping[mpd_id][adc_ch][1]==1){ mPedestalMeany->Fill(RstripPos,mean);mPedestalRMSy->Fill(RstripPos,rms);}
+				if(mMapping[mpd_id][adc_ch][1]==0){
+					mPedestalMeanx[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,mean);
+					mPedestalRMSx[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,rms);
+				}
+				if(mMapping[mpd_id][adc_ch][1]==1){
+					mPedestalMeany[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,mean);
+					mPedestalRMSy[mMapping[mpd_id][adc_ch][0]]->Fill(RstripPos,rms);
+				}
 
 				mPedestalMean[mpd_id][adc_ch]->Fill(stripNb, mean);
 				mPedestalRMS[mpd_id][adc_ch]->Fill(stripNb, rms);
-				mPedestalMeanall->Fill(mean);
-				mPedestalRMSall->Fill(rms);
+
+				mPedestalMeanall[mMapping[mpd_id][adc_ch][0]]->Fill(mean);
+				mPedestalRMSall[mMapping[mpd_id][adc_ch][0]]->Fill(rms);
 			}
 		}
 	}
@@ -1013,8 +898,6 @@ if(filestream.good()){
 		  //map<mpd_id, map<ch_id, vector<int> > >, vector: adc values (all time samples)
 		  mTsAdc = raw_decoder.GetStripTsAdcMap();//
 
-
-
 		  int mpd_id=0;
 		  int adc_ch=0;
 		  int stripNb=0;
@@ -1127,11 +1010,11 @@ return ZeroSReturn;
 }
 
 // used for multi-detector mode
-	// detectorID     x or Y     strips  ADC
+// detectorID     x or Y     strips  ADC
 std::map<int,std::map<int,std::map<int,int> > > InputHandler::ZeroSProcessSingleEvents(int entries, std::map<int,std::map<int,std::map<int,int> > > & vRaw_Pedesta, string pedestal_file_name,int SampleID)  {
 
-	//map<int,map<int,int>> ZeroSReturn;  // 1 x before zero subression 2 x afterzerosubration, 3 after remove cross talk  4 cross talk
-										// 11       12                13
+	// 1 x before zero subression 2 x afterzerosubration, 3 after remove cross talk  4 cross talk
+	// 11       12                13
 	std::map<int,std::map<int,std::map<int,int> > > vRaw_Pedestal_return;   // used for buffer the temp data
 
 	//Loading Mapping
@@ -1268,30 +1151,19 @@ std::map<int,std::map<int,std::map<int,int> > > InputHandler::ZeroSProcessSingle
   			  float fadcvalue_temp = adcSum_temp-hMean->GetBinContent(stripNb+1);   // zero subtraction
   			  float rms_temp=hRMS->GetBinContent(stripNb+1);
   			  if(mMapping[mpd_id][adc_ch][1]==0){
-//  				  ZeroSReturn[1][RstripPos]=fadcvalue_temp;
   				vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][1][RstripPos]=fadcvalue_temp;
-  				  //hhX->Fill(RstripPos,fadcvalue_temp);
   			  }
   			  if(mMapping[mpd_id][adc_ch][1]==1){
-  				  //hhY->Fill(RstripPos,fadcvalue_temp);
-//  				  ZeroSReturn[11][RstripPos]=fadcvalue_temp;
   				vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][11][RstripPos]=fadcvalue_temp;
   			  }
 
   			  // apply 5 sigma select the effective hit
   			  if(( fadcvalue_temp>5*rms_temp))
   			    {
-  			      //int detID=mMapping[mpd_id][adc_ch][0];
-  			      //int planeID=mMapping[mpd_id][adc_ch][1];
   			      if(mMapping[mpd_id][adc_ch][1]==0){
-  			    	  //hX->Fill(RstripPos,fadcvalue_temp);
-  			    	  //ZeroSReturn[2][RstripPos]=fadcvalue_temp;
   			    	  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][2][RstripPos]=fadcvalue_temp;
-
   			      }
   			      if(mMapping[mpd_id][adc_ch][1]==1){
-  			    	  //hY->Fill(RstripPos,fadcvalue_temp);
-  			    	  //ZeroSReturn[12][RstripPos]=fadcvalue_temp;
   			    	  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][12][RstripPos]=fadcvalue_temp;
   			      }
   			      cout<<"orginal strip: "<<stripNb<<" hit in MPD:"<<mpd_id<<" adc:"<<adc_ch<<" strip: "<<RstripNb+1<<"Position: "<<RstripPos<<" adc value:"<<fadcvalue_temp<<" RMS:"<<rms_temp<<endl;
@@ -1302,32 +1174,23 @@ std::map<int,std::map<int,std::map<int,int> > > InputHandler::ZeroSProcessSingle
   	      map<int,int> sRemoveCrossTalk;
   	      map<int,int> sCrossTalk;
   	      FindCrossTalk(AddressCorrelation,sEventCrossTalk_temp,&sRemoveCrossTalk,&sCrossTalk);
-  	      //cout<<" crosstalk size="<<sRemoveCrossTalk.size()<<" crosstalk size="<<sCrossTalk.size()<<endl;
   	      map<int,int>::iterator iter_rmcttemp=sRemoveCrossTalk.begin();
   	      while(iter_rmcttemp!=sRemoveCrossTalk.end()){
   	    	  if(mMapping[mpd_id][adc_ch][1]==0){
-  	    		  //ZeroSReturn[3][iter_rmcttemp->first]=iter_rmcttemp->second;
   	    		  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][3][iter_rmcttemp->first]=iter_rmcttemp->second;
-  	    		  //hX_rmCt->Fill(iter_rmcttemp->first,iter_rmcttemp->second);
   	    	  }
   	    	  if(mMapping[mpd_id][adc_ch][1]==1){
-  	    		  //ZeroSReturn[13][iter_rmcttemp->first]=iter_rmcttemp->second;
   	    		  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][13][iter_rmcttemp->first]=iter_rmcttemp->second;
-  	    		  //hY_rmCt->Fill(iter_rmcttemp->first,iter_rmcttemp->second);
   	    	  }
   	    	  iter_rmcttemp++;
   	      }
   	      map<int,int>::iterator iter_cttemp=sCrossTalk.begin();
   	      while(iter_cttemp!= sCrossTalk.end()) {
   	    	  if(mMapping[mpd_id][adc_ch][1]==0){
-  	    		  //ZeroSReturn[4][iter_cttemp->first]=iter_cttemp->second;
   	    		  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][4][iter_cttemp->first]=iter_cttemp->second;
-  	    		  //hX_Ct->Fill(iter_cttemp->first,iter_cttemp->second);
   	    	  }
   	    	  if(mMapping[mpd_id][adc_ch][1]==1){
-  	    		  //ZeroSReturn[14][iter_cttemp->first]=iter_cttemp->second;
   	    		  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][14][iter_cttemp->first]=iter_cttemp->second;
-  	    		  //hY_Ct->Fill(iter_cttemp->first,iter_cttemp->second);
   	    	  }
   	    	  iter_cttemp++;
   	      }
@@ -1339,12 +1202,8 @@ std::map<int,std::map<int,std::map<int,int> > > InputHandler::ZeroSProcessSingle
 }
 
 int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, string root_file_name) {
-	int entry=0;
 
-	//TCanvas *cHit = new TCanvas("cHit", "ZeroSupression", 10, 10, 1000, 800);
-	//cHit->Divide(2,2);
-	//Initialize root tree to store hits
-	//TFile *Hit_rootfile = new TFile("13apv_prod12Hit.root","RECREATE");
+	int entry=0;
 
 	Int_t EvtID,nch,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
 	Vstrip =new Int_t[2000];
@@ -1538,32 +1397,6 @@ if(filestream.good()){
 		    	 }  // end of loop on APVs
 		     }      // end of loop on MPDs -finish decode one event
 
-		     /*
-		      // test functions
-		     //map<int,map<int,vector<TH1F*>>> Test_histo;
-		     // detID    PlaneID   nstrips SixTimeSample
-		     map<int, map<int,map<int,vector<int> > > >::iterator iter_detID_test=mmHit.begin();
-		     while(iter_detID_test!=mmHit.end()) {
-		    	 int DetID=iter_detID_test->first;
-		    	 map<int, map<int,vector<int> > >::iterator itter_plane_test=iter_detID_test->second.begin();
-		    	 while(itter_plane_test!= iter_detID_test->second.end()) {
-		    		 int PlaneID=itter_plane_test->first;
-		    		 map<int,vector<int> >::iterator ittter_strip_test=itter_plane_test->second.begin();
-		    		 while(ittter_strip_test!=itter_plane_test->second.end()) {
-		    			 int Nstrips_temp=ittter_strip_test->first;
-		    			 int NTimeSample_temp=ittter_strip_test->second.size();
-		    			 vector<int> TsimpleData_temp=ittter_strip_test->second;
-		    			 for(int i =0; i < TsimpleData_temp.size(); i++) {
-		    				 cout<<" => EventID="<<entry<<" DetID="<<DetID<<" PlaneID="<<PlaneID<<" Tsample="<<i<<" add="<<Nstrips_temp<<" ADC="<<TsimpleData_temp[i]<<endl;
-		     		       }
-		     		    					 //
-		     		     ittter_strip_test++;
-		     		    }
-		     		   itter_plane_test++;
-		     		   }
-		     		  iter_detID_test++;
-		     	 }*/
-
 		     int detid,planeid;
 		     Int_t nstrip=0;
 		     for(map<int, map<int, map<int, vector<int> > > >::iterator it = mmHit.begin(); it!=mmHit.end(); ++it) {
@@ -1595,11 +1428,9 @@ if(filestream.good()){
 		    		 }
 		    	 }
 		     }
-		     nch=nstrip;//cout<<nch<<"HHHHHHH"<<endl;
+		     nch=nstrip;
 		     EvtID=entry;
 		     Hit->Fill();
-		     //end of sorting hits
-		     //end of zero supression
 		 }
 		 chan.close();
 	} catch (evioException e) {
@@ -1611,10 +1442,7 @@ if(filestream.good()){
 	int mpd_id=0;
 	int adc_ch=0;
 	int stripNb=0;
-//	char *HitFilename_temp = new char[100];
-//	std::strcpy(HitFilename_temp,root_file_name.c_str());
-//	TFile *Hit_rootfile = new TFile(HitFilename_temp,"RECREATE");
-//	delete[] HitFilename_temp;
+
 	Hit->Write();
 	Hit_rootfile->Write();
 	Hit_rootfile->Close();

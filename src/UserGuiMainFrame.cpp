@@ -30,8 +30,8 @@ const char *datfiletype[]={
 		"All files", "*",
 					0, 0
 };
-UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
-		TGMainFrame(p, w, h) {
+UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
+
 	// TODO Auto-generated constructor stub
 	SetCleanup(kDeepCleanup);
 
@@ -39,7 +39,6 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	// user variable initialize
 	vWorkMode=NULL;
 	// oooooooooooOOOOOOOOOOO000000000000OOOOOOOOOooooooooooooooooo
-
 
 	fMenuDock = new TGDockableFrame(this);
 	AddFrame(fMenuDock, new TGLayoutHints(kLHintsExpandX, 0, 0, 1, 0));
@@ -57,7 +56,6 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 
 	fMenuSet = new TGPopupMenu(fClient->GetRoot());
 	SetMenuSet();
-
 
 	fMenuView = new TGPopupMenu(fClient->GetRoot());
 	SetMenuView();
@@ -82,31 +80,24 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
 	fMenuBar -> AddPopup("&View",fMenuView,fMenuBarItemLayout);
 	fMenuBar -> AddPopup("&Help",fMenuHelp,fMenuBarHelpLayout);
 	fMenuDock -> AddFrame(fMenuBar,fMenuBarLayout);
+
 	// add separation line to the menu bar
 	TGHorizontal3DLine *menu_seperator=new TGHorizontal3DLine(this);
 	AddFrame(menu_seperator,new TGLayoutHints(kLHintsExpandX));
 
-
 	// add the work zone frame
 	fWorkZoneFrame = new TGHorizontalFrame(this);
+
+	// WorkZone -> control sub-zone
 	fWorkZoneControlFrame = new TGVerticalFrame(fWorkZoneFrame, 10,10);
-	SetWorkZoneButton();   // set the control penal
-
-
-	//fWorkZoneControlFrame->SetBackgroundColor(33);
+	SetWorkZoneButton();   												// set the control penal
+	//workZone  -> display Sub-zone
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
 
 	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
-	SetWorkZoneTab();
+	SetWorkZoneTab(NTabs);
 	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-	//fEmnbeddedCanvas = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneCanvasFrame, 600,600);
-	//fEmnbeddedCanvas->GetCanvas()->SetBorderMode(0);
-	//fEmnbeddedCanvas->GetCanvas()->SetFillColor(0);
-	//fEmnbeddedCanvas->GetCanvas()->SetFrameFillColor(41);
-	//fEmnbeddedCanvas->GetCanvas()->SetGrid();
-	//fWorkZoneCanvasFrame->AddFrame(fEmnbeddedCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-	//cRawCanvas=fEmnbeddedCanvas->GetCanvas();
 
 	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
 	fWorkZoneFrame -> AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
@@ -182,8 +173,8 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		// attach the embeded canvas
 		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
-		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFillColor(38);
-		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFrameFillColor(41);
+		//fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFillColor(38);
+		//fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFrameFillColor(41);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
 		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
@@ -245,7 +236,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	fNumberFrame->AddFrame(tNumberEntry,new TGLayoutHints(kLHintsExpandX));
 	fWorkZoneControlFrame->AddFrame(fNumberFrame,new TGLayoutHints(kLHintsExpandX));
 
-
 	//confirm button
 	bConfirmButton = new TGTextButton(fWorkZoneControlFrame,"Confirm",C_CONFIRM);
 	bConfirmButton->Associate(this);
@@ -254,9 +244,17 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 
 void UserGuiMainFrame::SetStatusBar(){
 
+
+	Pixel_t yellow;
+	fClient->GetColorByName("yellow", yellow);
+	fColorSel = new TGColorSelect(fStatusFrame, yellow, COLORSEL);
+	fColorSel->Associate(this);
+	fStatusFrame->AddFrame(fColorSel,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
+	TGVertical3DLine *lStatusbarSeparation0=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation0, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
+
 	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM Analysis Framework Author: Siyu Jian");
 	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
-
 	TGVertical3DLine *lStatusbarSeparation1=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation1, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
 
@@ -283,15 +281,15 @@ void UserGuiMainFrame::SetStatusBar(){
 	TGVertical3DLine *lStatusbarSeparation3=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation3, new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY));
 }
-void UserGuiMainFrame::fFileBrowse() {
-	printf("where am I \n");
-	static TString dir(".");
-	TGFileInfo file_infor;
-	file_infor.fFileTypes = filetype;
-	file_infor.fIniDir = StrDup(dir);
-	new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &file_infor);
-	printf(" try to open file %s\n", file_infor.fFilename);
-}
+//void UserGuiMainFrame::fFileBrowse() {
+//	//printf("where am I \n");
+//	static TString dir(".");
+//	TGFileInfo file_infor;
+//	file_infor.fFileTypes = filetype;
+//	file_infor.fIniDir = StrDup(dir);
+//	new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &file_infor);
+//	printf(" try to open file %s\n", file_infor.fFilename);
+//}
 
 void UserGuiMainFrame::SetDataFileName(){
 	printf("where am I \n");
@@ -307,8 +305,9 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
-	switch (GET_MSG(msg)) {
+	printf("mcg: %d  expect %d\n",GET_MSG(msg),kC_COLORSEL);
 
+	switch (GET_MSG(msg)) {
 	case kC_COMMAND:
 		switch (GET_SUBMSG(msg)) {
 		case kCM_MENU:
@@ -347,6 +346,9 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case M_SET_LOADMAPPING:
 				dMenuSetLoadMapping();
 				 break;
+			case COLORSEL:
+				printf("color color \n");
+				break;
 			default:
 				break;
 			}
@@ -417,9 +419,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
-				//cRawCanvas->Clear();
-				//cRawCanvas->ResetAttPad();
-				//cRawCanvas->Divide(2,3);
 				printf("ZERO mode selected \n");
 				break;
 			case C_WORKMODE_PEDESTAL:
@@ -460,7 +459,18 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					break;
 			}
 			break;
+	case kC_COLORSEL:
+		printf("color %d\n",TColor::GetColor(fColorSel->GetColor()));
+		for(int i =0; i <NTabs; i++){
+			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
 
+			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Modified();
+			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Update();
+
+			gSystem->ProcessEvents();
+		}
+
+		break;
 	default:
 		break;
 	}
@@ -519,11 +529,10 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 		}
 		cfWorkZoneTabCanvas[Canvas_counter]->Modified();
 		cfWorkZoneTabCanvas[Canvas_counter]->Update();
+		gSystem->ProcessEvents();
 		Canvas_counter++;
 	}
-	delete[] inputHandler;
-	//printf("%d\n",tRawFileEntry->GetSelected());
-	gSystem->ProcessEvents();
+	delete inputHandler;
 }
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
@@ -532,43 +541,24 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 	printf("=>Pedestal Filename: %s\n",Pedestal_name.c_str());
 
 	std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
-
-//	//std::map<int,std::map<std::string, map<>>>
-//	TH1F *histox=new TH1F("BeforeZeroSupression_X","BeforeZeroSupression_X",1600,0,1600);
-//	TH1F *histoy=new TH1F("BeforeZeroSupression_Y","BeforeZeroSupression_Y",1600,0,1600);
-//
-//	TH1F *histo_zerox=new TH1F("AfterZeroSupression_X","AfterZeroSupression_X",1600,0,1600);
-//	TH1F *histo_zeroy=new TH1F("AfterZeroSupression_Y","AfterZeroSupression_Y",1600,0,1600);
-//
-//	TH1F *histo_rmtakx=new TH1F("AfterRemoveCrosstalk_X","AfterRemoveCrosstalkX",1600,0,1600);
-//	TH1F *histo_rmtaky=new TH1F("AfterRemoveCrosstalk_Y","AfterRemoveCrosstalk_Y",1600,0,1600);
-//
-//	TH1F *histo_talkx=new TH1F("CrossTalk_X","CrossTalk_X",1600,0,1600);
-//	histo_talkx->SetLineColor(2);
-//	TH1F *histo_talky=new TH1F("CrossTalk_Y","CrossTalk_Y",1600,0,1600);
-//	histo_talky->SetLineColor(2);
-
-
-
 	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
-
 			InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
 			if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
 			std::map<int,std::map<int,std::map<int,int> > > a;
 			std::map<int,std::map<int,std::map<int,int> > > ZeroSubRawBuffer=inputHandler->ZeroSProcessSingleEvents(vEventNumber,a,Pedestal_name.c_str(),-1);
 
 			for(std::map<int,std::map<int,std::map<int,int> > > ::iterator iter_detectorID=ZeroSubRawBuffer.begin(); iter_detectorID!=ZeroSubRawBuffer.end();iter_detectorID++){
-				ZeroSubHistoBuffer[iter_detectorID->first][1]=new TH1F(Form("GEM_%d_BeforeZeroSupression_X",iter_detectorID->first),"BeforeZeroSupression_X",1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][11]=new TH1F(Form("GEM_%d_BeforeZeroSupression_Y",iter_detectorID->first),"BeforeZeroSupression_Y",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][1]=new TH1F("BeforeZeroSupression_X",Form("GEM_%d_BeforeZeroSupression_X",iter_detectorID->first),1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][11]=new TH1F("BeforeZeroSupression_Y",Form("GEM_%d_BeforeZeroSupression_Y",iter_detectorID->first),1600,0,1600);
 
-				ZeroSubHistoBuffer[iter_detectorID->first][2]=new TH1F(Form("GEM_%d_AfterZeroSupression_X",iter_detectorID->first),"AfterZeroSupression_X",1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][12]=new TH1F(Form("GEM_%d_AfterZeroSupression_Y",iter_detectorID->first),"AfterZeroSupression_Y",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][2]=new TH1F("AfterZeroSupression_X",Form("GEM_%d_AfterZeroSupression_X",iter_detectorID->first),1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][12]=new TH1F("AfterZeroSupression_Y",Form("GEM_%d_AfterZeroSupression_Y",iter_detectorID->first),1600,0,1600);
 
-				ZeroSubHistoBuffer[iter_detectorID->first][3]=new TH1F(Form("GEM_%d_AfterRemoveCrosstalk_X",iter_detectorID->first),"AfterRemoveCrosstalk_X",1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][13]=new TH1F(Form("GEM_%d_AfterRemoveCrosstalk_Y",iter_detectorID->first),"AfterRemoveCrosstalk_Y",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][3]=new TH1F("AfterRemoveCrosstalk_X",Form("GEM_%d_AfterRemoveCrosstalk_X",iter_detectorID->first),1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][13]=new TH1F("AfterRemoveCrosstalk_Y",Form("GEM_%d_AfterRemoveCrosstalk_Y",iter_detectorID->first),1600,0,1600);
 
-				ZeroSubHistoBuffer[iter_detectorID->first][4]=new TH1F(Form("GEM_%d_CrossTalk_X",iter_detectorID->first),"CrossTalk_X",1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][14]=new TH1F(Form("GEM_%d_CrossTalk_Y",iter_detectorID->first),"CrossTalk_Y",1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][4]=new TH1F("CrossTalk_X",Form("GEM_%d_CrossTalk_X",iter_detectorID->first),1600,0,1600);
+				ZeroSubHistoBuffer[iter_detectorID->first][14]=new TH1F("CrossTalk_Y",Form("GEM_%d_CrossTalk_Y",iter_detectorID->first),1600,0,1600);
 
 				for(std::map<int,std::map<int,int> >::iterator itter_dimension=iter_detectorID->second.begin();itter_dimension!=iter_detectorID->second.end();itter_dimension++){
 					for(std::map<int,int>::iterator ittter_strips=itter_dimension->second.begin(); ittter_strips!=itter_dimension->second.end();ittter_strips++) {
@@ -601,9 +591,10 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
 			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+			gSystem->ProcessEvents();
 			Canvas_counter++;
 		}
-		gSystem->ProcessEvents();
+
 	}else{
 		printf("Pedestal File structure unrecgnized, only .root allowed\n");
 	}
@@ -764,7 +755,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 					nStatusBarInfor->SetText(
 							Form("OutPut file is save as %s\n",
 									Hit_outname.c_str()));
-
 					//delete decoder;
 					delete decoder;
 				}
