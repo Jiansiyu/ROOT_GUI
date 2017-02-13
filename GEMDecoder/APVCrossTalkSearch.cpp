@@ -2,23 +2,44 @@
  * APVCrossTalkSearch.cpp
  *
  *  Created on: Feb 4, 2017
- *      Author: newdriver
+ *      Author: Siyu Jian
  */
 
 #include "APVCrossTalkSearch.h"
 #include "time.h"
-//APVCrossTalkSearch::APVCrossTalkSearch() {
-//	// TODO Auto-generated constructor stub
-//
-//}
 
-int APVCrossTalkSearch::Run(){
-	std::map<int,int> a;
-	APVMapping(a);    		//set the defult mapping
-	if (cRemoveTalkMethod == "regular") {        // apply the crssponding method get the result
+int APVCrossTalkSearch::SingleSampleRun(){
+
+	if(!cAPVMapping.size()){     // set the defult mapping if the mapping is empty
+		std::map<int,int> a;
+		APVMapping(a);    		//set the defult mapping
+		Massage("string",Form("%s_Using Defult Mapping",__FUNCTION__));
+	}
+	if ((cRemoveTalkMethod == "regular")&&(!vAPVInputData.size())) {        // apply the crssponding method get the result
 		fRemoveCrosstalk(); // apply the regular peocess method to calculate the
+	}else{
+		Massage("error", "NULL data is passed in");
 	}
 	return 1;
+}
+
+int APVCrossTalkSearch::SingleEventRun(){   //
+	if(!vAPVSingleEventInputData.size()){
+		Massage("error", Form("%s NULL data is passed in",__FUNCTION__));
+		return -1;
+	}else{
+		for(std::map<int,std::map<int,int>>::iterator iter_sampleID=vAPVSingleEventInputData.begin();iter_sampleID!=vAPVSingleEventInputData.end();iter_sampleID++){
+			vAPVInputData.clear();
+			vAPVCrossTalkData.clear();
+			vAPVRemoveCrossTalkData.clear();
+
+			vAPVInputData=iter_sampleID->second;
+			SingleEventRun();     // calculate the  crosstalk for this single time sample
+			vAPVSingleEventCrossTalkData.insert(std::make_pair(iter_sampleID->first,vAPVCrossTalkData));
+			vAPVSingleEventRemoveCrossTalkData.insert(std::make_pair(iter_sampleID->first, vAPVRemoveCrossTalkData));
+		}
+		return 1;
+	}
 }
 APVCrossTalkSearch::~APVCrossTalkSearch() {
 	// TODO Auto-generated destructor stub
@@ -51,6 +72,20 @@ APVCrossTalkSearch::APVCrossTalkSearch(std::map<int,int> Raw_data) {
 	}
 }
 
+
+// for
+APVCrossTalkSearch::APVCrossTalkSearch(std::map<int,std::map<int,int> > Raw_data){
+
+}
+
+APVCrossTalkSearch::APVCrossTalkSearch(std::map<int,std::vector<int> > Raw_data) {
+	for(std::map<int,std::vector<int> > ::iterator iter_stripsID=Raw_data.begin(); iter_stripsID!=Raw_data.end();iter_stripsID++){
+		for(unsigned int Tsample_Counter=0;Tsample_Counter<iter_stripsID->second.size();Tsample_Counter++){
+			vAPVSingleEventInputData[Tsample_Counter][iter_stripsID->first]=(iter_stripsID->second)[Tsample_Counter];
+		}
+	}
+}
+
 void APVCrossTalkSearch::SetRawAPVData(TH1F * Raw_data) {
 	// loading the raw data
 	vAPVInputData.clear();
@@ -77,6 +112,14 @@ void APVCrossTalkSearch::SetRawAPVData(std::map<int,int> Raw_data) {
 	std::map<int,int>::iterator iter_strips=Raw_data.begin();
 	for(;iter_strips!=Raw_data.end();iter_strips++) {
 		vAPVInputData[iter_strips->first]=iter_strips->second;
+	}
+}
+
+void APVCrossTalkSearch::SetRawAPVData(std::map<int,std::vector<int> > Raw_data){
+	for(std::map<int,std::vector<int> > ::iterator iter_stripsID=Raw_data.begin(); iter_stripsID!=Raw_data.end();iter_stripsID++){
+		for(unsigned int Tsample_Counter=0;Tsample_Counter<iter_stripsID->second.size();Tsample_Counter++){
+			vAPVSingleEventInputData[Tsample_Counter][iter_stripsID->first]=(iter_stripsID->second)[Tsample_Counter];
+		}
 	}
 }
 
@@ -162,7 +205,6 @@ int APVCrossTalkSearch::fRemoveCrosstalk(){
 			std::map<int,int> Cluster_rmct;
 			Cluster_rmct.insert(std::make_pair(MaxADC_address_temp,MaxADC_temp));
 			sRemoveCrossTalk_buffer.push_back(Cluster_rmct);
-
 			// the strips near the maximum would be the crosstalk condidate
 			// write the others in the crosstalk candidate buffer
 			std::map<int,int> CrossCandidate_maptemp=(*iter_allevents);
@@ -190,10 +232,21 @@ int APVCrossTalkSearch::fRemoveCrosstalk(){
 	return 1;
 }
 
-std::map<int,int> APVCrossTalkSearch::GetCrossTalkData() {
+std::map<int,int> APVCrossTalkSearch::GetSingleSampleCrossTalkData() {
 	return vAPVCrossTalkData;
 }
 
-std::map<int,int> APVCrossTalkSearch::GetRemoveCrossTalkData() {
+std::map<int,int> APVCrossTalkSearch::GetSingleSampleRemoveCrossTalkData() {
 	return vAPVRemoveCrossTalkData;
+}
+
+// for muti timesample usage
+std::map<int, std::map<int,int>> APVCrossTalkSearch::GetSingleEventCrossTalkData() {
+	return vAPVSingleEventCrossTalkData;
+}
+std::map<int, std::map<int,int>> APVCrossTalkSearch::GetSingleEventRemoveCrossTalkData(){
+	return vAPVSingleEventRemoveCrossTalkData;
+}
+int APVCrossTalkSearch::Massage(std::string MSG_TYPE, std::string MSG) {
+	return 1;
 }

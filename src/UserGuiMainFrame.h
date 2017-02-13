@@ -73,6 +73,7 @@ enum ETestCommandIdentifiers {
 	M_SET_LOADPEDESTAL,
 	M_SET_BATCH,
 
+	M_TOOL_APVMAPPINGWIZARD,
 
 	M_VIEW_ENBL_DOCK,
 	M_VIEW_ENBL_HIDE,
@@ -151,7 +152,7 @@ private:
 
 	// set the menu layout
 	TGMenuBar *fMenuBar;
-	TGPopupMenu *fMenuFile, *fMenuSet, *fMenuView, *fMenuHelp;
+	TGPopupMenu *fMenuFile, *fMenuSet, *fMenuTool, *fMenuView, *fMenuHelp;
 	TGLayoutHints *fMenuBarLayout, *fMenuBarItemLayout, *fMenuBarHelpLayout;
 
 	// set the work zone variables
@@ -219,6 +220,7 @@ private:
 	// menu
 	void SetMenuFile();
 	void SetMenuSet();
+	void SetMenuTool();
 	void SetMenuView();
 	void SetMenuHelp();
 

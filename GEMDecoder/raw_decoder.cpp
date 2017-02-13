@@ -171,8 +171,6 @@ map<int, map<int, TH1F* > > RawDecoder::GetAPVRawHisto()
       vector<int> adc_temp = itt->second;
 
       int N = adc_temp.size();
-      //cout<<"adc_tempsize:"<<N<<endl;
-      //cout<<"mpdid: "<<mpd_id<<"  adcCh: "<<adc_ch<<endl;
       TH1F* h = new TH1F(Form("mpd_%d_ch_%d",mpd_id, adc_ch), Form("mpd_%d_ch_%d_raw_data",mpd_id, adc_ch), N+128, 0, N+127);
       for(int i=0;i<N;i++)
       {

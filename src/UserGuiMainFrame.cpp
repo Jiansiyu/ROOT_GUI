@@ -35,11 +35,6 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	// TODO Auto-generated constructor stub
 	SetCleanup(kDeepCleanup);
 
-	// oooooooooooOOOOOOOOOOO000000000000OOOOOOOOOooooooooooooooooo
-	// user variable initialize
-	vWorkMode=NULL;
-	// oooooooooooOOOOOOOOOOO000000000000OOOOOOOOOooooooooooooooooo
-
 	fMenuDock = new TGDockableFrame(this);
 	AddFrame(fMenuDock, new TGLayoutHints(kLHintsExpandX, 0, 0, 1, 0));
 	fMenuDock->SetWindowName("MainFrame Menu");
@@ -57,26 +52,30 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	fMenuSet = new TGPopupMenu(fClient->GetRoot());
 	SetMenuSet();
 
+	fMenuTool= new TGPopupMenu(fClient->GetRoot());
+	SetMenuTool();
+
 	fMenuView = new TGPopupMenu(fClient->GetRoot());
 	SetMenuView();
 
 	fMenuHelp = new TGPopupMenu(fClient->GetRoot());
 	SetMenuHelp();
 
-
 	fMenuDock->EnableUndock(kTRUE);
 	fMenuDock->EnableHide(kTRUE);
 
 	// Menu button messages are handled by the main frame (i.e. "this")
 	// ProcessMessage() method.
-	fMenuFile->Associate(this);
-	fMenuSet->Associate(this);
-	fMenuView->Associate(this);
-	fMenuHelp->Associate(this);
+//	fMenuFile->Associate(this);
+//	fMenuSet->Associate(this);
+//	fMenuTool->Associate(this);
+//	fMenuView->Associate(this);
+//	fMenuHelp->Associate(this);
 
 	fMenuBar = new TGMenuBar(fMenuDock,1,1,kHorizontalFrame);
 	fMenuBar -> AddPopup("&File",fMenuFile,fMenuBarItemLayout);
 	fMenuBar -> AddPopup("&Set",fMenuSet,fMenuBarItemLayout);
+	fMenuBar -> AddPopup("&Tool",fMenuTool,fMenuBarItemLayout);
 	fMenuBar -> AddPopup("&View",fMenuView,fMenuBarItemLayout);
 	fMenuBar -> AddPopup("&Help",fMenuHelp,fMenuBarHelpLayout);
 	fMenuDock -> AddFrame(fMenuBar,fMenuBarLayout);
@@ -141,6 +140,11 @@ void UserGuiMainFrame::SetMenuSet() {
 	fMenuSet->AddEntry("Load Pedestal(root)...", M_SET_LOADPEDESTAL);
 	fMenuSet->AddEntry("&Set...", M_SET_WORKMODE);
 	fMenuSet->Associate(this);
+}
+
+void UserGuiMainFrame::SetMenuTool(){
+	fMenuTool->AddEntry("&APVMapping Wizard...",M_TOOL_APVMAPPINGWIZARD);
+	fMenuTool->Associate(this);
 }
 
 void UserGuiMainFrame::SetMenuView() {
@@ -281,15 +285,6 @@ void UserGuiMainFrame::SetStatusBar(){
 	TGVertical3DLine *lStatusbarSeparation3=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation3, new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY));
 }
-//void UserGuiMainFrame::fFileBrowse() {
-//	//printf("where am I \n");
-//	static TString dir(".");
-//	TGFileInfo file_infor;
-//	file_infor.fFileTypes = filetype;
-//	file_infor.fIniDir = StrDup(dir);
-//	new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &file_infor);
-//	printf(" try to open file %s\n", file_infor.fFilename);
-//}
 
 void UserGuiMainFrame::SetDataFileName(){
 	printf("where am I \n");
@@ -305,8 +300,7 @@ void UserGuiMainFrame::CloseWindow() {
 }
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
-	printf("mcg: %d  expect %d\n",GET_MSG(msg),kC_COLORSEL);
-
+	//printf("mcg: %d  expect %d\n",GET_MSG(msg),kC_COLORSEL);
 	switch (GET_MSG(msg)) {
 	case kC_COMMAND:
 		switch (GET_SUBMSG(msg)) {
@@ -317,13 +311,11 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 				break;
 			case M_FILE_NEWCANVAS:{
-				//TCanvas *Canvas= ;
 				new TCanvas("UVa GEM Analysis Framework--NewCanvas","UVa GEM Analysis Framework--NewCanvas",400,400);
 			}
 			break;
 
 			case M_FILE_TBROWER: {
-				//TBrowser *tBrowser=;
 				new TBrowser("UVa GEM Analysis Framework--TBrowser","UVa GEM Analysis Framework--Root Tree Browser");
 			}
 			break;
@@ -365,25 +357,33 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				break;
 			case C_CONFIRM:
 				{
-					if (vWorkMode==NULL) {
+					Pixel_t red;
+					fClient->GetColorByName("red", red);
+					bConfirmButton->SetBackgroundColor(red);
+					bConfirmButton->SetText("Processing...");
+					bConfirmButton->SetEnabled(kFALSE);
+					//bConfirmButton->;
+					if (vWorkMode=='\0') {
 						printf("Please Set the work Mode\n");
 						// set the color
-						Pixel_t red;
-						gClient->GetColorByName("red",red);
-						nStatusBarInfor->SetBackgroundColor(red);
+						//Pixel_t red;
+						//gClient->GetColorByName("red",red);
+						//nStatusBarInfor->SetBackgroundColor(red);
 						nStatusBarInfor->SetText("Please Set the work Mode");
 					}else {
 					switch (vWorkMode) {
 					case 'R':
 						printf("raw mode\n");
 						{
+							if(!tRawFileEntry->GetNumberOfEntries())
 							fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
 						}
 						break;
 					case 'Z':
 						printf("zero mode\n");
 						{
-							fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[0].c_str());
+							if(!tRawFileEntry->GetNumberOfEntries())
+							fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[tRawFileEntry->GetSelected()].c_str());
 						}
 						break;
 
@@ -405,6 +405,11 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 						break;
 						}
 					}
+					Pixel_t green;
+					fClient->GetColorByName("green", green);
+					bConfirmButton->SetBackgroundColor(green);
+					bConfirmButton->SetText("Confirm");
+					bConfirmButton->SetEnabled(kTRUE);
 				}
 				break;
 			default:
@@ -444,14 +449,19 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	case kCM_CHECKBUTTON:
 			switch (parm1) {
 				case -1:{
+
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
+
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
-						//fRawModeProcess(vEventNumber,vRawDataList[0].c_str());
+						//tNumberEntry->SetState(kFALSE);
 						fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
+						//tNumberEntry->SetState(kTRUE);
 					}
 					string Pedestal_name= vPedestalName;
 					if((vWorkMode=='Z')&&(vRawDataList.size()!=0)&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root")){
+						//tNumberEntry->SetState(kFALSE);
 						fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[0].c_str());
+						//tNumberEntry->SetState(kTRUE);
 					};
 					}
 					break;
@@ -460,13 +470,11 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 			break;
 	case kC_COLORSEL:
-		printf("color %d\n",TColor::GetColor(fColorSel->GetColor()));
+		//printf("color %d\n",TColor::GetColor(fColorSel->GetColor()));
 		for(int i =0; i <NTabs; i++){
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
-
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Modified();
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Update();
-
 			gSystem->ProcessEvents();
 		}
 
@@ -479,60 +487,73 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
-
-	printf("Filename: %s\n", rawfilename.c_str());
-	InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
-	if (!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
-	map<int,map<int, map<int, std::vector<int> > > > a;
-	map<int,map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent=inputHandler->RawProcessAllEvents(entries, a);
-
-	for(std::map<int,std::map<int,std::map<int,TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++){
-		for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++){
-			for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++){
-				delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
+	if (!rawfilename.empty()) {
+		printf("Filename: %s\n", rawfilename.c_str());
+		InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
+		if (!vMappingName.empty())
+			inputHandler->SetMapping(vMappingName.c_str());
+		map<int, map<int, map<int, std::vector<int> > > > a;
+		map<int, map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent =
+				inputHandler->RawProcessAllEvents(entries, a);
+		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++) {
+			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++) {
+				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
+					delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
+				}
 			}
 		}
-	}
-
-	dMultiGEMHistoBuffer.clear();
-	// test functions
-	for(map<int,map<int, map<int, std::vector<int> > > >::iterator iter_detectorID=dMultiGEMSingleEvent.begin(); iter_detectorID!=dMultiGEMSingleEvent.end(); iter_detectorID++){
-		for(map<int, map<int, std::vector<int> > >::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end(); itter_mpd++){
-			for(map<int, std::vector<int> >::iterator ittter_apv=itter_mpd->second.begin(); ittter_apv!=itter_mpd->second.end(); ittter_apv++){
-				dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
-										new TH1F(
-												Form("MPD%d_ADC%d", itter_mpd->first,
-														ittter_apv->first),
-												Form("MPD%d_ADC%d", itter_mpd->first,
-														ittter_apv->first), 800, 0, 800);
-				for(unsigned int i =0; i<(ittter_apv->second).size(); i++){
-					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(i,(ittter_apv->second)[i]);
+		dMultiGEMHistoBuffer.clear();
+		// test functions
+		for (map<int, map<int, map<int, std::vector<int> > > >::iterator iter_detectorID =
+				dMultiGEMSingleEvent.begin();
+				iter_detectorID != dMultiGEMSingleEvent.end();
+				iter_detectorID++) {
+			for (map<int, map<int, std::vector<int> > >::iterator itter_mpd =
+					iter_detectorID->second.begin();
+					itter_mpd != iter_detectorID->second.end(); itter_mpd++) {
+				for (map<int, std::vector<int> >::iterator ittter_apv =
+						itter_mpd->second.begin();
+						ittter_apv != itter_mpd->second.end(); ittter_apv++) {
+					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
+							new TH1F(
+									Form("MPD%d_ADC%d", itter_mpd->first,
+											ittter_apv->first),
+									Form("MPD%d_ADC%d", itter_mpd->first,
+											ittter_apv->first), 800, 0, 800);
+					for (unsigned int i = 0; i < (ittter_apv->second).size();
+							i++) {
+						dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(
+								i, (ittter_apv->second)[i]);
 					}
 				}
 			}
 		}
-
-	unsigned int Canvas_counter=0;
-	for(std::map<int,std::map<int,std::map<int,TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++){
-		cfWorkZoneTabCanvas[Canvas_counter]->Clear();
-		cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
-		cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
-		int canvaspad_counter=0;
-		for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++){
-			for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++){
-				cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
-				ittter_apv->second->SetMaximum(2500);
-				ittter_apv->second->SetMinimum(0);
-				ittter_apv->second->Draw();
-				canvaspad_counter++;
+		unsigned int Canvas_counter = 0;
+		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++) {
+			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
+			int canvaspad_counter=0;
+			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++) {
+				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
+					cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
+					ittter_apv->second->SetMaximum(2500);
+					ittter_apv->second->SetMinimum(0);
+					ittter_apv->second->Draw();
+					canvaspad_counter++;
+				}
 			}
+
+			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+
+			Canvas_counter++;
 		}
-		cfWorkZoneTabCanvas[Canvas_counter]->Modified();
-		cfWorkZoneTabCanvas[Canvas_counter]->Update();
 		gSystem->ProcessEvents();
-		Canvas_counter++;
+		delete inputHandler;
+	} else {
+		printf("No input file detected\n");
 	}
-	delete inputHandler;
 }
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
@@ -656,7 +677,6 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 			tRawFileEntry->AddEntry(
 					(dialog->GetBaseFileName(vRawDataList[file_counter])).c_str(),
 					file_counter);//dialog->GetNumberFromFilename(vRawDataList[file_counter]));
-			//printf("%d\n",dialog->GetNumberFromFilename(vRawDataList[file_counter]));
 		}
 		for (unsigned int file_counter = 0; file_counter < vRootDataList.size();
 				file_counter++) {
@@ -709,10 +729,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 		if ((!testfile.good())
 				|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
 			printf("Please input the Pedestal file\n");
-			// set the color
-			Pixel_t red;
-			gClient->GetColorByName("red", red);
-			nStatusBarInfor->SetBackgroundColor(red);
 			nStatusBarInfor->SetText("Please input the Pedestal file");
 		} else {
 
@@ -720,10 +736,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 				std::ifstream testfile(rawfilename[i].c_str());
 				if (testfile.good()) {
 					printf("Processing  %s\n", rawfilename[i].c_str());
-					// set the color
-					Pixel_t yellow;
-					gClient->GetColorByName("yellow", yellow);
-					nStatusBarInfor->SetBackgroundColor(yellow);
 					nStatusBarInfor->SetText(
 							Form("Processing  %s\n", rawfilename[i].c_str()));
 
@@ -749,9 +761,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 								Hit_outname.c_str());
 					}
 					printf("OutPut file is save as %s\n", Hit_outname.c_str());
-					Pixel_t green;
-					gClient->GetColorByName("green", green);
-					nStatusBarInfor->SetBackgroundColor(green);
 					nStatusBarInfor->SetText(
 							Form("OutPut file is save as %s\n",
 									Hit_outname.c_str()));

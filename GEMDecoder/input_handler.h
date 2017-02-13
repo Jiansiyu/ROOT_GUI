@@ -34,12 +34,8 @@ public:
 
 	virtual ~InputHandler();
 
-	//int ProcessAllEvents(int evtID = -1);
 	int RawProcessAllEvents(int entries=0);
-	// mpd      apv       all the timesample and the data
-	map<int, map<int, std::vector<int>>> RawProcessAllEvents(int entries, string a="gui");  // used for gui mode
-	map<int,map<int, map<int, std::vector<int> > > > RawProcessAllEvents(int entries , map<int,map<int, map<int, std::vector<int> > > > &);
-	// detector_ID, MPD   APV        strips
+	map<int,map<int, map<int, std::vector<int> > > > RawProcessAllEvents(int entries , map<int,map<int, map<int, std::vector<int> > > > &); // detector_ID, MPD   APV        strips
 
 	// pedestal process function
 	int PedProcessAllEvents(int entries=0, string pedestal_file_name="");			// process certain number data
@@ -69,6 +65,7 @@ private:
 	// THE address correlation  events input return non-cross-talk  return cross talk
 	int FindCrossTalk(map<int,int> Address_Correlation,map<int, int> sEvent_input, map<int, int> *sRemoveCrossTalk, map<int, int> *sCrossTalk);
 
+	std::string Massage(std::string MSG_Category, std::string MSG);      // used for the future GUI process bar the multi class communication
 private:
 	vector<int> vSRSSingleEventData;
 	map<int, map<int, TH1F*> > mAPVRawHistos;
@@ -79,8 +76,8 @@ private:
 	map<int, map<int, map<int, TH1F* > > > mPedestalHisto;
 	map<int, map<int, TH1F*> > mPedestalMean;
 	map<int, map<int, TH1F*> > mPedestalRMS;
-	TFile *f;
 
+	TFile *f;
 	string filename;
 	ifstream file;
 	string vDefaultMappingPath="Mapping/temp_Mapping.cfg";

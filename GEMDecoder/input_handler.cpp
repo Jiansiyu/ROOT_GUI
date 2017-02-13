@@ -10,8 +10,6 @@
 #include <iostream>
 #include <stdio.h>
 
-//#include <curses.h>
-
 // root function
 #include <TTree.h>
 #include <TCanvas.h>
@@ -52,13 +50,9 @@ int InputHandler::RawProcessAllEvents(int entries){
 	cRaw->Divide(5,5);
 
 	try{
-
 		evioFileChannel chan(filename.c_str(), "r");
-
 		chan.open();
-
 		while(chan.read()&&entry<entries) {
-
 			map<int, map<int, map<int, vector<int> > > > mmHit;
 			//vector<uint32_t> srsSingleEvent;
 			vSRSSingleEventData.clear();
@@ -96,8 +90,8 @@ int InputHandler::RawProcessAllEvents(int entries){
 			RawAPVs.clear();
 
 			for(it=mAPVRawHistos.begin(); it!=mAPVRawHistos.end();++it) {
+
 				map<int, TH1F*> temp = it->second;//
-				//cout<<"**"<<it->second<<endl;
 				map<int, TH1F*>::iterator itt;
 
 				for(itt=temp.begin();itt!=temp.end();++itt) {
@@ -124,61 +118,63 @@ int InputHandler::RawProcessAllEvents(int entries){
   return entry;
 }
 
-map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
-	try {
-		//load the data
-		evioFileChannel chan(filename.c_str(), "r");
-		chan.open();
-		printf("Looking for Event # %d\n", entries);
-		int current_entry = 0;
-		while (chan.read()) {
-			map<int, map<int, map<int, vector<int> > > > mmHit;
-			vSRSSingleEventData.clear();
-
-			evioDOMTree event(chan);
-			evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-			if (current_entry == entries) { // get the target  entry, start decode the data
-				evioDOMNodeList::iterator iter;
-				for (iter = mpdEventList->begin(); iter != mpdEventList->end();
-						++iter) {
-					if ((*iter)->tag == 10) {
-						vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-						if (vec != NULL) {
-							vSRSSingleEventData.reserve(
-									vSRSSingleEventData.size() + vec->size());
-							vSRSSingleEventData.insert(
-									vSRSSingleEventData.end(), vec->begin(),
-									vec->end());
-						} else {
-							cout << "found NULL contents in mpd.." << endl;
-						}
-					}
-				}
-				cout << "Event ID: " << current_entry << endl;
-				if (vSRSSingleEventData.size() != 0) {
-					current_entry++;
-					break;
-				} else {
-					printf("Error accrue in this events, go to next event");
-					entries++;
-					current_entry++;
-					continue;
-				}
-			}
-			// here did not decode the data and check the data if the current event is not the target event
-			current_entry++;    //maybe this is not a good usage
-		}
-	} catch (evioException e) {
-		cerr << endl << e.toString() << endl << endl;
-		exit(EXIT_FAILURE);
-	}
-
-	RawDecoder raw_decoder(vSRSSingleEventData);
-
-	return raw_decoder.GetDecoded();
-}
+//map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
+//	try {
+//		//load the data
+//		evioFileChannel chan(filename.c_str(), "r");
+//		chan.open();
+//		printf("Looking for Event # %d\n", entries);
+//		int current_entry = 0;
+//		while (chan.read()) {
+//			map<int, map<int, map<int, vector<int> > > > mmHit;
+//			vSRSSingleEventData.clear();
+//
+//			evioDOMTree event(chan);
+//			evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
+//			if (current_entry == entries) { // get the target  entry, start decode the data
+//				evioDOMNodeList::iterator iter;
+//				for (iter = mpdEventList->begin(); iter != mpdEventList->end();
+//						++iter) {
+//					if ((*iter)->tag == 10) {
+//						vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
+//						if (vec != NULL) {
+//							vSRSSingleEventData.reserve(
+//									vSRSSingleEventData.size() + vec->size());
+//							vSRSSingleEventData.insert(
+//									vSRSSingleEventData.end(), vec->begin(),
+//									vec->end());
+//						} else {
+//							cout << "found NULL contents in mpd.." << endl;
+//						}
+//					}
+//				}
+//				cout << "Event ID: " << current_entry << endl;
+//				if (vSRSSingleEventData.size() != 0) {
+//					current_entry++;
+//					break;
+//				} else {
+//					printf("Error accrue in this events, go to next event");
+//					entries++;
+//					current_entry++;
+//					continue;
+//				}
+//			}
+//			// here did not decode the data and check the data if the current event is not the target event
+//			current_entry++;    //maybe this is not a good usage
+//		}
+//	} catch (evioException e) {
+//		cerr << endl << e.toString() << endl << endl;
+//		exit(EXIT_FAILURE);
+//	}
+//
+//	RawDecoder raw_decoder(vSRSSingleEventData);
+//
+//	return raw_decoder.GetDecoded();
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// GUI and multi-detector support
+//  detector_ID, MPD   APV        strips
 std::map<int,std::map<int, std::map<int, std::vector<int> > > > InputHandler::RawProcessAllEvents(int entries , map<int,map<int, map<int, std::vector<int> > > > & vRaw_Data) {
 
 	// loading the mapping
@@ -279,8 +275,6 @@ std::map<int,std::map<int, std::map<int, std::vector<int> > > > InputHandler::Ra
 		std::map<int, std::vector<int>>::iterator itter_apvid=iter_mpdid->second.begin();
 		for(;itter_apvid!=iter_mpdid->second.end();itter_apvid++) {
 			Return_data[mMapping[iter_mpdid->first][itter_apvid->first][0]][iter_mpdid->first][itter_apvid->first]=itter_apvid->second;
-			//for(unsigned int i = 0; i<itter_apvid->second.size();i++)
-			//printf("Detector %d;  MPD  %d ; apv  %d ; Strips  %d ; ADC  %d\n",mMapping[iter_mpdid->first][itter_apvid->first][0],iter_mpdid->first,itter_apvid->first,i,(itter_apvid->second)[i]);
 		}
 	}
 	vRaw_Data=Return_data;
@@ -313,7 +307,6 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Xis);//1
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Pos);//2
 	      mMapping[Mapping_mpdId][Mapping_ADCId].push_back(Mapping_Invert);//3
-	      //cout<<"test: "<<mMapping[Mapping_mpdId][Mapping_ADCId][2]<<endl;
 	    }
 	    cout<<endl;
 	  }
@@ -713,7 +706,8 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	// check the number of Detector attached
 	for(std::map<int, std::map<int, std::map<int, TH1F*> > >::iterator iter_mpd=mPedestalHisto.begin(); iter_mpd!=mPedestalHisto.end();iter_mpd++){
 		for(std::map<int, std::map<int, TH1F*> >::iterator itter_apv=iter_mpd->second.begin(); itter_apv!=iter_mpd->second.end();itter_apv++){
-			vChamberID.push_back(mMapping[iter_mpd->first][itter_apv->first][0]);
+			if((mMapping.find(iter_mpd->first)!=mMapping.end())&&(mMapping[iter_mpd->first].find(itter_apv->first)!=mMapping[iter_mpd->first].end())) {
+			vChamberID.push_back(mMapping[iter_mpd->first][itter_apv->first][0]);}
 		}
 	}
 	sort(vChamberID.begin(),vChamberID.end());
@@ -729,6 +723,7 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 		mPedestalRMSx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),1600,0,1600);
 		mPedestalRMSy[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),1280,0,1280);
 	}
+
 	// save the files
 	map<int, map<int, map<int, TH1F*> > >::iterator it;
 	for (it = mPedestalHisto.begin(); it != mPedestalHisto.end(); ++it) {   // MPD loop
@@ -738,6 +733,7 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 		map<int, map<int, TH1F*> >::iterator itt;
 		for (itt = temp.begin(); itt != temp.end(); ++itt) {     // ADC(apv)loop
 			adc_ch = itt->first;
+			if((mMapping.find(mpd_id)!=mMapping.end())&&(mMapping[mpd_id].find(adc_ch)!=mMapping[mpd_id].end())) {
 			map<int, TH1F*> tempp = itt->second;
 			map<int, TH1F*>::iterator ittt;
 			mPedestalMean[mpd_id][adc_ch] = new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d", mpd_id, adc_ch),Form("PedestalMean(offset)_mpd_%d_ch_%d", mpd_id, adc_ch), 128, 0, 128);
@@ -774,6 +770,7 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 
 				mPedestalMeanall[mMapping[mpd_id][adc_ch][0]]->Fill(mean);
 				mPedestalRMSall[mMapping[mpd_id][adc_ch][0]]->Fill(rms);
+				}
 			}
 		}
 	}
@@ -1572,6 +1569,10 @@ if(filestream.good()){
 
 		    	 for(itt=temp.begin();itt!=temp.end();++itt) {      // loop on all the APVs that attached on thi MPD
 		    		 adc_ch=itt->first;
+
+		    		 // in this if condition make sure current cards is in the mapping files, if it is not in the mapping exclude it
+		    		 if((mMapping.find(mpd_id)!=mMapping.end())&&(mMapping[mpd_id].find(adc_ch)!=mMapping[mpd_id].end()))
+		    		 {
 		    		 map<int, vector<int> > tempp=itt->second;
 		    		 map<int, vector<int> >::iterator ittt;
 
@@ -1645,6 +1646,9 @@ if(filestream.good()){
 		    		 hMean->Delete();
 		    		 hRMS->Delete();
 		    	 }  // end of loop on APVs
+
+		     }   // except the cards that not in the mapping
+
 		     }      // end of loop on MPDs -finish decode one event
 		     int detid,planeid;
 		     Int_t nstrip=0;
