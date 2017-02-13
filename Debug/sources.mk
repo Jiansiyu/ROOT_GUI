@@ -25,5 +25,6 @@ CPP_DEPS :=
 SUBDIRS := \
 GEMDecoder \
 GUIDialog \
+analysis \
 src \
 

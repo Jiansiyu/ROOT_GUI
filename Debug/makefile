@@ -9,6 +9,7 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include src/subdir.mk
+-include analysis/subdir.mk
 -include GUIDialog/subdir.mk
 -include GEMDecoder/subdir.mk
 -include subdir.mk
@@ -46,7 +47,7 @@ all: ROOT_GUI
 ROOT_GUI: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++  $(OBJS) $(USER_OBJS) $(LIBS) -L"/home/newdriver/Source/ROOT_CERN/root_v5.34.36/lib" -L"/home/newdriver/Source/CODA/2.6.2/Linux-x86_64/lib" -levioxx -levio -lexpat  -lMinuit -Xlinker `/home/newdriver/Source/ROOT_CERN/root_v5.34.36/bin/root-config --libs --glibs --cflags --ldflags --auxlibs --auxcflags` -pthread -lm -ldl -o  "ROOT_GUI"
+	g++  $(OBJS) $(USER_OBJS) $(LIBS) -L"/home/newdriver/Source/ROOT_CERN/root_v5.34.36/lib" -L"/home/newdriver/Source/CODA/2.6.2/Linux-x86_64/lib" -levioxx -levio -lexpat  -lMinuit -pthread -lm -ldl -Xlinker `/home/newdriver/Source/ROOT_CERN/root_v5.34.36/bin/root-config --libs --glibs --cflags --ldflags --auxlibs --auxcflags` -pthread -lm -ldl -o  "ROOT_GUI"
 	@echo 'Finished building target: $@'
 	@echo ' '
 

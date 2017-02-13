@@ -11,6 +11,30 @@
 // user defined classes
 #include "UserGuiMainFrame.h"
 
+////
+#include <cstdlib>
+#include <cstdio>
+#include <cassert>
+#include <getopt.h>
+#include <iostream>
+
+// for test uasage
+// process time display
+#include <time.h>
+
+#include <TROOT.h>
+#include <TError.h>
+#include <TApplication.h>
+#include <TChain.h>
+#include <TFile.h>
+#include <TTree.h>
+
+#include "../analysis/Config.h"
+#include "../analysis/GEMTree.h"
+#include "../analysis/GEMTracking.h"
+#include "../analysis/GEMFittingShape.h"
+//
+
 int main(int argc, char **argv)
 {
    TApplication theApp("App", &argc, argv);
