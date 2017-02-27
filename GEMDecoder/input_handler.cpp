@@ -459,14 +459,31 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 	vChamberID.erase(unique(vChamberID.begin(),vChamberID.end()),vChamberID.end());
 	// find the chamberID, initilize the histo
 	for(unsigned int i=0; i < vChamberID.size();i++){
-		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),200,0,200);
+		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber 39 APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber 39 APV Pedestal RMS Distribution",vChamberID[i]),100,0,100);
+		mPedestalRMSall[vChamberID[i]]->GetXaxis()->SetTitle("ADC channels");
+		mPedestalRMSall[vChamberID[i]]->GetYaxis()->SetTitle("# of readout channels");
+
 		mPedestalMeanall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),200,0,200);
+		mPedestalMeanall[vChamberID[i]]->GetXaxis()->SetTitle("ADC channels");
+		mPedestalMeanall[vChamberID[i]]->GetYaxis()->SetTitle("# of readout channels");
 
 		mPedestalMeanx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),1600,0,1600);
+		mPedestalMeanx[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalMeanx[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
+
+
 		mPedestalMeany[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),1280,0,1280);
+		mPedestalMeany[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalMeany[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
 
 		mPedestalRMSx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),1600,0,1600);
+		mPedestalRMSx[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalRMSx[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
+
+
 		mPedestalRMSy[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),1280,0,1280);
+		mPedestalRMSy[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalRMSy[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
 	}
 
 	// save the files
@@ -714,14 +731,31 @@ int InputHandler::PedProcessAllEvents(string pedestal_file_name ) {
 	vChamberID.erase(unique(vChamberID.begin(),vChamberID.end()),vChamberID.end());
 	// find the chamberID, initilize the histo
 	for(unsigned int i=0; i < vChamberID.size();i++){
-		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),200,0,200);
+		mPedestalRMSall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Distribution",vChamberID[i]),100,0,100);
+		mPedestalRMSall[vChamberID[i]]->GetXaxis()->SetTitle("ADC channels");
+		mPedestalRMSall[vChamberID[i]]->GetYaxis()->SetTitle("# of readout channels");
+
 		mPedestalMeanall[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Distribution",vChamberID[i]),200,0,200);
+		mPedestalMeanall[vChamberID[i]]->GetXaxis()->SetTitle("ADC channels");
+		mPedestalMeanall[vChamberID[i]]->GetYaxis()->SetTitle("# of readout channels");
 
 		mPedestalMeanx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),Form("Chamber %d APV Pedestal Mean X",vChamberID[i]),1600,0,1600);
+		mPedestalMeanx[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalMeanx[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
+
+
 		mPedestalMeany[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),Form("Chamber %d APV Pedestal Mean Y",vChamberID[i]),1280,0,1280);
+		mPedestalMeany[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalMeany[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
 
 		mPedestalRMSx[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),Form("Chamber %d APV Pedestal RMS X",vChamberID[i]),1600,0,1600);
+		mPedestalRMSx[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalRMSx[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
+
+
 		mPedestalRMSy[vChamberID[i]]= new TH1F(Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),Form("Chamber %d APV Pedestal RMS Y",vChamberID[i]),1280,0,1280);
+		mPedestalRMSy[vChamberID[i]]->GetXaxis()->SetTitle("position");
+		mPedestalRMSy[vChamberID[i]]->GetYaxis()->SetTitle("ADC channels");
 	}
 
 	// save the files

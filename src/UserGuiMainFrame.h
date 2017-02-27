@@ -164,7 +164,7 @@ private:
 	TGCompositeFrame *fWorkZoneTabSubFrame[50];
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
-	int NTabs=2;
+	int NTabs=5;
 
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;

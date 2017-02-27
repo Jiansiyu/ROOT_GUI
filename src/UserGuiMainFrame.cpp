@@ -30,19 +30,17 @@ const char *datfiletype[]={
 		"All files", "*",
 					0, 0
 };
-UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 
+UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	// TODO Auto-generated constructor stub
 	SetCleanup(kDeepCleanup);
 
 	fMenuDock = new TGDockableFrame(this);
 	AddFrame(fMenuDock, new TGLayoutHints(kLHintsExpandX, 0, 0, 1, 0));
 	fMenuDock->SetWindowName("MainFrame Menu");
-
 	// set the layout of the menu bar
 	fMenuBarLayout = new TGLayoutHints(kLHintsTop | kLHintsExpandX);
-	fMenuBarItemLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 0, 4, 0,
-			0);
+	fMenuBarItemLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 0, 4, 0,0);
 	fMenuBarHelpLayout = new TGLayoutHints(kLHintsTop | kLHintsRight);
 
 	// set the "File" menu
@@ -64,14 +62,6 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	fMenuDock->EnableUndock(kTRUE);
 	fMenuDock->EnableHide(kTRUE);
 
-	// Menu button messages are handled by the main frame (i.e. "this")
-	// ProcessMessage() method.
-//	fMenuFile->Associate(this);
-//	fMenuSet->Associate(this);
-//	fMenuTool->Associate(this);
-//	fMenuView->Associate(this);
-//	fMenuHelp->Associate(this);
-
 	fMenuBar = new TGMenuBar(fMenuDock,1,1,kHorizontalFrame);
 	fMenuBar -> AddPopup("&File",fMenuFile,fMenuBarItemLayout);
 	fMenuBar -> AddPopup("&Set",fMenuSet,fMenuBarItemLayout);
@@ -86,14 +76,11 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 
 	// add the work zone frame
 	fWorkZoneFrame = new TGHorizontalFrame(this);
-
-	// WorkZone -> control sub-zone
 	fWorkZoneControlFrame = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	SetWorkZoneButton();   												// set the control penal
 	//workZone  -> display Sub-zone
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
-
 	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
 	SetWorkZoneTab(NTabs);
 	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
@@ -101,7 +88,6 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
 	fWorkZoneFrame -> AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
 	fWorkZoneFrame ->AddFrame(fWorkZoneCanvasFrame, new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsExpandY));
-
 	AddFrame(fWorkZoneFrame, new TGLayoutHints(kLHintsRight|kLHintsExpandX|kLHintsExpandY));
 
 	// statuts bar menu
@@ -177,8 +163,6 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		// attach the embeded canvas
 		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
-		//fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFillColor(38);
-		//fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetFrameFillColor(41);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
 		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
@@ -199,7 +183,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModePedestal ->Associate(this);
 	bWorkModeHit ->Associate(this);
 	bWorkModeAnalysis ->Associate(this);
-
 	fWorkZoneControlFrame->AddFrame(bWorkModeButtonGroup , new TGLayoutHints(kLHintsExpandX));
 
 	TGGroupFrame * fDataInputFrame= new TGGroupFrame(fWorkZoneControlFrame,"Data Input");
@@ -362,13 +345,8 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					bConfirmButton->SetBackgroundColor(red);
 					bConfirmButton->SetText("Processing...");
 					bConfirmButton->SetEnabled(kFALSE);
-					//bConfirmButton->;
 					if (vWorkMode=='\0') {
 						printf("Please Set the work Mode\n");
-						// set the color
-						//Pixel_t red;
-						//gClient->GetColorByName("red",red);
-						//nStatusBarInfor->SetBackgroundColor(red);
 						nStatusBarInfor->SetText("Please Set the work Mode");
 					}else {
 					switch (vWorkMode) {
@@ -451,7 +429,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				case -1:{
 
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
-
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
 						//tNumberEntry->SetState(kFALSE);
 						fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
@@ -470,7 +447,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 			break;
 	case kC_COLORSEL:
-		//printf("color %d\n",TColor::GetColor(fColorSel->GetColor()));
 		for(int i =0; i <NTabs; i++){
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Modified();
@@ -648,7 +624,7 @@ void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
 				vPedestalROOTFileName.clear();
 				vPedestalName=inputfilename;
 			}else{
-				printf("Unkown data format\n");
+				printf("Unknown data format\n");
 			}
 			std::string filebasename=basename(strdup(vPedestalName.c_str()));
 			tPedestalFileEntry->SetTitle(filebasename.c_str());
@@ -726,19 +702,15 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 	UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
 	if (rawfilename.size() != 0) {
 		std::ifstream testfile(Pedestal_name.c_str());
-		if ((!testfile.good())
-				|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
+		if ((!testfile.good())|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
 			printf("Please input the Pedestal file\n");
 			nStatusBarInfor->SetText("Please input the Pedestal file");
 		} else {
-
 			for (int i = 0; i < rawfilename.size(); i++) {
 				std::ifstream testfile(rawfilename[i].c_str());
 				if (testfile.good()) {
 					printf("Processing  %s\n", rawfilename[i].c_str());
-					nStatusBarInfor->SetText(
-							Form("Processing  %s\n", rawfilename[i].c_str()));
-
+					nStatusBarInfor->SetText(Form("Processing  %s\n", rawfilename[i].c_str()));
 					InputHandler * decoder = new InputHandler(
 							rawfilename[i].c_str());
 					if(!vMappingName.empty()) decoder->SetMapping(vMappingName.c_str());

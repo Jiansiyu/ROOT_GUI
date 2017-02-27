@@ -185,7 +185,7 @@ Int_t GEMTracking::IsBestHit(GEMHit hit,int max_sample_1,int max_sample_2,int ma
 //==================================================================================
 void GEMTracking::Run(Int_t event)
 {
-  
+//  printf(__LINE__)
   if(!fChain)
     {
       Error("run","No Tree to analyze.");
@@ -214,8 +214,6 @@ void GEMTracking::Run(Int_t event)
 	  for(int k=0;k<2;k++)
 	    {
 	      Decode(j,k);
-	      
-	      
 	    }
 	}
 	
@@ -245,7 +243,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 {
   //++++++++++++++++++++++++
   //TFile f("tree1.root","recreate");
-  TTree GEMCluster_tree("GEMCluster","HAHAHAHA");
+/*  TTree GEMCluster_tree("GEMCluster","HAHAHAHA");
   
   Int_t evtID_t;
   Int_t Module_t;
@@ -267,7 +265,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
   GEMCluster_tree.Branch("adc2_t",&adc2_t,"adc2_t/I");
   GEMCluster_tree.Branch("adc3_t",&adc3_t,"adc3_t/I");
   GEMCluster_tree.Branch("adc4_t",&adc4_t,"adc4_t/I");
-  GEMCluster_tree.Branch("adc5_t",&adc5_t,"adc5_t/I");
+  GEMCluster_tree.Branch("adc5_t",&adc5_t,"adc5_t/I");*/
   //++++++++++++++++++++++++
   
   if(!fChain)
@@ -302,7 +300,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	      
 	      //+++++++++++++++++++++++++
 	      
-	      Int_t nch = digi_gem_nch; //number of strips fired
+	     /* Int_t nch = digi_gem_nch; //number of strips fired
 	      for(int m=0; m<nch; m++)       //strips index loop on all the channels
 	        {
 	          // cout<<digi_gem_plane[i]<<endl;
@@ -327,7 +325,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	     		//}
 	            }
 	            
-	     	 }
+	     	 }*/
 	      //+++++++++++++++++++++++++
 	      
 	    }
@@ -353,12 +351,12 @@ void GEMTracking::Run(Int_t event, const char *filename)
   //PrintHistogramsAPVBest();
   save_cluster_tree();
   //++++++++++++++++++++++++++++
-      TFile *cluster_rootfile = new TFile(Form("Cluster_%s",filename),"RECREATE");
+/*      TFile *cluster_rootfile = new TFile(Form("Cluster_%s",filename),"RECREATE");
       GEMCluster_tree.Write();
       cluster_rootfile->Write();
       cluster_rootfile->Close();
       //GEMCluster_tree.Write();
-      
+      */
       //++++++++++++++++++++++++++++
 }
 
