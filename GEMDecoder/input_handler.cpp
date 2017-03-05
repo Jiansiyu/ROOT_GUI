@@ -9,13 +9,15 @@
 #include <fstream>
 #include <iostream>
 #include <stdio.h>
+#include "string"
 
+#include <TThread.h>
 // root function
 #include <TTree.h>
 #include <TCanvas.h>
 #include "TRootEmbeddedCanvas.h"
 //user defined functions
-#include "input_handler.h"
+#include "../GEMDecoder/input_handler.h"
 
 // namespace
 using namespace std;
@@ -44,7 +46,6 @@ std::string InputHandler::SetMapping(string mappingfile){
 int InputHandler::RawProcessAllEvents(int entries){
 
 	int entry = 0;
-
 	vector<TH1F*> RawAPVs;
 	TCanvas *cRaw = new TCanvas("cRaw", "APV Raw Signal", 10, 10, 1000, 800);
 	cRaw->Divide(5,5);
@@ -118,59 +119,6 @@ int InputHandler::RawProcessAllEvents(int entries){
   return entry;
 }
 
-//map<int, map<int, std::vector<int>>> InputHandler:: RawProcessAllEvents(int entries, string a) {
-//	try {
-//		//load the data
-//		evioFileChannel chan(filename.c_str(), "r");
-//		chan.open();
-//		printf("Looking for Event # %d\n", entries);
-//		int current_entry = 0;
-//		while (chan.read()) {
-//			map<int, map<int, map<int, vector<int> > > > mmHit;
-//			vSRSSingleEventData.clear();
-//
-//			evioDOMTree event(chan);
-//			evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
-//			if (current_entry == entries) { // get the target  entry, start decode the data
-//				evioDOMNodeList::iterator iter;
-//				for (iter = mpdEventList->begin(); iter != mpdEventList->end();
-//						++iter) {
-//					if ((*iter)->tag == 10) {
-//						vector<uint32_t> *vec = (*iter)->getVector<uint32_t>();
-//						if (vec != NULL) {
-//							vSRSSingleEventData.reserve(
-//									vSRSSingleEventData.size() + vec->size());
-//							vSRSSingleEventData.insert(
-//									vSRSSingleEventData.end(), vec->begin(),
-//									vec->end());
-//						} else {
-//							cout << "found NULL contents in mpd.." << endl;
-//						}
-//					}
-//				}
-//				cout << "Event ID: " << current_entry << endl;
-//				if (vSRSSingleEventData.size() != 0) {
-//					current_entry++;
-//					break;
-//				} else {
-//					printf("Error accrue in this events, go to next event");
-//					entries++;
-//					current_entry++;
-//					continue;
-//				}
-//			}
-//			// here did not decode the data and check the data if the current event is not the target event
-//			current_entry++;    //maybe this is not a good usage
-//		}
-//	} catch (evioException e) {
-//		cerr << endl << e.toString() << endl << endl;
-//		exit(EXIT_FAILURE);
-//	}
-//
-//	RawDecoder raw_decoder(vSRSSingleEventData);
-//
-//	return raw_decoder.GetDecoded();
-//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // GUI and multi-detector support
@@ -416,7 +364,6 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 						adcSum_temp = adcSum_temp / TSsize;
 						mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(
 								adcSum_temp);
-
 					}
 				}
 			}
@@ -1506,9 +1453,14 @@ int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_fil
 	// create the files that used for save the data
 	char *HitFilename_temp = new char[100];
 	std::strcpy(HitFilename_temp,root_file_name.c_str());
+
+	TThread::Lock();
 	TFile *Hit_rootfile = new TFile(HitFilename_temp,"RECREATE");
+	TThread::UnLock();
+
 	delete[] HitFilename_temp;
 
+	TThread::Lock();
 	TTree *Hit = new TTree("GEMHit","Hit list");
 	Hit->Branch("evtID",&EvtID,"evtID/I");	     // event ID, start from 1
 	Hit->Branch("nch",&nch,"nch/I");                   // how many channels been fired at one time
@@ -1522,6 +1474,7 @@ int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_fil
 	Hit->Branch("adc3",adc3,"adc3[nch]/I");
 	Hit->Branch("adc4",adc4,"adc4[nch]/I");
 	Hit->Branch("adc5",adc5,"adc5[nch]/I");
+	TThread::UnLock();
 	//end of initialize root tree to store hits
 	//Loading Mapping
 	ifstream filestream (vDefaultMappingPath.c_str(), ifstream::in);
@@ -1611,8 +1564,10 @@ if(filestream.good()){
 		    		 map<int, vector<int> >::iterator ittt;
 
 		    		 //lood the pedestal information fron the root file
+		    		 TThread::Lock();
 		    		 TH1F* hMean = (TH1F*)f->Get(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd_id, adc_ch));
 		    		 TH1F* hRMS  = (TH1F*)f->Get(Form("PedestalRMS_mpd_%d_ch_%d",mpd_id, adc_ch));
+		    		 TThread::UnLock();
 
 		    		 // used for identify the crosstalk issues
 		    		 //timeSample  POsition ADC
@@ -1717,7 +1672,9 @@ if(filestream.good()){
 		     }
 		     nch=nstrip;//cout<<nch<<"HHHHHHH"<<endl;
 		     EvtID=entry;
+		     TThread::Lock();
 		     Hit->Fill();
+		     TThread::UnLock();
 		 }
 		 chan.close();
 	} catch (evioException e) {
@@ -1730,9 +1687,12 @@ if(filestream.good()){
 	int adc_ch=0;
 	int stripNb=0;
 
+	TThread::Lock();
 	Hit->Write();
 	Hit_rootfile->Write();
 	Hit_rootfile->Close();
+	TThread::UnLock();
+
 	delete[] Vstrip;
 	delete[] VdetID;
 	delete[] VplaneID;

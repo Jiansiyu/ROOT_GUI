@@ -49,7 +49,7 @@ void GEMHit::SetTiming(void)
   agr.SetMarkerStyle(22);
   Int_t TS = kMAXADC;
   Int_t ts_size = vTsAdc.size();
-  assert(ts_size == TS);
+  assert(ts_size == TS);            //make sure all those 6 time sample have signals
   vector<Double_t>::const_iterator iter = vTsAdc.begin();
   for(;iter!=vTsAdc.end();iter++)
     {

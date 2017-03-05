@@ -241,33 +241,6 @@ void GEMTracking::Run(Int_t event)
 //June 28th modified so as to change the output file name  --siyu 
 void GEMTracking::Run(Int_t event, const char *filename)
 {
-  //++++++++++++++++++++++++
-  //TFile f("tree1.root","recreate");
-/*  TTree GEMCluster_tree("GEMCluster","HAHAHAHA");
-  
-  Int_t evtID_t;
-  Int_t Module_t;
-  Int_t Plane_t;
-  Int_t StripIndex_t;
-  Int_t adc0_t;
-  Int_t adc1_t;
-  Int_t adc2_t;
-  Int_t adc3_t;
-  Int_t adc4_t;
-  Int_t adc5_t;
-  
-  GEMCluster_tree.Branch("evtID_t",&evtID_t,"evtID_t/I");
-  GEMCluster_tree.Branch("Module_t",&Module_t,"Module_t/I");
-  GEMCluster_tree.Branch("Plane_t",&Plane_t,"Plane_t/I");
-  GEMCluster_tree.Branch("StripIndex_t",&StripIndex_t,"StripIndex_t/I");
-  GEMCluster_tree.Branch("adc0_t",&adc0_t,"adc0_t/I");
-  GEMCluster_tree.Branch("adc1_t",&adc1_t,"adc1_t/I");
-  GEMCluster_tree.Branch("adc2_t",&adc2_t,"adc2_t/I");
-  GEMCluster_tree.Branch("adc3_t",&adc3_t,"adc3_t/I");
-  GEMCluster_tree.Branch("adc4_t",&adc4_t,"adc4_t/I");
-  GEMCluster_tree.Branch("adc5_t",&adc5_t,"adc5_t/I");*/
-  //++++++++++++++++++++++++
-  
   if(!fChain)
     {
       Error("run","No Tree to analyze.");
@@ -279,7 +252,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
     entries = event; //for decoding
   cout<<"    Will analyze  "<<entries<<"  event..."<<endl;
 
-  for(int i=0;i<entries;i++)
+  for(int i=0;i<entries;i++)    // each entries is one event
     {
       
       //Progress bar
@@ -291,42 +264,11 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
       evtID = i;
       //cout<<"Event: "<<evtID<<endl;
-      for(int j=0;j<kNMODULE;j++)
+      for(int j=0;j<kNMODULE;j++)	// loop on detector and dimension
 	{
 	  for(int k=0;k<2;k++)      // two dimension
 	    {
 	      Decode(j,k);
-	      
-	      
-	      //+++++++++++++++++++++++++
-	      
-	     /* Int_t nch = digi_gem_nch; //number of strips fired
-	      for(int m=0; m<nch; m++)       //strips index loop on all the channels
-	        {
-	          // cout<<digi_gem_plane[i]<<endl;
-	           if(digi_gem_chamber[m] == j && digi_gem_plane[m] == k)
-	           {
-	      	    evtID_t=evtID;
-	            Module_t=j;
-	            Plane_t=k;
-	            StripIndex_t=digi_gem_strip[m];
-	            //digi_gem_adc[j][i] // 6 tinme sample, strips index 
-	            adc0_t=digi_gem_adc[0][m];
-	            adc1_t=digi_gem_adc[1][m];
-	            adc2_t=digi_gem_adc[2][m];
-	            adc3_t=digi_gem_adc[3][m];
-	            adc4_t=digi_gem_adc[4][m];
-	            adc5_t=digi_gem_adc[5][m];
-	            GEMCluster_tree.Fill();
-	            //printf("eventID=%d, plane=%d, strips=%d, adc0=%d,adc1=%d,adc2%d",evtID_t,);
-       		    //module chamber index   plane : dimension x or y 
-      		    //if(digi_gem_chamber[m] == module && digi_gem_plane[m] == plane)   // where is this comes from
-			//{
-	     		//}
-	            }
-	            
-	     	 }*/
-	      //+++++++++++++++++++++++++
 	      
 	    }
 	}
@@ -350,14 +292,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
   //PrintHistogramsBest();
   //PrintHistogramsAPVBest();
   save_cluster_tree();
-  //++++++++++++++++++++++++++++
-/*      TFile *cluster_rootfile = new TFile(Form("Cluster_%s",filename),"RECREATE");
-      GEMCluster_tree.Write();
-      cluster_rootfile->Write();
-      cluster_rootfile->Close();
-      //GEMCluster_tree.Write();
-      */
-      //++++++++++++++++++++++++++++
 }
 
 
@@ -367,39 +301,29 @@ void GEMTracking::Decode(Int_t module, Int_t plane)
 {
 
   Int_t nch = digi_gem_nch; //number of strips fired
-  //cout<<"number of strips fired"<<nch<<endl;
-
-  for(int i=0; i<nch; i++)       //strips index 
-     {
-       //module chamber index   plane : dimension x or y 
-      if(digi_gem_chamber[i] == module && digi_gem_plane[i] == plane)   // where is this comes from
+  for (int i = 0; i < nch; i++)       //strips index
 	{
-	  //cout<<"GEMID:"<<digi_gem_chamber[i]<<endl;
-	  vector<Double_t> vamp;
-
-	  for(int j = 0; j< kMAXADC ; j++)
-	    {
-	      vamp.push_back(digi_gem_adc[j][i]);
-	      //if(i>100)
-      
-	    }
-	  //cout<<endl;
-	  GEMHit gem_hit(module, plane, digi_gem_strip[i], vamp);
-	  gem_hit.SetTiming();
-
-	  //make sure all events are reasonable and apply cuts here
-	  //Xinzhan: if you want to put some cuts, the following line would be a good place to start
-	  //if( (gem_hit.Charge < kMaxSignalADC) && (gem_hit.Charge > 0) && (gem_hit.MaxTsAdc < kMaxStripADC) && ( gem_hit.MaxTsAdc > 0) )
-	 //if(IsBestHit(gem_hit,0,0,0))
-	  {//cout<<"ANY?"<<endl;
-	      vHit.push_back(gem_hit);
-	      if(gem_hit.StartTime>kStartingTimeLow && gem_hit.StartTime < kStartingTimeHigh)
-		{
-		  vHit_cut.push_back(gem_hit);
+		//module chamber index   plane : dimension x or y
+		if (digi_gem_chamber[i] == module && digi_gem_plane[i] == plane) {
+			vector<Double_t> vamp;
+			for (int j = 0; j < kMAXADC; j++) {
+				vamp.push_back(digi_gem_adc[j][i]);
+			}
+			GEMHit gem_hit(module, plane, digi_gem_strip[i], vamp);
+			gem_hit.SetTiming();
+			//make sure all events are reasonable and apply cuts here
+			//Xinzhan: if you want to put some cuts, the following line would be a good place to start
+			//if( (gem_hit.Charge < kMaxSignalADC) && (gem_hit.Charge > 0) && (gem_hit.MaxTsAdc < kMaxStripADC) && ( gem_hit.MaxTsAdc > 0) )
+			//if(IsBestHit(gem_hit,0,0,0))
+			{	 //cout<<"ANY?"<<endl;
+				vHit.push_back(gem_hit);
+				if (gem_hit.StartTime > kStartingTimeLow
+						&& gem_hit.StartTime < kStartingTimeHigh) {
+					vHit_cut.push_back(gem_hit);
+				}
+			}
 		}
-	    }
 	}
-    }
 }
 
 //==================================================================================
@@ -414,7 +338,6 @@ void GEMTracking::FindCluster(Int_t module, Int_t plane, vector<GEMHit> vHit, In
 	{
 	  if( ((*it).Module == module) && ((*it).Plane == plane))
 	    v_hit.push_back(*it);                                // select only certain plane and modules to process
-	  //cout<<"Find cluster:  "<<it->PedSigma.size()<<endl;
 	}
 
       Int_t nbclustperplane=0; //number of clusters per plane

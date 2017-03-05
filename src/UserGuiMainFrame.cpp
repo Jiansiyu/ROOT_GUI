@@ -12,6 +12,7 @@
 #include "TG3DLine.h"
 #include "TGFrame.h"
 #include "TGNumberEntry.h"
+#include "TThread.h"
 
 #include "libgen.h"
 #include "string"
@@ -25,6 +26,7 @@ const char *filetype[] = {
 			"All files", "*",
 			0, 0
 	};
+
 const char *datfiletype[]={
 		"Data files", "*.dat",
 		"All files", "*",
@@ -706,44 +708,65 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 			printf("Please input the Pedestal file\n");
 			nStatusBarInfor->SetText("Please input the Pedestal file");
 		} else {
-			for (int i = 0; i < rawfilename.size(); i++) {
-				std::ifstream testfile(rawfilename[i].c_str());
-				if (testfile.good()) {
-					printf("Processing  %s\n", rawfilename[i].c_str());
-					nStatusBarInfor->SetText(Form("Processing  %s\n", rawfilename[i].c_str()));
-					InputHandler * decoder = new InputHandler(
-							rawfilename[i].c_str());
-					if(!vMappingName.empty()) decoder->SetMapping(vMappingName.c_str());
+				for (unsigned int i = 0; i < rawfilename.size(); i++) {
+					std::ifstream testfile(rawfilename[i].c_str());
+					if (testfile.good()) {
+						printf("Processing  %s\n", rawfilename[i].c_str());
+						nStatusBarInfor->SetText(
+								Form("Processing  %s\n",
+										rawfilename[i].c_str()));
+						InputHandler * decoder = new InputHandler(
+								rawfilename[i].c_str());
+						if (!vMappingName.empty())
+							decoder->SetMapping(vMappingName.c_str());
 
-					string raw_filename(
-							basename(strdup(rawfilename[i].c_str()))); // get the basename
-					string filename_noappendix = raw_filename.substr(0,
-							raw_filename.find_last_of("."));
-					string number_index = filename_noappendix.substr(
-							filename_noappendix.find_last_not_of("0123456789")
-									+ 1);
-					std::string Hit_outname(
-							Form(tOutPutfilePattern->GetTitle(), "",
-									atoi(number_index.c_str())));
-					if (entries > 2) {
-						decoder->HitProcessAllEvents(entries,
-								vPedestalName.c_str(), Hit_outname.c_str());
-					} else {
-						decoder->HitProcessAllEvents(vPedestalName.c_str(),
+						string raw_filename(
+								basename(strdup(rawfilename[i].c_str()))); // get the basename
+						string filename_noappendix = raw_filename.substr(0,
+								raw_filename.find_last_of("."));
+						string number_index = filename_noappendix.substr(
+								filename_noappendix.find_last_not_of(
+										"0123456789") + 1);
+						std::string Hit_outname(
+								Form(tOutPutfilePattern->GetTitle(), "",
+										atoi(number_index.c_str())));
+						if (entries > 2) {
+							decoder->HitProcessAllEvents(entries,
+									vPedestalName.c_str(), Hit_outname.c_str());
+						} else {
+							decoder->HitProcessAllEvents(vPedestalName.c_str(),
+									Hit_outname.c_str());
+						}
+						printf("OutPut file is save as %s\n",
 								Hit_outname.c_str());
+						nStatusBarInfor->SetText(
+								Form("OutPut file is save as %s\n",
+										Hit_outname.c_str()));
+						//delete decoder;
+						delete decoder;
 					}
-					printf("OutPut file is save as %s\n", Hit_outname.c_str());
-					nStatusBarInfor->SetText(
-							Form("OutPut file is save as %s\n",
-									Hit_outname.c_str()));
-					//delete decoder;
-					delete decoder;
-				}
 			}
 		}
 	}
 }
 
+void UserGuiMainFrame::fHitModeThreadProcess(int entries,string Pedestal_name,vector<string> rawfilename){
+}
+
+void UserGuiMainFrame::thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries){
+	string raw_filename(basename(strdup(rawfilename.c_str()))); // get the basename
+	string filename_noappendix = raw_filename.substr(0,raw_filename.find_last_of("."));
+	string number_index = filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789") + 1);
+	std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(), "",atoi(number_index.c_str())));
+	printf("rawname =%s\n pedestal=%s\n mapping= %s\n, entries=%d\n output=%s\n ",rawfilename.c_str(),pedestalname.c_str(),mappingfilename.c_str(),entries,Hit_outname.c_str());
+	InputHandler * decoder = new InputHandler(rawfilename.c_str());
+	if (!mappingfilename.empty())decoder->SetMapping(mappingfilename.c_str());
+	if (entries > 2) {
+		decoder->HitProcessAllEvents(entries,pedestalname.c_str(), Hit_outname.c_str());
+		} else {
+				decoder->HitProcessAllEvents(pedestalname.c_str(),Hit_outname.c_str());
+			}
+}
 void UserGuiMainFrame::dMenuSetLoadMapping(){
 	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 	const char *datfiletype[]={

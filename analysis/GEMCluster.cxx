@@ -42,6 +42,7 @@ void GEMCluster::SetTiming(void)
       Int_t icur =  ((GEMHit*)HitIndex[i])->Strip;
       assert( (inext-icur) == 1);
     }
+
   //Fill vector<Double_t> vTsAdc
   for(int ii=0;ii<kMAXADC;ii++)
     {

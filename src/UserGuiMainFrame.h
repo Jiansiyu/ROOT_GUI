@@ -139,6 +139,7 @@ private :
 	void fPedestalModeProcess(int entries, std::string rawfilename);
 	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
 	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
+	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
 // dialog process
 private:
 	void dMenuOpenFileDialog();
@@ -231,7 +232,11 @@ private:
 	void SetWorkZoneDataInput();
 	void SetStatusBar();
 
-
+	// read the configure file, and set the default variables
+	void SetDefaultPath();
+	void SaveDefaultPath();   // save the default value
+	void thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries);
+//	void TestFunctions(int i, std::string a);
 public:
 	void fFileBrowse();
 	void SetDataFileName();

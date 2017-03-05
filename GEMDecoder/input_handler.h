@@ -49,8 +49,6 @@ public:
 //	 hit process functions
 	int HitProcessAllEvents(int entries=0, string pedestal_file_name="", string root_file_name="");
 	int HitProcessAllEvents(string pedestal_file_name="", string root_file_name="");
-
-
 	int RMS_Mean_ProcessAllEvents(int entries,string pedestal_file_name="",string root_file_name="");  //used for calculate the RMS and Means of each chennals of the raw data
 
 	string SetMapping(string);
@@ -81,7 +79,6 @@ private:
 	string filename;
 	ifstream file;
 	string vDefaultMappingPath="Mapping/temp_Mapping.cfg";
-
 	RawDecoder *fRawDecoder;
 };
 
