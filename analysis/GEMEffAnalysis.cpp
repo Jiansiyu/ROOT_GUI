@@ -1,8 +1,7 @@
 /*
- * GEMEffAnalysis.cpp
  *
- *  Created on: Mar 4, 2017
- *      Author: newdriver
+ * GEM effeciency analysis program
+ *
  */
 
 #include "GEMEffAnalysis.h"

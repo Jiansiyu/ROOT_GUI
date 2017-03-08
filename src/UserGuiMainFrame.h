@@ -50,6 +50,9 @@
 
 #include "TDatime.h"
 
+// usede for GEManalysis program
+#include "TChain.h"
+
 #include "vector"
 #include "string.h"
 #include "TObjString.h"
@@ -140,6 +143,8 @@ private :
 	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
 	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
 	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
+	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
+
 // dialog process
 private:
 	void dMenuOpenFileDialog();

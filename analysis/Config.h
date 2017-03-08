@@ -5,13 +5,13 @@
 //#define SHOW_EVENT_INFO_HIT
 //#define SHOW_EVENT_INFO_CLUSTER
 
-const int kNMODULE = 1;
+const int kNMODULE = 4;
 //How many chambers
 const int kMAXADC = 6;
 //How many Time Samples
 
-const Double_t kNbXAPVModule[] = {2, 12, 2, 2, 10};
-const Double_t kNbYAPVModule[] = {2, 10, 2, 2, 10};
+const Double_t kNbXAPVModule[] = {12, 12, 12, 12, 12};
+const Double_t kNbYAPVModule[] = {10, 10, 10, 10, 10};
 //This is how many APVs a plane can hold, not how many APVs are actually on that plane.
 //Postition Constants; each APV has 128 channels, each channel is 4e-2cm, so we can compute the position based on the # of APVs
 //Thus, x side positions for the first module:
@@ -26,6 +26,10 @@ const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
 //not using the following two lines
 const Double_t kXStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};  // Here, Units is in cm, origin of the chamber is in their bottom left corner
 const Double_t kYStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};
+const Double_t kZStartModule[] = {53.5,39.0, 24.5, 1, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
+
+
+
 
 const Double_t kStartingTimeLow = 0;
 const Double_t kStartingTimeHigh = 30;
@@ -46,7 +50,7 @@ const Double_t kMaxStripADC = 2000; //maximum value of the shape on a strip
 const Double_t kMaxSignalADC = 15000; //Max for the Integral of the signal shape on a strip
 const Double_t kMinSignalADC = 0;
 const Int_t kMaxStripsPerEvent = 1000;
-const Int_t kMinStripsinCluster = 2;
+const Int_t kMinStripsinCluster = 1;//2;
 const Int_t kMaxStripsinCluster = 100;
 
 //Xinzhan: I changed to anther fitting method, so the following section is not being used any more

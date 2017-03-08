@@ -49,8 +49,8 @@ class GEMCluster : public TObject
 
  public:
   Int_t Size;
-  Int_t Plane;
-  Int_t Module;
+  Int_t Plane;	// x dimension = 0. y dimension = 1
+  Int_t Module;	// GEM detector ID
   Double_t Charge;
   Double_t Pos;
   TObjArray HitIndex;

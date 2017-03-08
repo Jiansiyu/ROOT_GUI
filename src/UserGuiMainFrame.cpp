@@ -13,9 +13,18 @@
 #include "TGFrame.h"
 #include "TGNumberEntry.h"
 #include "TThread.h"
-
+#include "TFile.h"
 #include "libgen.h"
 #include "string"
+
+
+
+/// gem analysis method
+#include "../analysis/Config.h"
+#include "../analysis/GEMTree.h"
+#include "../analysis/GEMTracking.h"
+#include "../analysis/GEMFittingShape.h"
+///
 
 // main decoder lib
 #include "../GEMDecoder/input_handler.h"
@@ -378,7 +387,13 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 						break;
 
 					case 'A':
+					{
 						printf("analysis mode\n");
+						std::vector<std::string> filename;
+						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R3/SBS38_39_33_36_temp1545.root");
+						filename.push_back(filename_temp);
+						fAnalysisProcess(filename);
+					}
 						break;
 
 					default:
@@ -600,6 +615,23 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 }
 
+void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
+	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+	TChain *fChain = new TChain("GEMHit", "");
+	std::vector<std::string>::iterator iter_filename=Filenames.begin();
+	while(iter_filename!=Filenames.end()){
+		Filenamecheck->CheckAppendix((*iter_filename).c_str(),"root");
+		TFile *ff=new TFile((*iter_filename).c_str());
+		assert(ff->IsOpen());
+		TTree *theTree= (TTree *)ff->Get("GEMHit");
+		if(!(theTree->IsZombie())){
+			fChain->AddFile((*iter_filename).c_str());
+		}else printf("Tree is not found in the file\n");
+		iter_filename++;
+	}
+	GEMTracking *pGEMTrack = new GEMTracking(fChain);
+	pGEMTrack->Run(-1,"test.root");
+}
 
 void UserGuiMainFrame::dMenuOpenFileDialog(){
 		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();

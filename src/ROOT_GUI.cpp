@@ -29,10 +29,10 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include "../analysis/Config.h"
-#include "../analysis/GEMTree.h"
-#include "../analysis/GEMTracking.h"
-#include "../analysis/GEMFittingShape.h"
+//#include "../analysis/Config.h"
+//#include "../analysis/GEMTree.h"
+//#include "../analysis/GEMTracking.h"
+//#include "../analysis/GEMFittingShape.h"
 //
 
 int main(int argc, char **argv)

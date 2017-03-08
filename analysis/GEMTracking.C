@@ -1,7 +1,7 @@
 #include "GEMTracking.h"
 
 #include "GEMHistoManager.h"
-
+#include "GEMTrackConstrcution.h"
 using namespace GEMHistoManager;
 using namespace std;
 
@@ -226,6 +226,7 @@ void GEMTracking::Run(Int_t event)
 	      //FindCluster(j,k,vHit_cut,1);
 	    }
 	}
+
       FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
     }
 
@@ -256,10 +257,10 @@ void GEMTracking::Run(Int_t event, const char *filename)
     {
       
       //Progress bar
-      Double_t ratio = i/(Double_t)entries;
-      cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+      //Double_t ratio = i/(Double_t)entries;
+      //cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
 
-      fChain->GetEntry(i);
+	  fChain->GetEntry(i);
       Reset();
 
       evtID = i;
@@ -281,6 +282,8 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	      //FindCluster(j,k,vHit_cut,1);
 	    }
 	}
+      GEMTrackConstrcution *test=new GEMTrackConstrcution(vCluster);
+      //delete test;
       FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
     }
 
@@ -473,7 +476,7 @@ void GEMTracking::FillHistograms()
   Int_t nhits = vHit.size();
   Int_t nhits_count = 0;
 
-  for(int i=0;i<kNMODULE;i++)
+  for(int i=0;i<kNMODULE;i++)    // loop on the detectors
     {
       //_____________________________________________________
       //Fill 1D hit distribution
