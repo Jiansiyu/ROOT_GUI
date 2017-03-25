@@ -26,7 +26,28 @@ const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
 //not using the following two lines
 const Double_t kXStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};  // Here, Units is in cm, origin of the chamber is in their bottom left corner
 const Double_t kYStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};
-const Double_t kZStartModule[] = {53.5,39.0, 24.5, 1, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
+const Double_t kZStartModule[] = {52.5,38.0, 23.5, 0, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
+const Double_t DistortionMx[4][4*4]={
+								{0.7439,0.547,-0.1947,0,
+								0.1176,1.395,-0.068,0,
+								0.283,4.258,0,0,
+								0,0,0,1
+								},
+								{0.5956,0.4886,-0.2209,0,
+								 0.2073,1.863, -0.01751,0,
+								 0.4623,6.9,0,0,
+								 0,0,0,1
+								},
+								{0.7501,0.8776,-0.3068,0,
+								 -0.01672,1.438,-0.04162,0,
+								 -0.6278,4.903,0.0,0,
+								 0,0,0,1
+								},
+									{1,0,0,0,
+									  0,1,0,0,
+									  0,0,1,0,
+									  0,0,0,1}
+									  };
 
 
 
@@ -38,7 +59,7 @@ const Double_t kMaxChargeRatio = 1.5;
 const Double_t kMinChargeRatio = 0.5;
 //Put a cut to the charge sharing ratio distribution
 
-const Int_t kMAXNCH = 1209;
+const Int_t kMAXNCH = 5*10*50;//1209;  // 5 chambers 10 strips per events 50 events total
 //How many strips can be fired in one event
 const Int_t kNAPV = 640; 
 //Maximum number of APVs this program can hold
@@ -50,7 +71,7 @@ const Double_t kMaxStripADC = 2000; //maximum value of the shape on a strip
 const Double_t kMaxSignalADC = 15000; //Max for the Integral of the signal shape on a strip
 const Double_t kMinSignalADC = 0;
 const Int_t kMaxStripsPerEvent = 1000;
-const Int_t kMinStripsinCluster = 1;//2;
+const Int_t kMinStripsinCluster = 3;//2;
 const Int_t kMaxStripsinCluster = 100;
 
 //Xinzhan: I changed to anther fitting method, so the following section is not being used any more
@@ -61,7 +82,7 @@ const Double_t FittingThreshold = 100.0;//not used for now
 
 //Read pedestal
 //Input the pedestal File name here, put it under the same directory with ./gem
-const TString fPedFileName = "./pedestal/pedestal_20150317.root";
+const TString fPedFileName = "/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/pedestal/pedestal_20150317.root";//"./pedestal/pedestal_20150317.root";
 //GEM mapping
 //Mapping : apv id (left to right) increase (x: -1 - 11; y: 12-21)
 //apvNo = Strip%128
@@ -77,7 +98,6 @@ const Int_t YmapFEC[]={2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
 const Int_t kXDelimit[] = {0, 150, 400, 650, 900, 1150, 1280}; // 6 sections
 const Int_t kYDelimit[] = {0, 300, 650, 950, 1280}; // 4 sections
 //Thus in all, 24 hitting spots
-
 typedef struct{
   Int_t section;
   Double_t charge;

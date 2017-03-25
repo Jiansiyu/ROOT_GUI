@@ -1184,15 +1184,15 @@ int InputHandler::HitProcessAllEvents(int entries, string pedestal_file_name, st
 	int entry=0;
 
 	Int_t EvtID,nch,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
-	Vstrip =new Int_t[2000];
-	VdetID =new Int_t[2000];
-	VplaneID =new Int_t[2000];
-	adc0  = new Int_t[2000];
-	adc1  = new Int_t[2000];
-	adc2  = new Int_t[2000];
-	adc3  = new Int_t[2000];
-	adc4  = new Int_t[2000];
-	adc5  = new Int_t[2000];
+	Vstrip =new Int_t[20000];
+	VdetID =new Int_t[20000];
+	VplaneID =new Int_t[20000];
+	adc0  = new Int_t[20000];
+	adc1  = new Int_t[20000];
+	adc2  = new Int_t[20000];
+	adc3  = new Int_t[20000];
+	adc4  = new Int_t[20000];
+	adc5  = new Int_t[20000];
 
 	// create the files that used for save the data
 	char *HitFilename_temp = new char[100];
@@ -1441,15 +1441,15 @@ int InputHandler::HitProcessAllEvents(string pedestal_file_name, string root_fil
 
 	int entry=0;
 	Int_t EvtID,nch,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
-	Vstrip =new Int_t[2000];
-	VdetID =new Int_t[2000];
-	VplaneID =new Int_t[2000];
-	adc0  = new Int_t[2000];
-	adc1  = new Int_t[2000];
-	adc2  = new Int_t[2000];
-	adc3  = new Int_t[2000];
-	adc4  = new Int_t[2000];
-	adc5  = new Int_t[2000];
+	Vstrip =new Int_t[5000];
+	VdetID =new Int_t[5000];
+	VplaneID =new Int_t[5000];
+	adc0  = new Int_t[5000];
+	adc1  = new Int_t[5000];
+	adc2  = new Int_t[5000];
+	adc3  = new Int_t[5000];
+	adc4  = new Int_t[5000];
+	adc5  = new Int_t[5000];
 	// create the files that used for save the data
 	char *HitFilename_temp = new char[100];
 	std::strcpy(HitFilename_temp,root_file_name.c_str());
@@ -1670,11 +1670,9 @@ if(filestream.good()){
 		    		 }
 		    	 }
 		     }
-		     nch=nstrip;//cout<<nch<<"HHHHHHH"<<endl;
+		     nch=nstrip;
 		     EvtID=entry;
-		     TThread::Lock();
 		     Hit->Fill();
-		     TThread::UnLock();
 		 }
 		 chan.close();
 	} catch (evioException e) {

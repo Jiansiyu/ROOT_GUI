@@ -166,8 +166,8 @@ namespace GEMHistoManager
   TH1F *hStripsADCdist_cut[kNMODULE];
   TH1F *hStripsADCdistX_cut[kNMODULE];
   TH1F *hStripsADCdistY_cut[kNMODULE];
-  
-  
+  TH1F *hTrackingResidueX[kNMODULE];
+  TH1F *hTrackingResidueY[kNMODULE];
   // @ initialize histograms.
   void InitHistograms()
   {
@@ -364,10 +364,11 @@ namespace GEMHistoManager
     //
     for (int i=0;i<kNMODULE;i++)
       {
-        hStripsADCdist[i] = new TH1F("hStripsADCdist", Form("hStripsADCdist module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
-        hStripsADCdistX[i] = new TH1F("hStripsADCdistX", Form("hStripsADCdistX module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
-        hStripsADCdistY[i] = new TH1F("hStripsADCdistY", Form("hStripsADCdistY module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
-        
+        hStripsADCdist[i] = new TH1F(Form("hStripsADCdist_module_%d",i), Form("hStripsADCdist module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
+        hStripsADCdistX[i] = new TH1F(Form("hStripsADCdistX_module_%d",i), Form("hStripsADCdistX module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
+        hStripsADCdistY[i] = new TH1F(Form("hStripsADCdistY_module_%d",i), Form("hStripsADCdistY module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
+        hTrackingResidueX[i] = new TH1F(Form("hTrackingX_module_%d",i), Form("hTrackingX_module_%d",i),2000,-500,500);
+        hTrackingResidueY[i] = new TH1F(Form("hTrackingY_module_%d",i), Form("hTrackingY_module_%d",i),2000,-500,500);
       }
     
   }
@@ -475,6 +476,9 @@ namespace GEMHistoManager
      hStripsADCdist[i]->Write();
      hStripsADCdistX[i]->Write();
      hStripsADCdistY[i]->Write();
+     hTrackingResidueX[i]->Write();
+     hTrackingResidueY[i]->Write();
+
       
     }
   

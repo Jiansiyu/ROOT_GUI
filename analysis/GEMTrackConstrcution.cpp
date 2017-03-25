@@ -98,6 +98,7 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		vxHisto->SetMarkerSize(0.5);
 		vxHisto->SetMarkerStyle(21);
 		vxHisto->SetMarkerColor(4);
+
 		//vxHisto->GetYaxis()->SetRangeUser(-10,60);
 		TH2D *vyHisto=new TH2D("y-z plane","y-z plane",160,(-1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0],(1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0],160,-10,120);
 		vyHisto->GetXaxis()->SetTitle("y dimension");
@@ -105,7 +106,14 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		vyHisto->SetMarkerSize(0.6);
 		vyHisto->SetMarkerStyle(21);
 		vyHisto->SetMarkerColor(4);
-		//vyHisto->GetYaxis()->SetRangeUser(-10,60);
+
+		TH2D *vzHisto= new TH2D("x-y plane","x-y plane",160,(-1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0]-20,(1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0]+20,160,(-1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0],(1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0]);
+		vzHisto->GetXaxis()->SetTitle("x dimension");
+		vzHisto->GetYaxis()->SetTitle("y dimension");
+		vzHisto->SetMarkerSize(0.6);
+		vzHisto->SetMarkerStyle(21);
+		vzHisto->SetMarkerColor(4);
+
 		TH3D *histo_3d = new TH3D("GEM 3D tracking", "GEM 3D tracking", 160,
 				-80, 80, 160, -80, 80, 160, -80, 80);
 		histo_3d->SetMarkerSize(0.6);
@@ -115,16 +123,19 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		for (int i = 0; i < kNMODULE; i++) {
 			//printf("\n\n Detector: %d\n",i);
 			for (unsigned int j = 0; j < vNCluster[i]; j++) {
-//				printf(
-//						"DetectorID=%d\n Number of Cluster   = %d, cluster=%5d, x=%5d  @%4d, y=%5d  @%4d, z=%5d\n ",
-//						i, vNCluster[i], j, (int) vxCluster[i][j].Pos,
-//						(int) vxCluster[i][j].StartTime,
-//						(int) vyCluster[i][j].Pos,
-//						(int) vyCluster[i][j].StartTime,
-//						(int) kZStartModule[i]);
+
+				vCorrectedPosX[i]=DistortionMx[i][0]*vxCluster[i][j].Pos+DistortionMx[i][1]*vyCluster[i][j].Pos+DistortionMx[i][1]*kZStartModule[i];
+				vCorrectedPosY[i]=DistortionMx[i][4]*vxCluster[i][j].Pos+DistortionMx[i][5]*vyCluster[i][j].Pos+DistortionMx[i][6]*kZStartModule[i];
+				vCorrectedPosZ[i]=DistortionMx[i][8]*vxCluster[i][j].Pos+DistortionMx[i][9]*vyCluster[i][j].Pos+DistortionMx[i][10]*kZStartModule[i];
+
+				vOriginalPosX[i]=vxCluster[i][j].Pos;
+				vOriginalPosY[i]=vyCluster[i][j].Pos;
+				vOriginalPosZ[i]=kZStartModule[i];
+
 				vxHisto->Fill(vxCluster[i][j].Pos, kZStartModule[i]);
 				//vxHisto->Fill(0.0,0.0);
 				vyHisto->Fill(vyCluster[i][j].Pos, kZStartModule[i]);
+				vzHisto->Fill(vxCluster[i][j].Pos, vyCluster[i][j].Pos);
 				histo_3d->Fill(vxCluster[i][j].Pos, vyCluster[i][j].Pos,
 						kZStartModule[i]);
 			}
@@ -147,6 +158,8 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		}*/
 		vxHisto->Fit("pol1","FMQ","",FitRangeMinX-10,FitRangeMaxX+10);
 		vyHisto->Fit("pol1","FMQ","",FitRangeMinY-10,FitRangeMaxY+10);
+		vzHisto->Fit("pol1","FMQ");
+
 		TF1 *FitFunctionx=vxHisto->GetFunction("pol1");
 		TF1 *FitFunctiony=vyHisto->GetFunction("pol1");
 		TH2D *PredictedPosx= new TH2D("","",160,(-1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0],(1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0],160,-10,120);
@@ -155,6 +168,7 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		if(!vNCluster[ChamberID]) {
 			PredictedPosx->SetMarkerColor(2);
 		}else PredictedPosx->SetMarkerColor(3);
+
 		PredictedPosx->SetMarkerSize(0.8);
 		PredictedPosx->SetMarkerStyle(21);
 
@@ -167,35 +181,47 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		PredictedPosy->SetMarkerStyle(21);
 		if((FitFunctionx->GetChisquare()<=500)&&(FitFunctiony->GetChisquare()<=500)){   // make sure this a good fit
 
-			PredictedPosx->Fill((kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1)),kZStartModule[ChamberID]);
-			PredictedPosy->Fill((kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1)),kZStartModule[ChamberID]);
-
 			vPredictedPosX[ChamberID]=(kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1));
 			vPredictedPosY[ChamberID]=(kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1));
 			vPredictedPosZ[ChamberID]=kZStartModule[ChamberID];
+			PredictedPosx->Fill(vPredictedPosX[ChamberID],vPredictedPosZ[ChamberID]);
+			PredictedPosy->Fill(vPredictedPosY[ChamberID],vPredictedPosZ[ChamberID]);
+
+			//PredictedPosx->Fill((kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1)),kZStartModule[ChamberID]);
+			//PredictedPosy->Fill((kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1)),kZStartModule[ChamberID]);
+			cout<<"=> Detector: "<<ChamberID;
 			if ((vPredictedPosX[ChamberID]> (-1.0) * kNbXAPVModule[ChamberID]*128/2*kStripPitchX[ChamberID])
 				&& (vPredictedPosX[ChamberID]< kNbXAPVModule[ChamberID] * 128 / 2* kStripPitchX[ChamberID])
 				&& (vPredictedPosY[ChamberID]> (-1.0) * kNbYAPVModule[ChamberID] * 128 / 2* kStripPitchY[ChamberID])
 				&& (vPredictedPosY[ChamberID]< kNbYAPVModule[ChamberID] * 128 / 2* kStripPitchY[ChamberID]))
 				{
+
 					vWithInRange[ChamberID]=1;
 					vGoodTrackingFlag[ChamberID]=1;     // this is a good hit
+					cout<<"[G] good tracking";
 					if(vNCluster[ChamberID]) {
 						vEventDetected[ChamberID]=1;
+						cout<<"  =>[ 1 ] envent detected"<<endl;
+
+					}
+					else{
+						cout<<"  =>[ 0 ] no event detected"<<endl;
 					}
 				}else {
 					vGoodTrackingFlag[ChamberID]=0;     // this is a good hit
+					cout<<"[B] bad tracking"<<endl;
 			}
 		}
 
 
 		// display if needed
 		if (Display_flag) {
-			TCanvas *canvas = new TCanvas("CANVAS", "alala", 800, 1100);
-			canvas->Divide(1, 3);
+			TCanvas *canvas = new TCanvas("CANVAS", "alala", 900, 900);
+			canvas->Divide(2, 2);
 
 			canvas->cd(1);
 			vxHisto->Draw("");
+			//vxCorrHisto->Draw("same");
 			// detector refence lines
 			for (int i = 0; i < kNMODULE; i++) {
 				detectorX[i]->SetLineColor(30);
@@ -205,6 +231,8 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 			// y dimensions
 			canvas->cd(2);
 			vyHisto->Draw("");
+			//vyCorrHisto->Draw("same");
+
 			for (int i = 0; i < kNMODULE; i++) {
 				detectorY[i]->SetLineColor(30);
 				detectorY[i]->Draw("same");
@@ -212,16 +240,23 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 			PredictedPosy->Draw("same");
 			//  draw the three dimension graph
 			canvas->cd(3);
+			vzHisto->Draw();
+			//vzCorrHisto->Draw("same");
+
+			canvas->cd(4);
 			histo_3d->Draw();
 			canvas->Modified();
 			canvas->Update();
 			canvas->Draw();
-			sleep(2);
+			getchar();
 			delete canvas;
 		}
 
+		delete PredictedPosx;
+		delete PredictedPosy;
 		delete vxHisto;
 		delete vyHisto;
+		delete vzHisto;
 		delete histo_3d;
 
 	}else vGoodTrackingFlag[ChamberID]=0;

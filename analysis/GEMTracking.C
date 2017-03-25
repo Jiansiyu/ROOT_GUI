@@ -204,8 +204,8 @@ void GEMTracking::Run(Int_t event)
       cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
 
       fChain->GetEntry(i);
-      Reset();
 
+      Reset();
       evtID = i;
       
       //cout<<"Event: "<<evtID<<endl;
@@ -242,59 +242,102 @@ void GEMTracking::Run(Int_t event)
 //June 28th modified so as to change the output file name  --siyu 
 void GEMTracking::Run(Int_t event, const char *filename)
 {
-  if(!fChain)
-    {
-      Error("run","No Tree to analyze.");
-    }
+	// used for the efficency test
+	Long_t nEvents[kNMODULE];
+	Long_t nEffEvents[kNMODULE];
+	float_t nEfficiency[kNMODULE];
 
-  Int_t entries = (Int_t) fChain->GetEntries();
-  cout<<"Number of events: "<<entries<<endl;
-  if(event > 0)
-    entries = event; //for decoding
-  cout<<"    Will analyze  "<<entries<<"  event..."<<endl;
-
-  for(int i=0;i<entries;i++)    // each entries is one event
-    {
-      
-      //Progress bar
-      //Double_t ratio = i/(Double_t)entries;
-      //cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
-
-	  fChain->GetEntry(i);
-      Reset();
-
-      evtID = i;
-      //cout<<"Event: "<<evtID<<endl;
-      for(int j=0;j<kNMODULE;j++)	// loop on detector and dimension
-	{
-	  for(int k=0;k<2;k++)      // two dimension
-	    {
-	      Decode(j,k);
-	      
-	    }
+	for(int i = 0 ; i <kNMODULE; i ++){
+		nEvents[i]=0;
+		nEffEvents[i]=0;
+		nEfficiency[i]=0;
 	}
-      
-      for(int j=0;j<kNMODULE;j++)
-	{
-	  for(int k=0;k<2;k++)
-	    {
-	      FindCluster(j,k,vHit,0);
-	      //FindCluster(j,k,vHit_cut,1);
-	    }
-	}
-      GEMTrackConstrcution *test=new GEMTrackConstrcution(vCluster);
-      //delete test;
-      FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
-    }
 
-  PrintHistograms(filename);
-  
-  PrintHistogramsAPV();
-  //PrintHistogramsCut();
-  //PrintHistogramsAPVCut();
-  //PrintHistogramsBest();
-  //PrintHistogramsAPVBest();
-  save_cluster_tree();
+
+	if (!fChain) {
+		Error("run", "No Tree to analyze.");
+	}
+
+	Int_t entries = (Int_t) fChain->GetEntries();
+	cout << "Number of events: " << entries << endl;
+	if (event > 0)
+		entries = event; //for decoding
+	cout << "    Will analyze  " << entries << "  event..." << endl;
+
+	for (int i =0; i < entries; i++)    // each entries is one event
+	{
+		//Progress bar
+		Double_t ratio = i / (Double_t) entries;
+		//cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+		fChain->GetEntry(i);
+		Reset();
+		evtID = i;
+
+		// make sure the maximum fired strips is with the limit range
+		if(digi_gem_nch > kMAXNCH) {
+			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
+			continue;
+		}
+
+		// start decode the data
+		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
+				{
+			for (int k = 0; k < 2; k++)      // two dimension
+					{
+				Decode(j, k);
+			}
+		}
+		for (int j = 0; j < kNMODULE; j++) {
+			for (int k = 0; k < 2; k++) {
+				FindCluster(j, k, vHit, 0);
+				//FindCluster(j,k,vHit_cut,1);
+			}
+		}
+
+		// calculate the efficiency for each detector
+		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
+		tracking->CosmicEff();
+		for(int DetectorID=0; DetectorID<kNMODULE; DetectorID++){
+
+			if(tracking->vGoodTrackingFlag[DetectorID]){
+				nEvents[DetectorID]++;
+				if(tracking->vEventDetected[DetectorID])nEffEvents[DetectorID]++;
+			}
+			if(nEvents[DetectorID]&&nEffEvents[DetectorID]) {
+				nEfficiency[DetectorID]= (float_t)nEffEvents[DetectorID] / (float_t)nEvents[DetectorID];
+			}
+
+			// calculate the residue
+			vResiduex[DetectorID]=tracking->vPredictedPosX[DetectorID]-tracking->vOriginalPosX[DetectorID];
+			vResiduey[DetectorID]=tracking->vPredictedPosY[DetectorID]-tracking->vOriginalPosY[DetectorID];
+		}
+
+		if(i%1==0)
+		{
+			cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
+					<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
+					<< setw(4) << " Detector:2" << setw(4) << (int) (nEfficiency[2] * 100)<< "% (" <<nEffEvents[2]<<"/"<<nEvents[2]<<")"
+					<< setw(4) << " Detector:3" << setw(4)<< (int) (nEfficiency[3] * 100) <<"% (" <<nEffEvents[3]<<"/"<<nEvents[3]<<")"
+					<< setw(4) << (int) (ratio * 100) << "\r" << flush;
+		}
+		//delete test;
+		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
+	}
+
+	PrintHistograms(filename);
+	PrintHistogramsAPV();
+	//PrintHistogramsCut();
+	//PrintHistogramsAPVCut();
+	//PrintHistogramsBest();
+	//PrintHistogramsAPVBest();
+	save_cluster_tree();
+
+	cout<<"Result"<<endl;
+	cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
+			<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
+			<< setw(4) << " Detector:2" << setw(4) << (int) (nEfficiency[2] * 100)<< "% (" <<nEffEvents[2]<<"/"<<nEvents[2]<<")"
+			<< setw(4) << " Detector:3" << setw(4)<< (int) (nEfficiency[3] * 100) <<"% (" <<nEffEvents[3]<<"/"<<nEvents[3]<<")"
+			<< setw(4) << (int) (1 * 100) << "\r" << flush;
 }
 
 
@@ -770,6 +813,14 @@ void GEMTracking::FillHistograms()
 		}
 	    }
 	}
+
+
+      // fill the residue
+      for(int detectorid=0; detectorid<kNMODULE; detectorid++){
+    		hTrackingResidueX[detectorid]->Fill(vResiduex[detectorid]);
+    	    hTrackingResidueY[detectorid]->Fill(vResiduey[detectorid]);
+      }
+
       //_______________________________________________________
     }
   assert(nhits == nhits_count);

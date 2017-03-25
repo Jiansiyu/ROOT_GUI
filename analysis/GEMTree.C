@@ -29,7 +29,6 @@ GEMTree::GEMTree(TChain *tree) {
   // if parameter tree is not specified (or zero), connect the file
   // used to generate this class and read the Tree.
   assert(tree);
-
   Init(tree);
 }
 
@@ -70,15 +69,14 @@ void GEMTree::Init(TChain *tree) {
   // code, but the routine can be extended by the user if needed.
   // Init() will be called many times when running on PROOF
   // (once per file to be processed).
-
+	printf("\n\n=>%s__%d\n",__FUNCTION__,__LINE__);
   // Set branch addresses and branch pointers
   if (!tree) return;
   fChain = tree;
   fCurrent = -1;
   fChain->SetMakeClass(1);
-
   fChain->SetBranchAddress("evtID", &EvtID, &b_EvtID);
-  fChain->SetBranchAddress("nch", &digi_gem_nch, &b_digi_gem_nch);
+  fChain->SetBranchAddress("nch", &digi_gem_nch, &b_digi_gem_nch);   //how many strips fired at this events
   //fChain->SetBranchAddress("hitTimebin", digi_gem_hitTimebin, &b_digi_gem_hitTimebin);
   fChain->SetBranchAddress("detID", digi_gem_chamber, &b_digi_gem_chamber);
   fChain->SetBranchAddress("planeID", digi_gem_plane, &b_digi_gem_plane);

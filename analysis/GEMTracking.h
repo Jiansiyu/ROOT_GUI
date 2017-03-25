@@ -76,6 +76,11 @@ class GEMTracking : public GEMTree
   vector<GEMCluster> vCluster;
   vector<GEMCluster> vCluster_cut;
 
+  // add temparatly
+  float_t vResiduex[kNMODULE];
+  float_t vResiduey[kNMODULE];
+
+
   //IsBestHit() adopts a much stricter event selection rule
   Int_t IsBestHit(GEMHit hit);    // select the events that maximun appears on 3rd or 4th sample
   Int_t IsBestHit(GEMHit hit,int max_sample_1,int max_sample_2=-1,int max_sample_3=-1); // select the events Maximum cluster on certen samples, negtive diabled.   Sept 15th 2016 Siyu 

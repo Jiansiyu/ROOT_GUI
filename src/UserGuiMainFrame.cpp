@@ -220,7 +220,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	TGGroupFrame * fDataOutPutFrame= new TGGroupFrame(fWorkZoneControlFrame,"Out Put Pattern");
 	fDataOutPutFrame->SetTitlePos(TGGroupFrame::kCenter);
 	tOutPutfilePattern = new TGTextEntry(fDataOutPutFrame);
-	tOutPutfilePattern ->SetTitle("~/SBS39%s_temp%04d.root");
+	tOutPutfilePattern ->SetTitle("~/Research/SBS/SBS_GEM_labtest/SBS38_39_33_36%s_temp%04d.root");
 	fDataOutPutFrame->AddFrame(tOutPutfilePattern, new TGLayoutHints(kLHintsExpandX));
 	fWorkZoneControlFrame->AddFrame(fDataOutPutFrame, new TGLayoutHints(kLHintsExpandX));
 
@@ -389,10 +389,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'A':
 					{
 						printf("analysis mode\n");
-						std::vector<std::string> filename;
-						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R3/SBS38_39_33_36_temp1545.root");
-						filename.push_back(filename_temp);
-						fAnalysisProcess(filename);
+						//std::vector<std::string> filename;
+						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R2-3/SBS38_39_33_Hit_temp1526.root");
+						//filename.push_back(filename_temp);
+						fAnalysisProcess(vRootDataList);
 					}
 						break;
 
@@ -619,18 +619,24 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
-	while(iter_filename!=Filenames.end()){
-		Filenamecheck->CheckAppendix((*iter_filename).c_str(),"root");
-		TFile *ff=new TFile((*iter_filename).c_str());
-		assert(ff->IsOpen());
-		TTree *theTree= (TTree *)ff->Get("GEMHit");
-		if(!(theTree->IsZombie())){
-			fChain->AddFile((*iter_filename).c_str());
-		}else printf("Tree is not found in the file\n");
+	while (iter_filename != Filenames.end()) {
+		Filenamecheck->CheckAppendix((*iter_filename).c_str(), "root");
+		TFile *ff = new TFile((*iter_filename).c_str());
+		if (ff->IsOpen()) {
+			TTree *theTree = (TTree *) ff->Get("GEMHit");
+			if (!(theTree->IsZombie())) {
+				fChain->AddFile((*iter_filename).c_str());
+			} else
+				printf("Tree is not found in the file\n");
+		}
 		iter_filename++;
 	}
+	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
+	//Form(tOutPutfilePattern->GetTitle(),a->GetNumberFromFilename(Filenames[0]));
+	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
+	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Run(-1,"test.root");
+	pGEMTrack->Run(-1,savename.c_str());
 }
 
 void UserGuiMainFrame::dMenuOpenFileDialog(){
