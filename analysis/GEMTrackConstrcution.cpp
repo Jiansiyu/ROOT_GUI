@@ -149,14 +149,7 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		Double_t FitRangeMaxX=(-1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0];
 		Double_t FitRangeMinY=(1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0];
 		Double_t FitRangeMaxY=(-1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0];
-/*		for(int i =0; i < kNMODULE; i ++){
-			if(vNCluster[i]){
-				if(FitRangeMaxX < vxCluster[i][0].Pos) FitRangeMaxX = vxCluster[i][0].Pos;
-				if(FitRangeMinX > vxCluster[i][0].Pos) FitRangeMinX = vxCluster[i][0].Pos;
-				if(FitRangeMaxY < vyCluster[i][0].Pos) FitRangeMaxY = vyCluster[i][0].Pos;
-				if(FitRangeMinY > vyCluster[i][0].Pos) FitRangeMinY = vyCluster[i][0].Pos;
-			}
-		}*/
+
 		vxHisto->Fit("pol1","FMQ","",FitRangeMinX-10,FitRangeMaxX+10);
 		vyHisto->Fit("pol1","FMQ","",FitRangeMinY-10,FitRangeMaxY+10);
 		vzHisto->Fit("pol1","FMQ");
@@ -182,22 +175,25 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		PredictedPosy->SetMarkerStyle(21);
 
 		// chech whether this is a good fit
-		if((FitFunctionx->GetChisquare()<=50)&&(FitFunctiony->GetChisquare()<=50)){   // make sure this a good fit
+		if((FitFunctionx->GetChisquare()<=ChiSquareTHRD)&&(FitFunctiony->GetChisquare()<=ChiSquareTHRD)){   // make sure this a good fit
 
+			vChiSquareFlag[ChamberID]=1;  // to be inprove
+
+			//generated all the predicted position on each chamber
 			vPredictedPosX[ChamberID]=(kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1));
 			vPredictedPosY[ChamberID]=(kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1));
 			vPredictedPosZ[ChamberID]=kZStartModule[ChamberID];
+
+			//fill the histo data
 			PredictedPosx->Fill(vPredictedPosX[ChamberID],vPredictedPosZ[ChamberID]);
 			PredictedPosy->Fill(vPredictedPosY[ChamberID],vPredictedPosZ[ChamberID]);
 
-			//PredictedPosx->Fill((kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1)),kZStartModule[ChamberID]);
-			//PredictedPosy->Fill((kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1)),kZStartModule[ChamberID]);
+			// make sure the projected point is located in  the chamber
 			if ((vPredictedPosX[ChamberID]> (-1.0) * kNbXAPVModule[ChamberID]*128/2*kStripPitchX[ChamberID])
 				&& (vPredictedPosX[ChamberID]< kNbXAPVModule[ChamberID] * 128 / 2* kStripPitchX[ChamberID])
 				&& (vPredictedPosY[ChamberID]> (-1.0) * kNbYAPVModule[ChamberID] * 128 / 2* kStripPitchY[ChamberID])
 				&& (vPredictedPosY[ChamberID]< kNbYAPVModule[ChamberID] * 128 / 2* kStripPitchY[ChamberID]))
 				{
-
 					vWithInRange[ChamberID]=1;
 					vGoodTrackingFlag[ChamberID]=1;     // this is a good hit
 					//cout<<"[G] good tracking";
@@ -209,20 +205,16 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 					}
 				}else {
 					vGoodTrackingFlag[ChamberID]=0;     // this is a good hit
-					//cout<<"[B] bad tracking\n"<<endl;
 			}
 		}
 		else{  // if this is not a good fit, this is not a good tracking
 			vGoodTrackingFlag[ChamberID]=0;
 			vEventDetected[ChamberID]=0;
 		}
-
-
 		// display if needed
 		if (Display_flag) {
 			TCanvas *canvas = new TCanvas("CANVAS", "alala", 900, 900);
 			canvas->Divide(2, 2);
-
 			canvas->cd(1);
 			vxHisto->Draw("");
 			//vxCorrHisto->Draw("same");
@@ -246,7 +238,6 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 			canvas->cd(3);
 			vzHisto->Draw();
 			//vzCorrHisto->Draw("same");
-
 			canvas->cd(4);
 			histo_3d->Draw();
 			canvas->Modified();

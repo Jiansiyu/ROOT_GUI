@@ -66,13 +66,13 @@ namespace GEMHistoManager
   TH1F *hClusterAdcDistX[kNMODULE];
   TH1F *hClusterAdcDistY[kNMODULE];
 
-  TH1F *hClusterSize;
-  TH1F *hClusterSize_x;  // cluster size in x dimension 
-  TH1F *hClusterSize_y;  // cluster size in y dimension 
+  TH1F *hClusterSize[kNMODULE];
+  TH1F *hClusterSize_x[kNMODULE];  // cluster size in x dimension
+  TH1F *hClusterSize_y[kNMODULE];  // cluster size in y dimension
   
-  TH1I *hNbClusterPerPlane;
-  TH1I *hNbClusterPerPlane_x;  // number of clusters in x dimension
-  TH1I *hNbClusterPerPlane_y;  // number of cluster  in y dimension 
+  TH1I *hNbClusterPerPlane[kNMODULE];
+  TH1I *hNbClusterPerPlane_x[kNMODULE];  // number of clusters in x dimension
+  TH1I *hNbClusterPerPlane_y[kNMODULE];  // number of cluster  in y dimension
  
   TH2F *hhClusterChargeRatio[kNMODULE];
 
@@ -345,15 +345,9 @@ namespace GEMHistoManager
 	hReducedChisquareCluster[i] = new TH1F(Form("hReducedChisquareCluster_module%d",i),Form("Cluster Chi^2 Module_%d",i),1e4,0,1e4);
       }
   
-    //Cluster Infomation
-    hClusterSize = new TH1F("hClusterSize","Cluster Size",15,0,15);
     
-    hClusterSize_x= new TH1F("hClusterSize_x","Cluster Size x",15,0,15);
-    hClusterSize_y= new TH1F("hClusterSize_y","Cluster Size y",15,0,15);
     
-    hNbClusterPerPlane = new TH1I("hNbClusterPerPlane", "# of Clusters Per Plane", 10, 0,10);
-    hNbClusterPerPlane_x = new TH1I("hNbClusterPerPlane_x", "# of Clusters Per Plane x", 10, 0,10);
-    hNbClusterPerPlane_y = new TH1I("hNbClusterPerPlane_y", "# of Clusters Per Plane y", 10, 0,10);
+
     
     
     
@@ -367,8 +361,18 @@ namespace GEMHistoManager
         hStripsADCdist[i] = new TH1F(Form("hStripsADCdist_module_%d",i), Form("hStripsADCdist module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
         hStripsADCdistX[i] = new TH1F(Form("hStripsADCdistX_module_%d",i), Form("hStripsADCdistX module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
         hStripsADCdistY[i] = new TH1F(Form("hStripsADCdistY_module_%d",i), Form("hStripsADCdistY module_%d",i),4095,0,4095);    // X is the ADC value of the each strips Y is the counts
+
+        hNbClusterPerPlane[i] = new TH1I(Form("hNbClusterPerPlane_module_%d",i), Form("# of Clusters Per Plane module %d",i), 10, 0,10);
+        hNbClusterPerPlane_x[i] = new TH1I(Form("hNbClusterPerPlane_x_module_%d",i), Form("# of Clusters Per Plane x module %d",i), 10, 0,10);
+        hNbClusterPerPlane_y[i] = new TH1I(Form("hNbClusterPerPlane_y_module_%d",i), Form("# of Clusters Per Plane y module %d",i), 10, 0,10);
+
         hTrackingResidueX[i] = new TH1F(Form("hTrackingX_module_%d",i), Form("hTrackingX_module_%d",i),2000,-500,500);
         hTrackingResidueY[i] = new TH1F(Form("hTrackingY_module_%d",i), Form("hTrackingY_module_%d",i),2000,-500,500);
+
+        //Cluster Infomation
+		hClusterSize[i] = new TH1F(Form("hClusterSize_module_%d",i), Form("Cluster Size module_%d",i), 15, 0, 15);
+		hClusterSize_x[i] = new TH1F(Form("hClusterSize_x_module_%d",i), Form("Cluster Size x module_%d",i), 15, 0,15);
+		hClusterSize_y[i] = new TH1F(Form("hClusterSize_y_module_%d",i), Form("Cluster Size y module_%d",i), 15, 0,15);
       }
     
   }
@@ -459,26 +463,29 @@ namespace GEMHistoManager
 	//Chi Square
 	//hReducedChisquareCluster[i]->Write();
       }
-    //Cluster Size
-     hClusterSize->Write();
-     hClusterSize_x->Write();    // write the size of cluster in x dimension and y dimension seperatly in the root file 
-     hClusterSize_y->Write();
+
        
-    //Cluster Size
-     hNbClusterPerPlane->Write();
-     hNbClusterPerPlane_x->Write();  // write the number of clusters in x and y dimension seperatly in the root file 
-     hNbClusterPerPlane_y->Write();
+
      
      // added by siyu 
      //used for calculat strips ADC distribution 
   for(int i=0; i<kNMODULE;i++)
     {
+	  //Cluster Size
+     hClusterSize[i]->Write();
+     hClusterSize_x[i]->Write();    // write the size of cluster in x dimension and y dimension seperatly in the root file
+     hClusterSize_y[i]->Write();
+
      hStripsADCdist[i]->Write();
      hStripsADCdistX[i]->Write();
      hStripsADCdistY[i]->Write();
      hTrackingResidueX[i]->Write();
      hTrackingResidueY[i]->Write();
 
+     //Cluster Size
+     hNbClusterPerPlane[i]->Write();
+     hNbClusterPerPlane_x[i]->Write();  // write the number of clusters in x and y dimension seperatly in the root file
+     hNbClusterPerPlane_y[i]->Write();
       
     }
   

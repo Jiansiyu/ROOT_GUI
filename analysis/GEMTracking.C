@@ -5,6 +5,7 @@
 using namespace GEMHistoManager;
 using namespace std;
 
+
 //==================================================================================
 GEMTracking::GEMTracking(TChain* chain) : GEMTree(chain)
 {
@@ -440,16 +441,16 @@ void GEMTracking::FindCluster(Int_t module, Int_t plane, vector<GEMHit> vHit, In
 	    }
 	  if(nbclustperplane!=0) 
 	  	{
-	  		hNbClusterPerPlane->Fill(nbclustperplane);
+	  		hNbClusterPerPlane[module]->Fill(nbclustperplane);
 	  		if(plane==0)
 	  		  {
-	  		     hNbClusterPerPlane_x->Fill(nbclustperplane);
+	  		     hNbClusterPerPlane_x[module]->Fill(nbclustperplane);
 	  		   }else
 	  		    {
 	  		       if(plane==1)
 	  		          {
 	  		          
-	  		             hNbClusterPerPlane_y->Fill(nbclustperplane);
+	  		             hNbClusterPerPlane_y[module]->Fill(nbclustperplane);
 	  		            }
 	  		      }
 	  	}
@@ -664,15 +665,15 @@ void GEMTracking::FillHistograms()
 	      if((*iter_cluster).Module == i && (*iter_cluster).Plane == 0)
 		{
 		  hClusterDistX[i]->Fill((*iter_cluster).Pos);
-		  hClusterSize->Fill((*iter_cluster).Size);
-		  hClusterSize_x->Fill((*iter_cluster).Size);
+		  hClusterSize[i]->Fill((*iter_cluster).Size);
+		  hClusterSize_x[i]->Fill((*iter_cluster).Size);
 		  hClusterAdcDistX[i]->Fill((*iter_cluster).Charge);
 		}
 	      else if((*iter_cluster).Module == i && (*iter_cluster).Plane == 1)
 		{
 		  hClusterDistY[i]->Fill((*iter_cluster).Pos);
-		  hClusterSize->Fill((*iter_cluster).Size);
-		  hClusterSize_y->Fill((*iter_cluster).Size);
+		  hClusterSize[i]->Fill((*iter_cluster).Size);
+		  hClusterSize_y[i]->Fill((*iter_cluster).Size);
 		  hClusterAdcDistY[i]->Fill((*iter_cluster).Charge);
 		}
 	      iter_cluster++;
