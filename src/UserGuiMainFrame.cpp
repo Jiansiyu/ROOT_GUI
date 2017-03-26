@@ -389,10 +389,11 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'A':
 					{
 						printf("analysis mode\n");
-						//std::vector<std::string> filename;
-						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R2-3/SBS38_39_33_Hit_temp1526.root");
-						//filename.push_back(filename_temp);
-						fAnalysisProcess(vRootDataList);
+						std::vector<std::string> filename;
+						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R5/SBS38_39_33_36_Hit_temp1605.root");
+						filename.push_back(filename_temp);
+						fAnalysisProcess(filename);
+						//fAnalysisProcess(vRootDataList);
 					}
 						break;
 

@@ -301,18 +301,21 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
 			if(tracking->vGoodTrackingFlag[DetectorID]){
 				nEvents[DetectorID]++;
-				if(tracking->vEventDetected[DetectorID])nEffEvents[DetectorID]++;
-			}
-			if(nEvents[DetectorID]&&nEffEvents[DetectorID]) {
-				nEfficiency[DetectorID]= (float_t)nEffEvents[DetectorID] / (float_t)nEvents[DetectorID];
+				if(tracking->vEventDetected[DetectorID]){
+					nEffEvents[DetectorID]++;
+				};
 			}
 
+			//if(nEvents[DetectorID]&&nEffEvents[DetectorID]) {
+				nEfficiency[DetectorID]= (float_t)nEffEvents[DetectorID] / (float_t)nEvents[DetectorID];
+			//}
 			// calculate the residue
 			vResiduex[DetectorID]=tracking->vPredictedPosX[DetectorID]-tracking->vOriginalPosX[DetectorID];
 			vResiduey[DetectorID]=tracking->vPredictedPosY[DetectorID]-tracking->vOriginalPosY[DetectorID];
-		}
 
-		if(i%1==0)
+		}
+		delete tracking;
+		if(i%100==0)
 		{
 			cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
 					<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"

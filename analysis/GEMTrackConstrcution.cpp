@@ -48,6 +48,7 @@ void GEMTrackConstrcution::CosmicEff(int Detector_ID){
 			SingleTrackFilter(i);
 		}
 	}
+	//ResultReport();
 }
 
 
@@ -179,7 +180,9 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		}
 		PredictedPosy->SetMarkerSize(0.8);
 		PredictedPosy->SetMarkerStyle(21);
-		if((FitFunctionx->GetChisquare()<=500)&&(FitFunctiony->GetChisquare()<=500)){   // make sure this a good fit
+
+		// chech whether this is a good fit
+		if((FitFunctionx->GetChisquare()<=50)&&(FitFunctiony->GetChisquare()<=50)){   // make sure this a good fit
 
 			vPredictedPosX[ChamberID]=(kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1));
 			vPredictedPosY[ChamberID]=(kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1));
@@ -189,7 +192,6 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 
 			//PredictedPosx->Fill((kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1)),kZStartModule[ChamberID]);
 			//PredictedPosy->Fill((kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1)),kZStartModule[ChamberID]);
-			cout<<"=> Detector: "<<ChamberID;
 			if ((vPredictedPosX[ChamberID]> (-1.0) * kNbXAPVModule[ChamberID]*128/2*kStripPitchX[ChamberID])
 				&& (vPredictedPosX[ChamberID]< kNbXAPVModule[ChamberID] * 128 / 2* kStripPitchX[ChamberID])
 				&& (vPredictedPosY[ChamberID]> (-1.0) * kNbYAPVModule[ChamberID] * 128 / 2* kStripPitchY[ChamberID])
@@ -198,19 +200,21 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 
 					vWithInRange[ChamberID]=1;
 					vGoodTrackingFlag[ChamberID]=1;     // this is a good hit
-					cout<<"[G] good tracking";
+					//cout<<"[G] good tracking";
 					if(vNCluster[ChamberID]) {
 						vEventDetected[ChamberID]=1;
-						cout<<"  =>[ 1 ] envent detected"<<endl;
-
 					}
 					else{
-						cout<<"  =>[ 0 ] no event detected"<<endl;
+						vEventDetected[ChamberID]=0;
 					}
 				}else {
 					vGoodTrackingFlag[ChamberID]=0;     // this is a good hit
-					cout<<"[B] bad tracking"<<endl;
+					//cout<<"[B] bad tracking\n"<<endl;
 			}
+		}
+		else{  // if this is not a good fit, this is not a good tracking
+			vGoodTrackingFlag[ChamberID]=0;
+			vEventDetected[ChamberID]=0;
 		}
 
 

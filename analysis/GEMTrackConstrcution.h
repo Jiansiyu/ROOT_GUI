@@ -64,7 +64,7 @@ private :
 	void Msg();
 
 private:
-	Bool_t Display_flag=1;
+	Bool_t Display_flag=0;
 };
 
 #endif /* GEMTRACKCONSTRCUTION_H_ */
