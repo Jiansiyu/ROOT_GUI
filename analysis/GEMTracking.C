@@ -295,9 +295,10 @@ void GEMTracking::Run(Int_t event, const char *filename)
 			}
 		}
 
-		// calculate the efficiency for each detector
+		//calculate the efficiency for each detector
 		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
 		tracking->CosmicEff();
+
 		for(int DetectorID=0; DetectorID<kNMODULE; DetectorID++){
 
 			if(tracking->vGoodTrackingFlag[DetectorID]){
@@ -307,14 +308,31 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				};
 			}
 
-			//if(nEvents[DetectorID]&&nEffEvents[DetectorID]) {
+			if(nEvents[DetectorID]&&nEffEvents[DetectorID]) {
 				nEfficiency[DetectorID]= (float_t)nEffEvents[DetectorID] / (float_t)nEvents[DetectorID];
-			//}
+			}
+
+
+			if((tracking->vChiSquareFlag[DetectorID])&&((tracking->vNCluster[DetectorID]==1)))
+			{
+
+/*				printf("[%s] Detector[%d] Predicted Data x=>%5.5f  y= %5.5f, realData x=%5.5f y=%5.5f Difference Dx=>%5.5f Dy=%5.5f\n",__FUNCTION__,DetectorID,
+
+										tracking->vPredictedPosX[DetectorID],
+										tracking->vPredictedPosY[DetectorID],
+
+										tracking->vOriginalPosX[DetectorID],
+										tracking->vOriginalPosY[DetectorID],
+										tracking->vPredictedPosX[DetectorID]-tracking->vOriginalPosX[DetectorID],
+										tracking->vPredictedPosY[DetectorID]-tracking->vOriginalPosY[DetectorID]
+								);*/
 			// calculate the residue
 			vResiduex[DetectorID]=tracking->vPredictedPosX[DetectorID]-tracking->vOriginalPosX[DetectorID];
 			vResiduey[DetectorID]=tracking->vPredictedPosY[DetectorID]-tracking->vOriginalPosY[DetectorID];
+			}
 
 		}
+
 		delete tracking;
 		if(i%100==0)
 		{

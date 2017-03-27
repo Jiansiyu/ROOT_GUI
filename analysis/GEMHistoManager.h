@@ -366,8 +366,8 @@ namespace GEMHistoManager
         hNbClusterPerPlane_x[i] = new TH1I(Form("hNbClusterPerPlane_x_module_%d",i), Form("# of Clusters Per Plane x module %d",i), 10, 0,10);
         hNbClusterPerPlane_y[i] = new TH1I(Form("hNbClusterPerPlane_y_module_%d",i), Form("# of Clusters Per Plane y module %d",i), 10, 0,10);
 
-        hTrackingResidueX[i] = new TH1F(Form("hTrackingX_module_%d",i), Form("hTrackingX_module_%d",i),2000,-500,500);
-        hTrackingResidueY[i] = new TH1F(Form("hTrackingY_module_%d",i), Form("hTrackingY_module_%d",i),2000,-500,500);
+        hTrackingResidueX[i] = new TH1F(Form("hTrackingX_module_%d",i), Form("hTrackingX_module_%d",i),800,-4,4);
+        hTrackingResidueY[i] = new TH1F(Form("hTrackingY_module_%d",i), Form("hTrackingY_module_%d",i),800,-4,4);
 
         //Cluster Infomation
 		hClusterSize[i] = new TH1F(Form("hClusterSize_module_%d",i), Form("Cluster Size module_%d",i), 15, 0, 15);

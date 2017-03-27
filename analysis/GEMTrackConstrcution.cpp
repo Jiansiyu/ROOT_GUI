@@ -58,6 +58,7 @@ void GEMTrackConstrcution::Clean() {
 		vNCluster[i]=0;
 		vxCluster[i].clear();
 		vyCluster[i].clear();
+		vChiSquareFlag[i]=0;
 	}
 }
 
@@ -82,6 +83,10 @@ void GEMTrackConstrcution::Sort(vector<GEMCluster> &vC)
 }
 
 void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
+
+	for (unsigned int i = 0; i < kNMODULE; i++) {
+		vChiSquareFlag[i]=0;
+	}
 
 	Bool_t SingleTrack_Flag = 1;
 	for (unsigned int i = 0; i < kNMODULE; i++) {
@@ -121,6 +126,7 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		histo_3d->SetMarkerStyle(21);
 		histo_3d->SetMarkerColor(4);
 
+		// load the orignal data into the histogram
 		for (int i = 0; i < kNMODULE; i++) {
 			//printf("\n\n Detector: %d\n",i);
 			for (unsigned int j = 0; j < vNCluster[i]; j++) {
@@ -129,10 +135,11 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 				vCorrectedPosY[i]=DistortionMx[i][4]*vxCluster[i][j].Pos+DistortionMx[i][5]*vyCluster[i][j].Pos+DistortionMx[i][6]*kZStartModule[i];
 				vCorrectedPosZ[i]=DistortionMx[i][8]*vxCluster[i][j].Pos+DistortionMx[i][9]*vyCluster[i][j].Pos+DistortionMx[i][10]*kZStartModule[i];
 
+
 				vOriginalPosX[i]=vxCluster[i][j].Pos;
 				vOriginalPosY[i]=vyCluster[i][j].Pos;
 				vOriginalPosZ[i]=kZStartModule[i];
-
+				//printf("[%s] detectorID %d  Size x->%d y->%d  Position: (%5.5f / %5.5f / %5.5f)\n", __FUNCTION__,i,vxCluster[i].size(),vyCluster[i].size(),vOriginalPosX[i],vOriginalPosY[i],vOriginalPosZ[i]);
 				vxHisto->Fill(vxCluster[i][j].Pos, kZStartModule[i]);
 				//vxHisto->Fill(0.0,0.0);
 				vyHisto->Fill(vyCluster[i][j].Pos, kZStartModule[i]);
@@ -145,6 +152,7 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 			detectorY[i] = new TLine((-1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0], kZStartModule[i], (1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0],
 								kZStartModule[i]);
 		}
+
 		Double_t FitRangeMinX=(1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0];
 		Double_t FitRangeMaxX=(-1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0];
 		Double_t FitRangeMinY=(1.0)* kNbYAPVModule[0]*128/2*kStripPitchY[0];
@@ -177,16 +185,39 @@ void GEMTrackConstrcution::SingleTrackFilter(unsigned int ChamberID) {
 		// chech whether this is a good fit
 		if((FitFunctionx->GetChisquare()<=ChiSquareTHRD)&&(FitFunctiony->GetChisquare()<=ChiSquareTHRD)){   // make sure this a good fit
 
-			vChiSquareFlag[ChamberID]=1;  // to be inprove
-
 			//generated all the predicted position on each chamber
-			vPredictedPosX[ChamberID]=(kZStartModule[ChamberID]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1));
-			vPredictedPosY[ChamberID]=(kZStartModule[ChamberID]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1));
-			vPredictedPosZ[ChamberID]=kZStartModule[ChamberID];
+			for(int i = 0 ; i <kNMODULE; i++){
+				vChiSquareFlag[i]=1;  // to be inprove
+
+				vPredictedPosX[i]=(kZStartModule[i]-FitFunctionx->GetParameter(0))/(FitFunctionx->GetParameter(1));
+				vPredictedPosY[i]=(kZStartModule[i]-FitFunctiony->GetParameter(0))/(FitFunctiony->GetParameter(1));
+				vPredictedPosZ[i]=kZStartModule[i];
+				//fill the histo data
+				PredictedPosx->Fill(vPredictedPosX[i],vPredictedPosZ[i]);
+				PredictedPosy->Fill(vPredictedPosY[i],vPredictedPosZ[i]);
+				/*if(vNCluster[i]){
+				printf("[%s] Detector[%d] Predicted Data x=>%5.5f  y= %5.5f, realData x=%5.5f y=%5.5f Difference Dx=>%5.5f Dy=%5.5f\n",__FUNCTION__,i,
+
+										vPredictedPosX[i],
+										vPredictedPosY[i],
+
+										vOriginalPosX[i],
+										vOriginalPosY[i],
+										vPredictedPosX[i]-vOriginalPosX[i],
+										vPredictedPosY[i]-vOriginalPosY[i]
+								);
+				}*/
+
+			}
+
+
+
+
+
 
 			//fill the histo data
-			PredictedPosx->Fill(vPredictedPosX[ChamberID],vPredictedPosZ[ChamberID]);
-			PredictedPosy->Fill(vPredictedPosY[ChamberID],vPredictedPosZ[ChamberID]);
+		//	PredictedPosx->Fill(vPredictedPosX[ChamberID],vPredictedPosZ[ChamberID]);
+		//	PredictedPosy->Fill(vPredictedPosY[ChamberID],vPredictedPosZ[ChamberID]);
 
 			// make sure the projected point is located in  the chamber
 			if ((vPredictedPosX[ChamberID]> (-1.0) * kNbXAPVModule[ChamberID]*128/2*kStripPitchX[ChamberID])
