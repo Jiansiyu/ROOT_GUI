@@ -94,6 +94,7 @@ enum ETestCommandIdentifiers {
 	C_WORKMODE_PEDESTAL,
 	C_WORKMODE_HIT,
 	C_WORKMODE_ANALYSIS,
+	C_WORKMODE_CALIBRATION,
 
 	C_RAWFILE_PEDESTAL,
 	C_RAWFILE_DAT,
@@ -144,7 +145,7 @@ private :
 	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
 	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
 	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
-
+	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
 // dialog process
 private:
 	void dMenuOpenFileDialog();
@@ -196,7 +197,7 @@ private:
 	TGRadioButton *bWorkModePedestal;
 	TGRadioButton *bWorkModeHit;
 	TGRadioButton *bWorkModeAnalysis;
-
+	TGRadioButton *bWorkModeCalibration;
 	// address and file control
 	TGGroupFrame *fDataInputFrame;
 

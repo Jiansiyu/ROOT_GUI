@@ -267,34 +267,21 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
   try{
 
     evioFileChannel chan(filename.c_str(), "r");
-
     chan.open();
-
     while(chan.read()&&entry<entries)
     {
+			map<int, map<int, map<int, vector<int> > > > mmHit;
+			//vector<uint32_t> srsSingleEvent;
+			vSRSSingleEventData.clear();
 
-      if((entry%200)==0){				//using this function to decrease display refresh interval, increase the process speed
-      Double_t ratio = entry/(Double_t)entries;
-      cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
-      }
-      map<int, map<int, map<int, vector<int> > > >  mmHit;
-      //vector<uint32_t> srsSingleEvent;
-      vSRSSingleEventData.clear();
+			evioDOMTree event(chan);
+			evioDOMNodeListP mpdEventList = event.getNodeList(isLeaf());
 
-      evioDOMTree event(chan);
-      evioDOMNodeListP mpdEventList = event.getNodeList( isLeaf() );
+#ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
+			cout << "number of banks: " << mpdEventList->size() << endl;
+#endif
 
-      #ifndef __INFORMATION_HitProcessAllEvents_DISPLAY_FLAG__
-      cout<<"number of banks: "<<mpdEventList->size()<<endl;
-      #endif
-
-      int n_bank = mpdEventList->size();
-
-      // process bar
-      if((entry%200)==0){				// using this function to decrease display refresh interval, increase the process speed
-      Double_t ratio = entry/(Double_t)entries;
-      cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
-      }
+			int n_bank = mpdEventList->size();
 			evioDOMNodeList::iterator iter;
 			for (iter = mpdEventList->begin(); iter != mpdEventList->end();
 					++iter) {
@@ -358,12 +345,9 @@ int InputHandler::PedProcessAllEvents(int entries, string pedestal_file_name)
 
 						for (int i = 0; i < TSsize; i++) {
 							adcSum_temp += adc_temp[i];
-							//mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adc_temp[i]);
-							//cout<<"mean: "<<adc_temp[i]<<endl;
 						}
 						adcSum_temp = adcSum_temp / TSsize;
-						mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(
-								adcSum_temp);
+						mPedestalHisto[mpd_id][adc_ch][stripNb]->Fill(adcSum_temp);
 					}
 				}
 			}

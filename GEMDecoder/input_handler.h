@@ -78,7 +78,7 @@ private:
 	TFile *f;
 	string filename;
 	ifstream file;
-	string vDefaultMappingPath="Mapping/temp_Mapping.cfg";
+	string vDefaultMappingPath="/home/newdriver/Research/Eclipse_Workspace/neon2/ROOT_GUI/Mapping/temp_Mapping_4Chamber.cfg";//"Mapping/temp_Mapping.cfg";
 	RawDecoder *fRawDecoder;
 };
 

@@ -59,6 +59,8 @@ class GEMTracking : public GEMTree
   void Reset();
   void FillHistograms();
 
+  void Calibration(Int_t, const char *);
+
  protected:
   void Decode(Int_t module, Int_t plane);
 
@@ -79,6 +81,7 @@ class GEMTracking : public GEMTree
   // add temparatly
   float_t vResiduex[kNMODULE];
   float_t vResiduey[kNMODULE];
+
 
 
   //IsBestHit() adopts a much stricter event selection rule

@@ -29,6 +29,7 @@
 // main decoder lib
 #include "../GEMDecoder/input_handler.h"
 #include "UserGuiGeneralDialogProcess.h"
+
 const char *filetype[] = {
 			"ROOT files", "*.root",
 			"Data files", "*.dat",
@@ -189,11 +190,13 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
 	bWorkModeHit = new TGRadioButton(bWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
 	bWorkModeAnalysis = new TGRadioButton(bWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
+	bWorkModeCalibration = new TGRadioButton(bWorkModeButtonGroup,"&Calibration",C_WORKMODE_CALIBRATION);
 	bWorkModeRAW->Associate(this);
 	bWorkModeZeroSubtraction ->Associate(this);
 	bWorkModePedestal ->Associate(this);
 	bWorkModeHit ->Associate(this);
 	bWorkModeAnalysis ->Associate(this);
+	bWorkModeCalibration->Associate(this);
 	fWorkZoneControlFrame->AddFrame(bWorkModeButtonGroup , new TGLayoutHints(kLHintsExpandX));
 
 	TGGroupFrame * fDataInputFrame= new TGGroupFrame(fWorkZoneControlFrame,"Data Input");
@@ -220,7 +223,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	TGGroupFrame * fDataOutPutFrame= new TGGroupFrame(fWorkZoneControlFrame,"Out Put Pattern");
 	fDataOutPutFrame->SetTitlePos(TGGroupFrame::kCenter);
 	tOutPutfilePattern = new TGTextEntry(fDataOutPutFrame);
-	tOutPutfilePattern ->SetTitle("~/Research/SBS/SBS_GEM_labtest/SBS38_39_33_36%s_temp%04d.root");
+	tOutPutfilePattern ->SetTitle("~/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40%s_temp%04d.root");
 	fDataOutPutFrame->AddFrame(tOutPutfilePattern, new TGLayoutHints(kLHintsExpandX));
 	fWorkZoneControlFrame->AddFrame(fDataOutPutFrame, new TGLayoutHints(kLHintsExpandX));
 
@@ -292,6 +295,7 @@ void UserGuiMainFrame::CloseWindow() {
 
 	gApplication->Terminate(); // the end of the program
 }
+
 
 Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	//printf("mcg: %d  expect %d\n",GET_MSG(msg),kC_COLORSEL);
@@ -390,12 +394,22 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					{
 						printf("analysis mode\n");
 						std::vector<std::string> filename;
-						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/Decoder_Result/SBS39-38-33-36/R5/SBS38_39_33_36_Hit_temp1605.root");
+						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
 						filename.push_back(filename_temp);
 						fAnalysisProcess(filename);
 						//fAnalysisProcess(vRootDataList);
 					}
 						break;
+					case 'C':
+					{
+						printf("Calibration mode\n");
+						std::vector<std::string> filename;
+						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
+						filename.push_back(filename_temp);
+						fCalibrationProcess(filename);
+
+					}
+					break;
 
 					default:
 						break;
@@ -433,6 +447,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case C_WORKMODE_ANALYSIS:
 				vWorkMode = 'A';
 				printf("Analysis mode selected \n");
+				break;
+			case C_WORKMODE_CALIBRATION:
+				vWorkMode = 'C';
+				printf("Calibration mode selected \n");
 				break;
 			default:
 				break;
@@ -557,6 +575,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 	std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
 	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
+
 			InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
 			if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
 			std::map<int,std::map<int,std::map<int,int> > > a;
@@ -617,6 +636,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
+
 	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
@@ -633,13 +653,38 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 		iter_filename++;
 	}
 	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
-	//Form(tOutPutfilePattern->GetTitle(),a->GetNumberFromFilename(Filenames[0]));
+
 	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Run(-1,savename.c_str());
 }
 
+void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
+
+	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+	TChain *fChain = new TChain("GEMHit", "");
+	std::vector<std::string>::iterator iter_filename=Filenames.begin();
+	while (iter_filename != Filenames.end()) {
+		Filenamecheck->CheckAppendix((*iter_filename).c_str(), "root");
+		TFile *ff = new TFile((*iter_filename).c_str());
+		if (ff->IsOpen()) {
+			TTree *theTree = (TTree *) ff->Get("GEMHit");
+			if (!(theTree->IsZombie())) {
+				fChain->AddFile((*iter_filename).c_str());
+			} else
+				printf("Tree is not found in the file\n");
+		}
+		iter_filename++;
+	}
+	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
+
+	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
+	//printf("File will be save as : %s",savename.c_str());
+	GEMTracking *pGEMTrack = new GEMTracking(fChain);
+	pGEMTrack->Calibration(-1,savename.c_str());
+
+}
 void UserGuiMainFrame::dMenuOpenFileDialog(){
 		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 		std::string inputfilename=dialog->Browser_file();

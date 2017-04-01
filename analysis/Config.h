@@ -26,28 +26,36 @@ const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
 //not using the following two lines
 const Double_t kXStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};  // Here, Units is in cm, origin of the chamber is in their bottom left corner
 const Double_t kYStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};
-const Double_t kZStartModule[] = {52.5,38.0, 23.5, 0, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
-const Double_t DistortionMx[4][4*4]={
-								{0.7439,0.547,-0.1947,0,
-								0.1176,1.395,-0.068,0,
-								0.283,4.258,0,0,
-								0,0,0,1
-								},
-								{0.5956,0.4886,-0.2209,0,
-								 0.2073,1.863, -0.01751,0,
-								 0.4623,6.9,0,0,
-								 0,0,0,1
-								},
-								{0.7501,0.8776,-0.3068,0,
-								 -0.01672,1.438,-0.04162,0,
-								 -0.6278,4.903,0.0,0,
-								 0,0,0,1
-								},
-									{1,0,0,0,
-									  0,1,0,0,
-									  0,0,1,0,
-									  0,0,0,1}
-									  };
+const Double_t kZStartModule[] = { 52.85,  38.12, 23.33,0, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
+
+const Double_t DistortionMx[kNMODULE][4*4]={
+		{
+		 1,        0,       0,       0,
+		 0,        1,       0,       0,
+		 0,		   0,       1,       0,
+		 0,        0,       0,       1
+		},
+
+	   {
+		1,        0,       0,       0,
+		0,        1,       0,       0,
+		0,		   0,       1,       0,
+		0,        0,       0,       1
+		},
+
+	   {
+		1,        0,       0,       0,
+		0,        1,       0,       0,
+		0,		   0,       1,       0,
+		0,        0,       0,       1
+	    },
+	   {
+		1,        0,       0,       0,
+		0,        1,       0,       0,
+		0,		   0,       1,       0,
+		0,        0,       0,       1
+		}
+};
 
 
 
@@ -71,7 +79,7 @@ const Double_t kMaxStripADC = 2000; //maximum value of the shape on a strip
 const Double_t kMaxSignalADC = 15000; //Max for the Integral of the signal shape on a strip
 const Double_t kMinSignalADC = 0;
 const Int_t kMaxStripsPerEvent = 1000;
-const Int_t kMinStripsinCluster = 3;//2;
+const Int_t kMinStripsinCluster = 2;//2;
 const Int_t kMaxStripsinCluster = 100;
 
 //Xinzhan: I changed to anther fitting method, so the following section is not being used any more
