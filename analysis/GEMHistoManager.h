@@ -168,6 +168,7 @@ namespace GEMHistoManager
   TH1F *hStripsADCdistY_cut[kNMODULE];
   TH1F *hTrackingResidueX[kNMODULE];
   TH1F *hTrackingResidueY[kNMODULE];
+  TH1F *hNChamberFired;
   // @ initialize histograms.
   void InitHistograms()
   {
@@ -374,6 +375,7 @@ namespace GEMHistoManager
 		hClusterSize_x[i] = new TH1F(Form("hClusterSize_x_module_%d",i), Form("Cluster Size x module_%d",i), 15, 0,15);
 		hClusterSize_y[i] = new TH1F(Form("hClusterSize_y_module_%d",i), Form("Cluster Size y module_%d",i), 15, 0,15);
       }
+    hNChamberFired= new TH1F(Form("hNChamberFiredperEvent"),Form("# chamber fired in one event"),11,0,10);
     
   }
 
@@ -488,7 +490,7 @@ namespace GEMHistoManager
      hNbClusterPerPlane_y[i]->Write();
       
     }
-  
+  hNChamberFired->Write();
   
     file->Write();
     file->Close();

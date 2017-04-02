@@ -5,6 +5,8 @@
 #include "GEMTrackConstrcution.h"
 #include "GEMCalibration.h"
 
+#include "time.h"
+
 using namespace GEMHistoManager;
 using namespace std;
 
@@ -267,11 +269,14 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		entries = event; //for decoding
 	cout << "    Will analyze  " << entries << "  event..." << endl;
 
+
 	for (int i =0; i < entries; i++)    // each entries is one event
 	{
-		//Progress bar
+		//Progress barss
 		Double_t ratio = i / (Double_t) entries;
-		//cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+
+
 		fChain->GetEntry(i);
 		Reset();
 		evtID = i;
@@ -313,6 +318,13 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];
 			}
 		}
+
+		unsigned int lNumberofChamberFired=0;
+		for(unsigned int i= 0; i<kNMODULE; i ++) {
+			if(calibration->vNCluster[i])lNumberofChamberFired++;
+			//hNChamberFired
+		}
+		hNChamberFired->Fill(lNumberofChamberFired);
 /*		//calculate the efficiency for each detector
 		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
 		tracking->CosmicEff();
@@ -421,11 +433,26 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 	if (event > 0)entries = event; //for decoding
 	cout << "    Will analyze  " << entries << "  event..." << endl;
 
+	time_t starttime;
+	time(&starttime);
 	for (int i = 0; i < entries; i++)   { // each entries is one event
 
 		if (i % 100 == 1) {           //Progress bar
+
+			time_t endtime;
+
+			time(&endtime);
+			double_t timeperiod=difftime(endtime,starttime);
+
+			int time_remins=(entries-i)*timeperiod/i;
 			Double_t ratio = i / (Double_t) entries;
-			cout << setw(8) << (int) (ratio * 100) << "%\r" << flush;
+			cout << setw(8) << (int) (ratio * 100) << setw(8)
+					<< "%  time remains : " << (int) (time_remins / 60)
+					<< "mins " << (int) (time_remins % 60)
+					<< "s / total time : "
+					<< ((int) ((entries) * timeperiod / i) / 60) << " mins"
+					<< ((int) ((entries) * timeperiod / i) % 60) << "s  "
+					<< (int) (i / timeperiod) << " events/s \r" << flush;
 		}
 
 		fChain->GetEntry(i);
