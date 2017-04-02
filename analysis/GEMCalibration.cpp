@@ -139,16 +139,11 @@ void GEMCalibration::CosmicCalibrate(){
 			vOriginalPosZ[i]=kZStartModule[i];
 		}
 
-//		for(unsigned int i =0; i <kNMODULE; i ++){
-//			printf("[%s]  %d  orignal=>  (%5.5f, %5.5f, %5.5f)\n", __FUNCTION__, vNCluster[i],vOriginalPosX[i],vOriginalPosY[i],vOriginalPosZ[i]);
-//		}
-
 		for(int i =0; i<kNMODULE; i ++){
 			vCorrectedPosX[i]=DistortionMx[i][0]*vOriginalPosX[i]+DistortionMx[i][1]*vOriginalPosY[i]+DistortionMx[i][2]*vOriginalPosZ[i]+DistortionMx[i][3];
 			vCorrectedPosY[i]=DistortionMx[i][4]*vOriginalPosX[i]+DistortionMx[i][5]*vOriginalPosY[i]+DistortionMx[i][6]*vOriginalPosZ[i]+DistortionMx[i][7];
 			vCorrectedPosZ[i]=DistortionMx[i][8]*vOriginalPosX[i]+DistortionMx[i][9]*vOriginalPosY[i]+DistortionMx[i][10]*vOriginalPosZ[i]+DistortionMx[i][11];
 		}
-
 
 		for (int i = 0; i < kNMODULE; i++) {
 			if (vNCluster[i]) {
@@ -215,8 +210,6 @@ void GEMCalibration::CosmicCalibrate(){
 		vCorrelationEffXZ=fabs(lCorrelationXZ);
 		vCorrelationEffYZ=fabs(lCorrelationYZ);
 
-		//if((fabs(lCorrelationXZ)+fabs(lCorrelationYZ))>1.8) vCorrelationEfficiencyFlag=1;
-		//printf("[%s]    Correlation   xz=%5.5f;  yz=%5.5f;   xy=%5.5f; \n ",__FUNCTION__,fabs(lCorrelationXZ),fabs(lCorrelationYZ), fabs(lCorrelationXY) );
 		//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		// fit the lines in xz, yz and zx, zy 2d histograms, because when the angle is larger than 45, the fit line is not good, here switch the x and y dimension
 		// to solve this problems
@@ -234,14 +227,12 @@ void GEMCalibration::CosmicCalibrate(){
 		TF1 *lFitFunctionYZ=vyzHisto->GetFunction("pol1");
 		TF1 *lFitFunctionZY=vzyHisto->GetFunction("pol1");
 
-
 		// select the good tracking
 		double_t lChiSquareXZ = lFitFunctionXZ->GetChisquare() > lFitFunctionZX->GetChisquare() ? lFitFunctionZX->GetChisquare():lFitFunctionXZ->GetChisquare();
 		double_t lChiSquareYZ = lFitFunctionYZ->GetChisquare() > lFitFunctionZY->GetChisquare() ? lFitFunctionZY->GetChisquare():lFitFunctionYZ->GetChisquare();
 		//printf("%f,   %f, \n\n\n ",lChiSquareXZ, lChiSquareYZ);
 		double_t lChiSquareTHRD=DETECTOR_RESOLUTION_SIGMA*DETECTOR_RESOLUTION_SIGMA*10*lNEventAllChamber/3;
 		if((lChiSquareXZ<lChiSquareTHRD)&&(lChiSquareYZ<lChiSquareTHRD)) {
-
 
 			//+++++++++++++++++++++++++++++++++
 			// generate the predicted position for each chamber

@@ -680,7 +680,7 @@ void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
 	}
 	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
 
-	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
+	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Calibration",a->GetNumberFromFilename(Filenames[0])));
 	//printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Calibration(-1,savename.c_str());

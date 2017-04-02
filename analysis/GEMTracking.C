@@ -299,7 +299,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
 		GEMCalibration *calibration = new GEMCalibration(vCluster);
 		calibration->CosmicCalibrate();
-
 		for(unsigned int i =0; i <kNMODULE; i ++){
 			if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
 				nEvents[i]++;
@@ -314,8 +313,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];
 			}
 		}
-
-
 /*		//calculate the efficiency for each detector
 		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
 		tracking->CosmicEff();
@@ -373,9 +370,10 @@ void GEMTracking::Run(Int_t event, const char *filename)
 }
 
 
+
 //==============================================================
 // used for extract the single cosmic ray and calculate the distortion matrix
-//
+// to be improve to make it a general program used for any number of layers of chambers
 void GEMTracking::Calibration(Int_t event,const char *filename) {
 
 	std::vector<unsigned int> cKnownDetector;
@@ -385,18 +383,9 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 	cUnknownDetector.push_back(1);
 	cUnknownDetector.push_back(2);
 
-	// used for the efficency test
-	Long_t nEvents[kNMODULE];
-	Long_t nEffEvents[kNMODULE];
-	float_t nEfficiency[kNMODULE];
-
-
 	// used for generate the X-Z and Y-Z 2d histo
 	TH2D *hZCalibrateX2D[cUnknownDetector.size()];
 	TH2D *hZCalibrateY2D[cUnknownDetector.size()];
-
-	/*TH1D *hChisqaureHitoXZ;
-	TH1D *hChisqaureHitoYZ;*/
 
 	TH1D *hCorrelationEffHitoXZ;
 	TH1D *hCorrelationEffHitoYZ;
@@ -404,21 +393,22 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 	TH1D *DistortionX[cUnknownDetector.size()];
 	TH1D *DistortionY[cUnknownDetector.size()];
 
-	/*hChisqaureHitoXZ = new TH1D("ChisquareXZ","ChisquareXZ",600,-3,3);
-	hChisqaureHitoYZ = new TH1D("ChisquareYZ","ChisquareYZ",600,-3,3);
-*/
-	hCorrelationEffHitoXZ = new TH1D("CorrelationEffXZ","CorrelationEffXZ",600,0,2);
-	hCorrelationEffHitoYZ = new TH1D("CorrelationEffYZ","CorrelationEffYZ",600,0,2);
+	hCorrelationEffHitoXZ = new TH1D("CorrelationEffXZ","CorrelationEffXZ",100,0,1.2);
+	hCorrelationEffHitoYZ = new TH1D("CorrelationEffYZ","CorrelationEffYZ",100,0,1.2);
 
 	unsigned int Counter_temp=0;
 	for(unsigned int i : cUnknownDetector){
-		hZCalibrateX2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_X",i),Form("CalibrationModule%d_X",i),1000,-100,100,2000,-1000,1000);
-		hZCalibrateY2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_Y",i),Form("CalibrationModule%d_Y",i),1000,-100,100,2000,-1000,1000);
+		hZCalibrateX2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_X",i),Form("CalibrationModule%d_X",i),1000,-100,100,4000,-1000,1000);
+		hZCalibrateY2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_Y",i),Form("CalibrationModule%d_Y",i),1000,-100,100,4000,-1000,1000);
 
-		DistortionX[Counter_temp] = new TH1D(Form("DistortionX_module%d",i),Form("DistortionX_module%d",i),500,-5,5);
-		DistortionY[Counter_temp] = new TH1D(Form("DistortionY_module%d",i),Form("DistortionY_module%d",i),500,-5,5);
+		DistortionX[Counter_temp] = new TH1D(Form("DistortionX_module%d",i),Form("DistortionX_module%d",i),650,-5,5);
+		DistortionY[Counter_temp] = new TH1D(Form("DistortionY_module%d",i),Form("DistortionY_module%d",i),650,-5,5);
 
-		hZCalibrateX2D[Counter_temp]->GetXaxis()->SetTitle(Form("Z%d-Z%d",0,3));
+		hZCalibrateX2D[Counter_temp]->GetXaxis()->SetTitle(Form("x%d-x%d",0,3));
+		hZCalibrateX2D[Counter_temp]->GetYaxis()->SetTitle(Form("(z%d-z%d)*(x%d-x%d)",0,3,i,3));
+		hZCalibrateY2D[Counter_temp]->GetXaxis()->SetTitle(Form("y%d-y%d",0,3));
+		hZCalibrateY2D[Counter_temp]->GetYaxis()->SetTitle(Form("(z%d-z%d)*(y%d-y%d)",0,3,i,3));
+
 		Counter_temp++;
 	}
 
@@ -432,16 +422,17 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 	cout << "    Will analyze  " << entries << "  event..." << endl;
 
 	for (int i = 0; i < entries; i++)   { // each entries is one event
-		//Progress bar
-		if(i%100==1){
-		Double_t ratio = i / (Double_t) entries;
-		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+
+		if (i % 100 == 1) {           //Progress bar
+			Double_t ratio = i / (Double_t) entries;
+			cout << setw(8) << (int) (ratio * 100) << "%\r" << flush;
 		}
+
 		fChain->GetEntry(i);
 		Reset();
 		evtID = i;
-		// make sure the maximum fired strips is with the limit range
-		if (digi_gem_nch > kMAXNCH) {
+
+		if (digi_gem_nch > kMAXNCH) {// make sure the maximum fired strips is with the limit range
 			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch, kMAXNCH);
 			continue;
 		}
@@ -460,7 +451,6 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 				//FindCluster(j,k,vHit_cut,1);
 			}
 		}
-
 
 		GEMCalibration *calibration = new GEMCalibration(vCluster);
 		calibration->CosmicCalibrate();
@@ -490,7 +480,7 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 
 		delete calibration;
 	}
-	TFile *file = new TFile("CalibrateHisto.root","RECREATE");
+	TFile *file = new TFile(filename,"RECREATE");
 	hZCalibrateX2D[0]->Write();
 	hZCalibrateY2D[0]->Write();
 	hZCalibrateX2D[1]->Write();
