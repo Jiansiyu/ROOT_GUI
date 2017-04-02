@@ -393,20 +393,21 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					case 'A':
 					{
 						printf("analysis mode\n");
-						std::vector<std::string> filename;
-						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
-						filename.push_back(filename_temp);
-						fAnalysisProcess(filename);
-						//fAnalysisProcess(vRootDataList);
+						//std::vector<std::string> filename;
+						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
+						//filename.push_back(filename_temp);
+						//fAnalysisProcess(filename);
+						fAnalysisProcess(vRootDataList);
 					}
 						break;
 					case 'C':
 					{
 						printf("Calibration mode\n");
-						std::vector<std::string> filename;
-						std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
-						filename.push_back(filename_temp);
-						fCalibrationProcess(filename);
+						//std::vector<std::string> filename;
+						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
+						//filename.push_back(filename_temp);
+						//fCalibrationProcess(filename);
+						fCalibrationProcess(vRootDataList);
 
 					}
 					break;

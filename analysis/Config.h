@@ -26,7 +26,7 @@ const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
 //not using the following two lines
 const Double_t kXStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};  // Here, Units is in cm, origin of the chamber is in their bottom left corner
 const Double_t kYStartModule[] = {-20.48, -10.24, 0, 0, 0, 0};
-const Double_t kZStartModule[] = { 52.85,  38.12, 23.33,0, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
+const Double_t kZStartModule[] = { 52.85,  38.008, 23.2971,0, 0, 0};   // add March 6th 2016. used for the simple tracking reconstruction,
 
 const Double_t DistortionMx[kNMODULE][4*4]={
 		{
@@ -37,15 +37,15 @@ const Double_t DistortionMx[kNMODULE][4*4]={
 		},
 
 	   {
-		1,        0,       0,       0,
-		0,        1,       0,       0,
+		1,        0,       0,       0.0232,
+		0,        1,       0,       0.0073,
 		0,		   0,       1,       0,
 		0,        0,       0,       1
 		},
 
 	   {
-		1,        0,       0,       0,
-		0,        1,       0,       0,
+		1,        0,       0,       0.0182,
+		0,        1,       0,       0.1804,
 		0,		   0,       1,       0,
 		0,        0,       0,       1
 	    },

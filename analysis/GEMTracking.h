@@ -31,6 +31,8 @@ All tracking work done by this class.
 #include <TGraphErrors.h>
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TMath.h>
 #include <TStyle.h>
 #include <TSystem.h>

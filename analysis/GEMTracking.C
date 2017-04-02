@@ -257,7 +257,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		nEfficiency[i]=0;
 	}
 
-
 	if (!fChain) {
 		Error("run", "No Tree to analyze.");
 	}
@@ -298,7 +297,26 @@ void GEMTracking::Run(Int_t event, const char *filename)
 			}
 		}
 
-		//calculate the efficiency for each detector
+		GEMCalibration *calibration = new GEMCalibration(vCluster);
+		calibration->CosmicCalibrate();
+
+		for(unsigned int i =0; i <kNMODULE; i ++){
+			if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
+				nEvents[i]++;
+				if(calibration->vNCluster[i]){
+					nEffEvents[i]++;
+					vResiduex[i]=calibration->vPredictedPosX[i]-calibration->vCorrectedPosX[i];
+					vResiduey[i]=calibration->vPredictedPosY[i]-calibration->vCorrectedPosY[i];
+				}
+			}
+
+			if (nEvents[i] && nEffEvents[i]) {
+				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];
+			}
+		}
+
+
+/*		//calculate the efficiency for each detector
 		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
 		tracking->CosmicEff();
 
@@ -322,10 +340,10 @@ void GEMTracking::Run(Int_t event, const char *filename)
 			vResiduex[DetectorID]=tracking->vPredictedPosX[DetectorID]-tracking->vOriginalPosX[DetectorID];
 			vResiduey[DetectorID]=tracking->vPredictedPosY[DetectorID]-tracking->vOriginalPosY[DetectorID];
 			}
-		}
+		}*/
 
-		delete tracking;
-		if(i%1==0)
+		delete calibration;
+		if(i%100==0)
 		{
 			cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
 					<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
@@ -360,53 +378,133 @@ void GEMTracking::Run(Int_t event, const char *filename)
 //
 void GEMTracking::Calibration(Int_t event,const char *filename) {
 
-		if (!fChain) {
-			Error("run", "No Tree to analyze.");
+	std::vector<unsigned int> cKnownDetector;
+	cKnownDetector.push_back(0);
+	cKnownDetector.push_back(3);
+	std::vector<unsigned int> cUnknownDetector;
+	cUnknownDetector.push_back(1);
+	cUnknownDetector.push_back(2);
+
+	// used for the efficency test
+	Long_t nEvents[kNMODULE];
+	Long_t nEffEvents[kNMODULE];
+	float_t nEfficiency[kNMODULE];
+
+
+	// used for generate the X-Z and Y-Z 2d histo
+	TH2D *hZCalibrateX2D[cUnknownDetector.size()];
+	TH2D *hZCalibrateY2D[cUnknownDetector.size()];
+
+	/*TH1D *hChisqaureHitoXZ;
+	TH1D *hChisqaureHitoYZ;*/
+
+	TH1D *hCorrelationEffHitoXZ;
+	TH1D *hCorrelationEffHitoYZ;
+
+	TH1D *DistortionX[cUnknownDetector.size()];
+	TH1D *DistortionY[cUnknownDetector.size()];
+
+	/*hChisqaureHitoXZ = new TH1D("ChisquareXZ","ChisquareXZ",600,-3,3);
+	hChisqaureHitoYZ = new TH1D("ChisquareYZ","ChisquareYZ",600,-3,3);
+*/
+	hCorrelationEffHitoXZ = new TH1D("CorrelationEffXZ","CorrelationEffXZ",600,0,2);
+	hCorrelationEffHitoYZ = new TH1D("CorrelationEffYZ","CorrelationEffYZ",600,0,2);
+
+	unsigned int Counter_temp=0;
+	for(unsigned int i : cUnknownDetector){
+		hZCalibrateX2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_X",i),Form("CalibrationModule%d_X",i),1000,-100,100,2000,-1000,1000);
+		hZCalibrateY2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_Y",i),Form("CalibrationModule%d_Y",i),1000,-100,100,2000,-1000,1000);
+
+		DistortionX[Counter_temp] = new TH1D(Form("DistortionX_module%d",i),Form("DistortionX_module%d",i),500,-5,5);
+		DistortionY[Counter_temp] = new TH1D(Form("DistortionY_module%d",i),Form("DistortionY_module%d",i),500,-5,5);
+
+		hZCalibrateX2D[Counter_temp]->GetXaxis()->SetTitle(Form("Z%d-Z%d",0,3));
+		Counter_temp++;
+	}
+
+	if (!fChain) {
+		Error("run", "No Tree to analyze.");
+	}
+
+	Int_t entries = (Int_t) fChain->GetEntries();
+	cout << "Number of events: " << entries << endl;
+	if (event > 0)entries = event; //for decoding
+	cout << "    Will analyze  " << entries << "  event..." << endl;
+
+	for (int i = 0; i < entries; i++)   { // each entries is one event
+		//Progress bar
+		if(i%100==1){
+		Double_t ratio = i / (Double_t) entries;
+		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+		}
+		fChain->GetEntry(i);
+		Reset();
+		evtID = i;
+		// make sure the maximum fired strips is with the limit range
+		if (digi_gem_nch > kMAXNCH) {
+			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch, kMAXNCH);
+			continue;
 		}
 
-		Int_t entries = (Int_t) fChain->GetEntries();
-		cout << "Number of events: " << entries << endl;
-		if (event > 0)
-			entries = event; //for decoding
-		cout << "    Will analyze  " << entries << "  event..." << endl;
-
-		for (int i =0; i < entries; i++)    // each entries is one event
-		{
-			//Progress bar
-			Double_t ratio = i / (Double_t) entries;
-			//cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
-			fChain->GetEntry(i);
-			Reset();
-			evtID = i;
-
-			// make sure the maximum fired strips is with the limit range
-			if(digi_gem_nch > kMAXNCH) {
-				printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
-				continue;
-			}
-
-			// start decode the data
-			for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
+		// start decode the data
+		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
+				{
+			for (int k = 0; k < 2; k++)      // two dimension
 					{
-				for (int k = 0; k < 2; k++)      // two dimension
-						{
-					Decode(j, k);
-				}
+				Decode(j, k);
 			}
-			for (int j = 0; j < kNMODULE; j++) {
-				for (int k = 0; k < 2; k++) {
-					FindCluster(j, k, vHit, 0);
-					//FindCluster(j,k,vHit_cut,1);
-				}
+		}
+		for (int j = 0; j < kNMODULE; j++) {
+			for (int k = 0; k < 2; k++) {
+				FindCluster(j, k, vHit, 0);
+				//FindCluster(j,k,vHit_cut,1);
 			}
-
-			//calculate the efficiency for each detector
-			GEMCalibration *calibration = new GEMCalibration(vCluster);
-			calibration->CosmicCalibrate();
-
-			delete calibration;
 		}
 
+
+		GEMCalibration *calibration = new GEMCalibration(vCluster);
+		calibration->CosmicCalibrate();
+		if(     (calibration->vGoodTrackingFlag[0])&&
+				(calibration->vGoodTrackingFlag[1])&&
+				(calibration->vGoodTrackingFlag[2])&&
+				(calibration->vGoodTrackingFlag[3])&&
+				(calibration->vNCluster[0]==1)&&
+				(calibration->vNCluster[1]==1)&&
+				(calibration->vNCluster[2]==1)&&
+				(calibration->vNCluster[3]==1)) {
+		 hZCalibrateX2D[0]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[1]-calibration->vOriginalPosX[3]));
+		 hZCalibrateY2D[0]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[1]-calibration->vOriginalPosY[3]));
+
+		 hZCalibrateX2D[1]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[2]-calibration->vOriginalPosX[3]));
+		 hZCalibrateY2D[1]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[2]-calibration->vOriginalPosY[3]));
+
+		 DistortionX[0]->Fill((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[1]);
+		 DistortionY[0]->Fill((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[1]);
+
+		 DistortionX[1]->Fill((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[2]);
+		 DistortionY[1]->Fill((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[2]);
+
+		 hCorrelationEffHitoXZ->Fill(calibration->vCorrelationEffXZ);
+		 hCorrelationEffHitoYZ->Fill(calibration->vCorrelationEffYZ);
+		}
+
+		delete calibration;
+	}
+	TFile *file = new TFile("CalibrateHisto.root","RECREATE");
+	hZCalibrateX2D[0]->Write();
+	hZCalibrateY2D[0]->Write();
+	hZCalibrateX2D[1]->Write();
+	hZCalibrateY2D[1]->Write();
+
+	DistortionX[0]->Write();
+	DistortionY[0]->Write();
+	DistortionX[1]->Write();
+	DistortionY[1]->Write();
+
+	hCorrelationEffHitoXZ->Write();
+	hCorrelationEffHitoYZ->Write();
+	file->Write();
+	file->Close();
 }
 
 

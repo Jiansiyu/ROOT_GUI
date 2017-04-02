@@ -139,9 +139,9 @@ void GEMCalibration::CosmicCalibrate(){
 			vOriginalPosZ[i]=kZStartModule[i];
 		}
 
-		for(unsigned int i =0; i <kNMODULE; i ++){
-			printf("[%s]  %d  orignal=>  (%5.5f, %5.5f, %5.5f)\n", __FUNCTION__, vNCluster[i],vOriginalPosX[i],vOriginalPosY[i],vOriginalPosZ[i]);
-		}
+//		for(unsigned int i =0; i <kNMODULE; i ++){
+//			printf("[%s]  %d  orignal=>  (%5.5f, %5.5f, %5.5f)\n", __FUNCTION__, vNCluster[i],vOriginalPosX[i],vOriginalPosY[i],vOriginalPosZ[i]);
+//		}
 
 		for(int i =0; i<kNMODULE; i ++){
 			vCorrectedPosX[i]=DistortionMx[i][0]*vOriginalPosX[i]+DistortionMx[i][1]*vOriginalPosY[i]+DistortionMx[i][2]*vOriginalPosZ[i]+DistortionMx[i][3];
@@ -172,17 +172,17 @@ void GEMCalibration::CosmicCalibrate(){
 		Double_t lAverageY=0;
 		double_t lAverageZ=0;
 		unsigned int lCounter=0;
-		printf("\n\n[%s]  Position ", __FUNCTION__);
+		//printf("\n\n[%s]  Position ", __FUNCTION__);
 		for(int i = 0; i <kNMODULE; i ++) {
 			if( vNCluster[i]){
 				lAverageX+=vCorrectedPosX[i];//vxCluster[i][j].Pos;
 				lAverageY+=vCorrectedPosY[i];//vyCluster[i][j].Pos;
 				lAverageZ+=vCorrectedPosZ[i];//kZStartModule[i];
 				lCounter++;
-				printf(" [%d ==>0]  (%5.5f, %5.5f, %5.5f)  ",i,vCorrectedPosX[i], vCorrectedPosY[i], vCorrectedPosZ[i]);
+				//printf(" [%d ==>0]  (%5.5f, %5.5f, %5.5f)  ",i,vCorrectedPosX[i], vCorrectedPosY[i], vCorrectedPosZ[i]);
 			}
 		}
-		printf("\n\n");
+		//printf("\n\n");
 		lAverageX=lAverageX/lCounter;
 		lAverageY=lAverageY/lCounter;
 		lAverageZ=lAverageZ/lCounter;
@@ -216,7 +216,7 @@ void GEMCalibration::CosmicCalibrate(){
 		vCorrelationEffYZ=fabs(lCorrelationYZ);
 
 		//if((fabs(lCorrelationXZ)+fabs(lCorrelationYZ))>1.8) vCorrelationEfficiencyFlag=1;
-		printf("[%s]    Correlation   xz=%5.5f;  yz=%5.5f;   xy=%5.5f; \n ",__FUNCTION__,fabs(lCorrelationXZ),fabs(lCorrelationYZ), fabs(lCorrelationXY) );
+		//printf("[%s]    Correlation   xz=%5.5f;  yz=%5.5f;   xy=%5.5f; \n ",__FUNCTION__,fabs(lCorrelationXZ),fabs(lCorrelationYZ), fabs(lCorrelationXY) );
 		//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		// fit the lines in xz, yz and zx, zy 2d histograms, because when the angle is larger than 45, the fit line is not good, here switch the x and y dimension
 		// to solve this problems
@@ -238,7 +238,7 @@ void GEMCalibration::CosmicCalibrate(){
 		// select the good tracking
 		double_t lChiSquareXZ = lFitFunctionXZ->GetChisquare() > lFitFunctionZX->GetChisquare() ? lFitFunctionZX->GetChisquare():lFitFunctionXZ->GetChisquare();
 		double_t lChiSquareYZ = lFitFunctionYZ->GetChisquare() > lFitFunctionZY->GetChisquare() ? lFitFunctionZY->GetChisquare():lFitFunctionYZ->GetChisquare();
-		printf("%f,   %f, \n\n\n ",lChiSquareXZ, lChiSquareYZ);
+		//printf("%f,   %f, \n\n\n ",lChiSquareXZ, lChiSquareYZ);
 		double_t lChiSquareTHRD=DETECTOR_RESOLUTION_SIGMA*DETECTOR_RESOLUTION_SIGMA*10*lNEventAllChamber/3;
 		if((lChiSquareXZ<lChiSquareTHRD)&&(lChiSquareYZ<lChiSquareTHRD)) {
 
@@ -246,27 +246,20 @@ void GEMCalibration::CosmicCalibrate(){
 			//+++++++++++++++++++++++++++++++++
 			// generate the predicted position for each chamber
 			if(lFitFunctionXZ->GetChisquare() < lFitFunctionZX->GetChisquare()){
-				printf("use XZ \n");
 				for(unsigned int i =0; i <kNMODULE; i ++){   // loop on all the chamber and generate the predicted position
 					vPredictedPosX[i]=(vCorrectedPosZ[i]-lFitFunctionXZ->GetParameter(0))/(lFitFunctionXZ->GetParameter(1));
 				}
 			}else{
-				printf("use ZX \n");
 				for(unsigned int i =0; i <kNMODULE; i ++){
 					vPredictedPosX[i]=lFitFunctionZX->GetParameter(0)+lFitFunctionZX->GetParameter(1)*vCorrectedPosZ[i];
 				}
 			}
 			if(lFitFunctionYZ->GetChisquare() < lFitFunctionZY->GetChisquare()){
 
-				printf("use YZ \n");
-
 				for(unsigned int i =0; i<kNMODULE; i ++){
 					vPredictedPosY[i]=(vCorrectedPosZ[i]-lFitFunctionYZ->GetParameter(0))/(lFitFunctionYZ->GetParameter(1));
 				}
 			}else {
-
-				printf("use ZY \n");
-
 				for(unsigned int i =0; i <kNMODULE; i ++) {
 					vPredictedPosY[i]=lFitFunctionZY->GetParameter(0)+ lFitFunctionZY->GetParameter(1)*vCorrectedPosZ[i];
 				}
@@ -382,6 +375,7 @@ void GEMCalibration::CosmicCalibrate(){
 		delete vzyHisto;
 		delete vxyHisto;
 		delete vyxHisto;
+		delete histo_3d;
 	}
 }
 
