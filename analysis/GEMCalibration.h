@@ -76,9 +76,9 @@ private:
 
 	//const unsigned int KNMINCHAMBER=3;		// minimum event requirement for a tracking (3)
 	const unsigned int NFIREDCHAMBERS=3;    // at least 3 chamber are fired in a tracking
-	const unsigned int DETECTOR_RESOLUTION_SIGMA=1;
+	const double DETECTOR_RESOLUTION_SIGMA=1;
 	// test variables
-	Bool_t Display_flag=0;
+	Bool_t Display_flag=1;
 };
 
 #endif /* GEMCALIBRATION_H_ */

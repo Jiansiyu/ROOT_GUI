@@ -375,7 +375,7 @@ namespace GEMHistoManager
 		hClusterSize_x[i] = new TH1F(Form("hClusterSize_x_module_%d",i), Form("Cluster Size x module_%d",i), 15, 0,15);
 		hClusterSize_y[i] = new TH1F(Form("hClusterSize_y_module_%d",i), Form("Cluster Size y module_%d",i), 15, 0,15);
       }
-    hNChamberFired= new TH1F(Form("hNChamberFiredperEvent"),Form("# chamber fired in one event"),11,0,10);
+    hNChamberFired= new TH1F(Form("hNChamberFiredperEvent"),Form("# chamber fired in one event"),10,0,10);
     
   }
 

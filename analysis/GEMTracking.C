@@ -410,11 +410,15 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 
 	unsigned int Counter_temp=0;
 	for(unsigned int i : cUnknownDetector){
-		hZCalibrateX2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_X",i),Form("CalibrationModule%d_X",i),1000,-100,100,4000,-1000,1000);
-		hZCalibrateY2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_Y",i),Form("CalibrationModule%d_Y",i),1000,-100,100,4000,-1000,1000);
+		hZCalibrateX2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_X",i),Form("CalibrationModule%d_X",i),1000,-10000,10000,2000,-100000,100000);
+		hZCalibrateY2D[Counter_temp]=new TH2D(Form("CalibrationModule%d_Y",i),Form("CalibrationModule%d_Y",i),1000,-10000,10000,2000,-100000,100000);
 
-		DistortionX[Counter_temp] = new TH1D(Form("DistortionX_module%d",i),Form("DistortionX_module%d",i),650,-5,5);
-		DistortionY[Counter_temp] = new TH1D(Form("DistortionY_module%d",i),Form("DistortionY_module%d",i),650,-5,5);
+		DistortionX[Counter_temp] = new TH1D(Form("DistortionX_module%d",i),Form("DistortionX_module%d",i),1000,-500,500);
+		DistortionX[Counter_temp]->GetXaxis()->SetTitle("Dx/100um");
+		DistortionX[Counter_temp]->GetYaxis()->SetTitle("Counts");
+		DistortionY[Counter_temp] = new TH1D(Form("DistortionY_module%d",i),Form("DistortionY_module%d",i),1000,-500,500);
+		DistortionY[Counter_temp]->GetXaxis()->SetTitle("Dy/100um");
+		DistortionY[Counter_temp]->GetYaxis()->SetTitle("Counts");
 
 		hZCalibrateX2D[Counter_temp]->GetXaxis()->SetTitle(Form("x%d-x%d",0,3));
 		hZCalibrateX2D[Counter_temp]->GetYaxis()->SetTitle(Form("(z%d-z%d)*(x%d-x%d)",0,3,i,3));
@@ -450,7 +454,7 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 					<< "%  time remains : " << (int) (time_remins / 60)
 					<< "mins " << (int) (time_remins % 60)
 					<< "s / total time : "
-					<< ((int) ((entries) * timeperiod / i) / 60) << " mins"
+					<< ((int) ((entries) * timeperiod / i) / 60) << " mins "
 					<< ((int) ((entries) * timeperiod / i) % 60) << "s  "
 					<< (int) (i / timeperiod) << " events/s \r" << flush;
 		}
@@ -489,17 +493,18 @@ void GEMTracking::Calibration(Int_t event,const char *filename) {
 				(calibration->vNCluster[1]==1)&&
 				(calibration->vNCluster[2]==1)&&
 				(calibration->vNCluster[3]==1)) {
-		 hZCalibrateX2D[0]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[1]-calibration->vOriginalPosX[3]));
-		 hZCalibrateY2D[0]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[1]-calibration->vOriginalPosY[3]));
 
-		 hZCalibrateX2D[1]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[2]-calibration->vOriginalPosX[3]));
-		 hZCalibrateY2D[1]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3]), (calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[2]-calibration->vOriginalPosY[3]));
+		 hZCalibrateX2D[0]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])*100, ((calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[1]-calibration->vOriginalPosX[3]))*100);
+		 hZCalibrateY2D[0]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])*100, ((calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[1]-calibration->vOriginalPosY[3]))*100);
 
-		 DistortionX[0]->Fill((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[1]);
-		 DistortionY[0]->Fill((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[1]);
+		 hZCalibrateX2D[1]->Fill((calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])*100, ((calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosX[2]-calibration->vOriginalPosX[3]))*100);
+		 hZCalibrateY2D[1]->Fill((calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])*100, ((calibration->vOriginalPosZ[0]-calibration->vOriginalPosZ[3])*(calibration->vOriginalPosY[2]-calibration->vOriginalPosY[3]))*100);
 
-		 DistortionX[1]->Fill((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[2]);
-		 DistortionY[1]->Fill((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[2]);
+		 DistortionX[0]->Fill(100*((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[1]));
+		 DistortionY[0]->Fill(100*((calibration->vCorrectedPosZ[1]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[1]));
+
+		 DistortionX[1]->Fill(100*((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosX[0]-calibration->vOriginalPosX[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosX[3]-calibration->vOriginalPosX[2]));
+		 DistortionY[1]->Fill(100*((calibration->vCorrectedPosZ[2]-calibration->vCorrectedPosZ[3])*(calibration->vOriginalPosY[0]-calibration->vOriginalPosY[3])/(calibration->vCorrectedPosZ[0]-calibration->vCorrectedPosZ[3])+calibration->vOriginalPosY[3]-calibration->vOriginalPosY[2]));
 
 		 hCorrelationEffHitoXZ->Fill(calibration->vCorrelationEffXZ);
 		 hCorrelationEffHitoYZ->Fill(calibration->vCorrelationEffYZ);
