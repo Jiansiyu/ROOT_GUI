@@ -62,7 +62,7 @@ void GEMCalibration::CosmicCalibrate(){
 	}
 
 	//if at least 3 chamber are fired, we consider this is a effective tracking
-	if((lNEventAllChamber>=NFIREDCHAMBERS)&&lSingleTrackFlag){
+	if((lNEventAllChamber>=NFIREDCHAMBERS_THR)&&lSingleTrackFlag){
 		//Initialize the histograms
 		TH2D *vxzHisto=new TH2D("x-z plane","x-z plane",160,(-1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0],(1.0)* kNbXAPVModule[0]*128/2*kStripPitchX[0],160,-10,120);
 		vxzHisto->GetXaxis()->SetTitle("x dimension");
@@ -289,6 +289,7 @@ void GEMCalibration::CosmicCalibrate(){
 			// set the flags
 			//+++++++++++++++++++++++++++++++++
 			// make sure the this is a good tracking
+
 			for (unsigned int i = 0; i < kNMODULE; i++) {
 				if ((vPredictedPosX[i] >= cDetectorRangeMinX[i])
 						&& (vPredictedPosX[i] <= cDetectorRangeMaxX[i])
@@ -297,6 +298,9 @@ void GEMCalibration::CosmicCalibrate(){
 					vGoodTrackingFlag[i]=1;
 				}
 			}
+
+			nFiredChamber=lNEventAllChamber;
+
 			//+++++++++++++++++++++++++++++++++
 		}
 		//Test_report();
@@ -412,7 +416,6 @@ void GEMCalibration::Sort(vector<GEMCluster> &vC) {
 		    }
 		}
 	    }
-
 }
 
 

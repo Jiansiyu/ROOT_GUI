@@ -304,15 +304,32 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
 		GEMCalibration *calibration = new GEMCalibration(vCluster);
 		calibration->CosmicCalibrate();
+
+		// new algrithm for calclation the efficency
+		for(unsigned int i =0; i < kNMODULE; i ++) {
+			if(calibration->vGoodTrackingFlag[i]){  // at least 3 chambers are fired and all the predicted points are located in the effective area
+				if(calibration->nFiredChamber==4){
+					nEvents[i]++;
+					nEffEvents[i]++;
+				}else{
+					if((calibration->nFiredChamber==3)&&(calibration->vNCluster[i]==0)){
+						nEvents[i]++;
+					}
+				}
+
+			}
+		}
+
+
 		for(unsigned int i =0; i <kNMODULE; i ++){
-			if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
+	/*		if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
 				nEvents[i]++;
 				if(calibration->vNCluster[i]){
 					nEffEvents[i]++;
 					vResiduex[i]=calibration->vPredictedPosX[i]-calibration->vCorrectedPosX[i];
 					vResiduey[i]=calibration->vPredictedPosY[i]-calibration->vCorrectedPosY[i];
 				}
-			}
+			}*/
 
 			if (nEvents[i] && nEffEvents[i]) {
 				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];

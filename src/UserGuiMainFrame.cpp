@@ -223,7 +223,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	TGGroupFrame * fDataOutPutFrame= new TGGroupFrame(fWorkZoneControlFrame,"Out Put Pattern");
 	fDataOutPutFrame->SetTitlePos(TGGroupFrame::kCenter);
 	tOutPutfilePattern = new TGTextEntry(fDataOutPutFrame);
-	tOutPutfilePattern ->SetTitle("~/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40%s_temp%04d.root");
+	tOutPutfilePattern ->SetTitle("~/Research/SBS/SBS_GEM_labtest/SBS38_39_36_40%s_temp%04d.root");
 	fDataOutPutFrame->AddFrame(tOutPutfilePattern, new TGLayoutHints(kLHintsExpandX));
 	fWorkZoneControlFrame->AddFrame(fDataOutPutFrame, new TGLayoutHints(kLHintsExpandX));
 

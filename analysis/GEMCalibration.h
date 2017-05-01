@@ -40,6 +40,7 @@ private:
 
 public:
 	std::vector<GEMCluster> vGEMCluster;
+
 	// number of clusters per plane (the minimum number of x and y)
 	long unsigned int vNCluster[kNMODULE];
 
@@ -72,13 +73,14 @@ public:
 	double_t cDetectorRangeMinX[kNMODULE];
 	double_t cDetectorRangeMinY[kNMODULE];
 
-private:
+	unsigned int nFiredChamber=0;
 
+private:
 	//const unsigned int KNMINCHAMBER=3;		// minimum event requirement for a tracking (3)
-	const unsigned int NFIREDCHAMBERS=3;    // at least 3 chamber are fired in a tracking
+	const unsigned int NFIREDCHAMBERS_THR=3;    // at least 3 chamber are fired in a tracking
 	const double DETECTOR_RESOLUTION_SIGMA=1;
 	// test variables
-	Bool_t Display_flag=1;
+	Bool_t Display_flag=0;
 };
 
 #endif /* GEMCALIBRATION_H_ */
