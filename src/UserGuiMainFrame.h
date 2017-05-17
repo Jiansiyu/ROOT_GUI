@@ -234,6 +234,8 @@ private:
 private:
 	void SetWorkZone();    // set the workspace
 	void SetWorkZoneTab(unsigned int NTabs=3);
+	void SetWorkZoneTab(unsigned int NTabs,std::vector<std::string>);   // create tab and set the names
+
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
 	void SetStatusBar();

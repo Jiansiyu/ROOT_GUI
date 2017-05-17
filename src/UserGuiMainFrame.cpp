@@ -29,6 +29,7 @@
 // main decoder lib
 #include "../GEMDecoder/input_handler.h"
 #include "UserGuiGeneralDialogProcess.h"
+#include "../GUIDialog/UserGUIMapWizard.h"
 
 const char *filetype[] = {
 			"ROOT files", "*.root",
@@ -180,6 +181,9 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
 	}
 }
+void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
+
+}
 void UserGuiMainFrame::SetWorkZoneButton(){
 
 	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
@@ -304,6 +308,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 		switch (GET_SUBMSG(msg)) {
 		case kCM_MENU:
 			switch (parm1) {
+
 			case M_FILE_OPEN: {
 				dMenuOpenFileDialog();
 			}
@@ -317,6 +322,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				new TBrowser("UVa GEM Analysis Framework--TBrowser","UVa GEM Analysis Framework--Root Tree Browser");
 			}
 			break;
+
 			case M_FILE_SAVE:
 				printf("file->save \n");
 				break;
@@ -339,6 +345,12 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case COLORSEL:
 				printf("color color \n");
 				break;
+
+			case M_TOOL_APVMAPPINGWIZARD:
+				printf(" APV mapping wizard\n");
+				new UserGUIMapWizard(fClient->GetRoot(),this,400,800);
+				break;
+
 			default:
 				break;
 			}
@@ -856,8 +868,8 @@ void UserGuiMainFrame::dMenuSetLoadMapping(){
 				"All files", "*",
 							0, 0
 		};
-	std::string inputfilename=dialog->Browser_file("",datfiletype);
 
+	std::string inputfilename=dialog->Browser_file("",datfiletype);
 	if((!inputfilename.empty()&&(dialog->CheckAppendix(inputfilename,"cfg")))){
 		vMappingName=inputfilename;
 		printf("%s\n",vMappingName.c_str());
