@@ -36,15 +36,23 @@ UserGUIMapWizard::UserGUIMapWizard(const TGWindow *p, const TGWindow *main, UInt
 
 	// add the list box frame
 	mvButtonGroupDetectorID =new TGButtonGroup(mvDisCtrl_ListBoxFrame,"DetectorID");
-	mvButtonGroupMPDID      =new TGButtonGroup(mvDisCtrl_ListBoxFrame,"MPDid");
-	mvButtonGroupAPVID		= new TGButtonGroup(mvDisCtrl_ListBoxFrame,"APVidD");
+	mvButtonGroupMPDID      =new TGButtonGroup(mvDisCtrl_ListBoxFrame,"MPDID");
+	mvButtonGroupAPVID		= new TGButtonGroup(mvDisCtrl_ListBoxFrame,"APVID");
 	// add the listbox  into the list box
 
+	mvListDetectorID = new TGListBox(mvButtonGroupDetectorID);
+	mvListMPDID      = new TGListBox(mvButtonGroupMPDID);
+	mvListAPVID		 = new TGListBox(mvButtonGroupAPVID);
+	mvListDetectorID->Resize(80,100);
+	mvListMPDID		->Resize(80,100);
+	mvListAPVID		->Resize(80,100);
+	// add the list box to the frame handler
+	mvButtonGroupDetectorID ->AddFrame( mvListDetectorID);
+	mvButtonGroupMPDID		->AddFrame(mvListMPDID);
+	mvButtonGroupAPVID		->AddFrame(mvListAPVID);
 
-
-
-	mvDisCtrl_ListBoxFrame->AddFrame(mvButtonGroupMPDID,new TGLayoutHints(kLHintsLeft|kLHintsTop));
 	mvDisCtrl_ListBoxFrame->AddFrame(mvButtonGroupDetectorID,new TGLayoutHints(kLHintsLeft|kLHintsTop));
+	mvDisCtrl_ListBoxFrame->AddFrame(mvButtonGroupMPDID,new TGLayoutHints(kLHintsLeft|kLHintsTop));
 	mvDisCtrl_ListBoxFrame->AddFrame(mvButtonGroupAPVID,new TGLayoutHints(kLHintsLeft|kLHintsBottom));
 
 
@@ -69,8 +77,9 @@ UserGUIMapWizard::UserGUIMapWizard(const TGWindow *p, const TGWindow *main, UInt
 	mvMainFrame ->AddFrame(mainlevelseperation,new TGLayoutHints(kLHintsTop|kLHintsRight|kLHintsLeft|kLHintsExpandX,2,2));
 	mvMainFrame ->AddFrame(mvMainFrameButton,new TGLayoutHints(kLHintsBottom|kLHintsExpandX|kLHintsTop,2,2,2,2));
 	mvMainFrame->Resize(500,500);
+
+	// redraw the main windows
 	AddFrame(mvMainFrame,new TGLayoutHints(kLHintsBottom | kLHintsRight|kLHintsExpandX|kLHintsExpandY, 2, 2, 5, 1));
-	// visualize the windows
 	SetWindowName("Detector Mapping Wizard");
 	MapSubwindows();
 	Resize();   // resize to default size
