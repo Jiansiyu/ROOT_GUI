@@ -21,7 +21,9 @@
 #include <TG3DLine.h>
 #include <TGButtonGroup.h>
 #include <TGListBox.h>
-
+#include <TGLabel.h>
+#include <TGNumberEntry.h>
+//#include
 #include <map>
 #include <vector>
 
@@ -47,6 +49,11 @@ enum USERGUICommandIdentifiers{
 
 	// control level identifiers
 
+	//-----------------------------
+	GUI_MAPPING_WIZARD_K_ADDAPV,
+	GUI_MAPPING_WIZARD_K_DELETEAPV,
+	GUI_MAPPING_WIZARD_K_DELETEMPD,
+	GUI_MAPPING_WIZARD_K_DELETEDETECTOR
 };
 
 class UserGUIMapWizard : public TGTransientFrame
@@ -84,6 +91,11 @@ private:
 
 	TGButtonGroup *mvButtonGroupDetectorID,*mvButtonGroupMPDID,*mvButtonGroupAPVID;
 	TGListBox	  *mvListDetectorID, *mvListMPDID, *mvListAPVID;
+
+	//TGHorizontalFrame *mvControlConfigureFrame;    //
+	TGButtonGroup *mvConfigureInputGroup, *mvConfigureButtonGroup;
+	TGNumberEntry *mvDetectorID,*mvMPDID,*mvADCID,*mvI2C,*mvXis,*mvPos,*Inverse;
+	TGButton *mvConfigureAddAPVButton,*mvConfigureDeleteAPVButton,*mvConfigureDeleteMPDButton,*mvConfigureDeleteDetectorButton;
 	//TRootEmbeddedCanvas *APVLayoutDisplayCanvas;
 
 	TGButton *mvMainFrameCancle, *mvMainFrameSave,*mvMainFrameSave_Exit;
