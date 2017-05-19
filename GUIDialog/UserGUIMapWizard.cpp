@@ -102,45 +102,51 @@ UserGUIMapWizard::UserGUIMapWizard(const TGWindow *p, const TGWindow *main, UInt
 
 	//++++++++++++++++++ control buttton++++++++++++++++++++++++++++++++++++++
 	//--------------------------------------------------------------------------------------------------------
-	mvConfigureAddAPVButton         = new TGTextButton(mvConfigureButtonGroup,"A&dd APV",GUI_MAPPING_WIZARD_K_ADDAPV);
-	mvConfigureDeleteAPVButton      = new TGTextButton(mvConfigureButtonGroup,"Delete APV",GUI_MAPPING_WIZARD_K_DELETEAPV);
-	mvConfigureDeleteMPDButton      = new TGTextButton(mvConfigureButtonGroup,"Delete MPD",GUI_MAPPING_WIZARD_K_DELETEMPD);
-	mvConfigureDeleteDetectorButton = new TGTextButton(mvConfigureButtonGroup,"Delete Detector",GUI_MAPPING_WIZARD_K_DELETEDETECTOR);
-//
+	TGVerticalFrame *lControlButtonFrame = new TGVerticalFrame(mvConfigureButtonGroup);
+
+	mvConfigureAddAPVButton         = new TGTextButton(lControlButtonFrame,"   A&dd APV      ",GUI_MAPPING_WIZARD_K_ADDAPV);
+	mvConfigureDeleteAPVButton      = new TGTextButton(lControlButtonFrame,"  Delete APV   ",GUI_MAPPING_WIZARD_K_DELETEAPV);
+	mvConfigureDeleteMPDButton      = new TGTextButton(lControlButtonFrame,"  Delete MPD   ",GUI_MAPPING_WIZARD_K_DELETEMPD);
+	mvConfigureDeleteDetectorButton = new TGTextButton(lControlButtonFrame,"Delete Detector",GUI_MAPPING_WIZARD_K_DELETEDETECTOR);
+
 	mvConfigureAddAPVButton->Associate(this);
 	mvConfigureDeleteAPVButton->Associate(this);
 	mvConfigureDeleteMPDButton->Associate(this);
 	mvConfigureDeleteDetectorButton->Associate(this);
-//
-//	mvConfigureButtonGroup->AddFrame(mvConfigureAddAPVButton,new TGLayoutHints(kLHintsCenterY , 2, 2, 2, 2));
-//	mvConfigureButtonGroup->AddFrame(mvConfigureDeleteAPVButton,new TGLayoutHints(kLHintsCenterY , 2, 2, 2, 2));
-//	mvConfigureButtonGroup->AddFrame(mvConfigureDeleteMPDButton,new TGLayoutHints(kLHintsCenterY , 2, 2, 2, 2));
-//	mvConfigureButtonGroup->AddFrame(mvConfigureDeleteDetectorButton,new TGLayoutHints(kLHintsCenterY , 2, 2, 2, 2));
+
+	lControlButtonFrame->AddFrame(mvConfigureAddAPVButton,new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2));
+	lControlButtonFrame->AddFrame(mvConfigureDeleteAPVButton,new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2));
+	lControlButtonFrame->AddFrame(mvConfigureDeleteMPDButton,new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2));
+	lControlButtonFrame->AddFrame(mvConfigureDeleteDetectorButton,new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2));
+	mvConfigureButtonGroup->AddFrame(lControlButtonFrame, new TGLayoutHints(kLHintsRight|kLHintsExpandY,2,2,2,2));
+
 	//--------------------------------------------------------------------------------------------------------
 
 	mvDisCtrl_Input_buttonFrame->AddFrame(mvConfigureInputGroup, new TGLayoutHints(kLHintsTop|kLHintsBottom|kLHintsLeft|kLHintsCenterX,2,2,2,2));
 	mvDisCtrl_Input_buttonFrame->AddFrame(mvConfigureButtonGroup,new TGLayoutHints(kLHintsTop|kLHintsBottom|kLHintsCenterX|kLHintsRight,2,2,2,2));
-
 	mvMapping_controlframe->AddFrame(mvDisCtrl_ListBoxFrame, new TGLayoutHints(kLHintsTop|kLHintsExpandX));
 	TGHorizontal3DLine *mvDisCtrl_Seperation=new TGHorizontal3DLine(mvMapping_controlframe);
 	mvMapping_controlframe->AddFrame(mvDisCtrl_Seperation,new TGLayoutHints(kLHintsExpandX|kLHintsTop));
-
 	mvMapping_controlframe->AddFrame(mvDisCtrl_Input_buttonFrame, new TGLayoutHints(kLHintsTop|kLHintsExpandX));
-
 	mvMainFrameDisplay->AddFrame(mvMapping_controlframe, new TGLayoutHints(kLHintsTop|kLHintsLeft,2,2,2,2));
 	TGVertical3DLine *mapping_seperations= new TGVertical3DLine(mvMainFrameDisplay);
 	mvMainFrameDisplay->AddFrame(mapping_seperations,new TGLayoutHints(kLHintsExpandY));
 
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	mvMappingmv_Canvasframe = new TGCompositeFrame(mvMainFrameDisplay);
-	mvMainFrameDisplay->AddFrame(mvMappingmv_Canvasframe, new TGLayoutHints(kLHintsLeft|kLHintsExpandY,2,2,2,2));
 
+	APVLayoutDisplayCanvas = new TRootEmbeddedCanvas("Electronics Layout",mvMappingmv_Canvasframe);
+	mvMappingmv_Canvasframe->AddFrame(APVLayoutDisplayCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 
+	mvMainFrameDisplay->AddFrame(mvMappingmv_Canvasframe, new TGLayoutHints(kLHintsLeft|kLHintsExpandY|kLHintsExpandX,2,2,2,2));
+	//---------------------------------------------------------------------------------------------------
 
 	mvMainFrame->AddFrame(mvMainFrameDisplay,new TGLayoutHints(kLHintsTop|kLHintsExpandX|kLHintsExpandY,2,2,2,2));
 	TGHorizontal3DLine *mainlevelseperation = new TGHorizontal3DLine(mvMainFrame);
 	mvMainFrame ->AddFrame(mainlevelseperation,new TGLayoutHints(kLHintsTop|kLHintsRight|kLHintsLeft|kLHintsExpandX,2,2));
 	mvMainFrame ->AddFrame(mvMainFrameButton,new TGLayoutHints(kLHintsBottom|kLHintsExpandX|kLHintsTop,2,2,2,2));
-	mvMainFrame->Resize(500,300);
+	mvMainFrame->Resize(800,300);
+
 	//redraw the main windows
 	AddFrame(mvMainFrame,new TGLayoutHints(kLHintsBottom | kLHintsRight|kLHintsExpandX|kLHintsExpandY, 2, 2, 5, 1));
 	SetWindowName("Detector Mapping Wizard");

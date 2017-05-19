@@ -96,7 +96,7 @@ private:
 	TGButtonGroup *mvConfigureInputGroup, *mvConfigureButtonGroup;
 	TGNumberEntry *mvDetectorID,*mvMPDID,*mvADCID,*mvI2C,*mvXis,*mvPos,*Inverse;
 	TGButton *mvConfigureAddAPVButton,*mvConfigureDeleteAPVButton,*mvConfigureDeleteMPDButton,*mvConfigureDeleteDetectorButton;
-	//TRootEmbeddedCanvas *APVLayoutDisplayCanvas;
+	TRootEmbeddedCanvas *APVLayoutDisplayCanvas;
 
 	TGButton *mvMainFrameCancle, *mvMainFrameSave,*mvMainFrameSave_Exit;
 	//TGVButtonGroup *mvControlButton;
