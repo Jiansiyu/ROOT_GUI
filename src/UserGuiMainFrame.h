@@ -155,6 +155,11 @@ private:
 	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 
 private:
+	void gKCMMenuConfirmProcess(Long_t parm1);
+	void gKCMButtonConfirmProcess(Long_t parm1);
+	void bButtonConfirmProcess();
+
+private:
 	TGDockableFrame *fMenuDock;
 
 	// set the menu layout

@@ -1,3 +1,4 @@
+##############################################
 #	SUBDIRS MAKEFILE	
 #	author: Siyu Jian 
 #	emal:   jiansiyu@gmail.com
@@ -13,32 +14,31 @@
 #+++++++++++++++++++++++++++++++++++++++++++
 
 #------------------------------------------------------------------------------
-SOURCEPATH=(analysis src GEMDecoder GUIDialog src) 
-srf       =(c cpp cxx C CPP)
-#------------------------------------------------------------------------------
+SOURCEPATH  =  analysis src GEMDeccoder GUIDialog src
+srf         =  c cpp cxx C CPP
 
+#------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # general make file configuration
+CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
 
-CC       = g++
-
-#------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLDFLAGS  := $(shell root-config --ldflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
-HASTHREAD    := $(shell root-config --has-thread)
+ROOTHASTHREAD    := $(shell root-config --has-thread)
+ROOTAUXLIB       := $(shell root-config --auxlibs)
+ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
 CXXFLAGS  +=${ROOTCFLAGS} -I${CODA}/Linux-x86_64/include
 LDFLAGS	  +=${ROOTLDFLAGS}
-LIBS      +=${ROOTLIBS} -L${CODA}/Linux-x86_64/lib -levioxx -levio -lexpat 
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${CODA}/Linux-x86_64/lib -levioxx -levio -lexpat 
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
+LINKOPTION += -pthread -lm -ldl -lconfig++
 
 OBJS	+= $(addprefix ./bin/analysis/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./analysis/*.cpp}}))
 OBJS	+= $(addprefix ./bin/analysis/, $(notdir ${patsubst %.C, %.o, ${wildcard ./analysis/*.C}}))
@@ -52,11 +52,11 @@ TARGET = ROOT_GUI
 all: ${TARGET}
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-ROOT_GUI: ${OBJS}
+ROOT_GUI: ${OBJS} 
 	@echo ${THIS_DIR}
 	@echo ${OBJS}
 	@echo 'Building target: $@' 
-	@$(CC) -pthread -g -o $@ $^ ${LIBS} -lstdc++ -lm  -lSpectrum
+	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
 	@echo 'Finish building: $<'
 	@echo
 

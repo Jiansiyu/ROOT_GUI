@@ -307,53 +307,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	case kC_COMMAND:
 		switch (GET_SUBMSG(msg)) {
 		case kCM_MENU:
-			switch (parm1) {
-
-			case M_FILE_OPEN: {
-				dMenuOpenFileDialog();
-			}
-				break;
-			case M_FILE_NEWCANVAS:{
-				new TCanvas("UVa GEM Analysis Framework--NewCanvas","UVa GEM Analysis Framework--NewCanvas",400,400);
-			}
-			break;
-
-			case M_FILE_TBROWER: {
-				new TBrowser("UVa GEM Analysis Framework--TBrowser","UVa GEM Analysis Framework--Root Tree Browser");
-			}
-			break;
-
-			case M_FILE_SAVE:
-				printf("file->save \n");
-				break;
-			case M_FILE_SAVEAS:
-				printf("file->saveas\n");
-				break;
-			case M_FILE_PRINT:
-				printf("file->print\n");
-				break;
-			case M_FILE_EXIT:
-				CloseWindow();
-				break;
-			case C_RAWFILE_PEDESTAL:
-				printf("pdestal detected\n");
-				break;
-
-			case M_SET_LOADMAPPING:
-				dMenuSetLoadMapping();
-				 break;
-			case COLORSEL:
-				printf("color color \n");
-				break;
-
-			case M_TOOL_APVMAPPINGWIZARD:
-				printf(" APV mapping wizard\n");
-				new UserGUIMapWizard(fClient->GetRoot(),this,400,800);
-				break;
-
-			default:
-				break;
-			}
+			gKCMMenuConfirmProcess(parm1);
 			break;
 		case kCM_BUTTON:
 			switch (parm1) {
@@ -365,75 +319,9 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				dButtonRawOpenFileDialog();
 			}
 				break;
-			case C_CONFIRM:
-				{
-					Pixel_t red;
-					fClient->GetColorByName("red", red);
-					bConfirmButton->SetBackgroundColor(red);
-					bConfirmButton->SetText("Processing...");
-					bConfirmButton->SetEnabled(kFALSE);
-					if (vWorkMode=='\0') {
-						printf("Please Set the work Mode\n");
-						nStatusBarInfor->SetText("Please Set the work Mode");
-					}else {
-					switch (vWorkMode) {
-					case 'R':
-						printf("raw mode\n");
-						{
-							if(!tRawFileEntry->GetNumberOfEntries())
-							fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
-						}
-						break;
-					case 'Z':
-						printf("zero mode\n");
-						{
-							if(!tRawFileEntry->GetNumberOfEntries())
-							fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[tRawFileEntry->GetSelected()].c_str());
-						}
-						break;
-
-					case 'P':
-						printf("pedestal mode\n");
-						fPedestalModeProcess(vEventNumber,vPedestalDataFileName);
-						break;
-
-					case 'H':
-						printf("histo mode\n");
-						fHitModeProcess(vEventNumber,vPedestalROOTFileName,vRawDataList);
-						break;
-
-					case 'A':
-					{
-						printf("analysis mode\n");
-						//std::vector<std::string> filename;
-						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
-						//filename.push_back(filename_temp);
-						//fAnalysisProcess(filename);
-						fAnalysisProcess(vRootDataList);
-					}
-						break;
-					case 'C':
-					{
-						printf("Calibration mode\n");
-						//std::vector<std::string> filename;
-						//std::string filename_temp("/home/newdriver/Research/SBS/SBS_GEM_labtest/SBS38_39_33_40_temp1623.root");
-						//filename.push_back(filename_temp);
-						//fCalibrationProcess(filename);
-						fCalibrationProcess(vRootDataList);
-
-					}
-					break;
-
-					default:
-						break;
-						}
-					}
-					Pixel_t green;
-					fClient->GetColorByName("green", green);
-					bConfirmButton->SetBackgroundColor(green);
-					bConfirmButton->SetText("Confirm");
-					bConfirmButton->SetEnabled(kTRUE);
-				}
+			case C_CONFIRM: {
+				bButtonConfirmProcess();
+			}
 				break;
 			default:
 				break;
@@ -503,12 +391,125 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Update();
 			gSystem->ProcessEvents();
 		}
-
 		break;
 	default:
 		break;
 	}
 	return kTRUE;
+}
+//ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
+void UserGuiMainFrame::gKCMMenuConfirmProcess(Long_t parm1){
+	switch (parm1) {
+
+	case M_FILE_OPEN: {
+		dMenuOpenFileDialog();
+	}
+		break;
+	case M_FILE_NEWCANVAS: {
+		new TCanvas("UVa GEM Analysis Framework--NewCanvas",
+				"UVa GEM Analysis Framework--NewCanvas", 400, 400);
+	}
+		break;
+
+	case M_FILE_TBROWER: {
+		new TBrowser("UVa GEM Analysis Framework--TBrowser",
+				"UVa GEM Analysis Framework--Root Tree Browser");
+	}
+		break;
+
+	case M_FILE_SAVE:
+		printf("file->save \n");
+		break;
+	case M_FILE_SAVEAS:
+		printf("file->saveas\n");
+		break;
+	case M_FILE_PRINT:
+		printf("file->print\n");
+		break;
+	case M_FILE_EXIT:
+		CloseWindow();
+		break;
+	case C_RAWFILE_PEDESTAL:
+		printf("pdestal detected\n");
+		break;
+
+	case M_SET_LOADMAPPING:
+		dMenuSetLoadMapping();
+		break;
+	case COLORSEL:
+		printf("color color \n");
+		break;
+
+	case M_TOOL_APVMAPPINGWIZARD:
+		printf("APV mapping wizard\n");
+		new UserGUIMapWizard(fClient->GetRoot(), this, 400, 800);
+		break;
+
+	default:
+		break;
+	}
+}
+
+//ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
+void UserGuiMainFrame::bButtonConfirmProcess(){
+	Pixel_t red;
+	fClient->GetColorByName("red", red);
+	bConfirmButton->SetBackgroundColor(red);
+	bConfirmButton->SetText("Processing...");
+	bConfirmButton->SetEnabled(kFALSE);
+	if (vWorkMode == '\0') {
+		printf("Please Set the work Mode\n");
+		nStatusBarInfor->SetText("Please Set the work Mode");
+	} else {
+		switch (vWorkMode) {
+		case 'R':
+			printf("raw mode\n");
+			{
+				if (!tRawFileEntry->GetNumberOfEntries())
+					fRawModeProcess(vEventNumber,
+							vRawDataList[tRawFileEntry->GetSelected()].c_str());
+			}
+			break;
+		case 'Z':
+			printf("zero mode\n");
+			{
+				if (!tRawFileEntry->GetNumberOfEntries())
+					fZeroSupressionProcess(vEventNumber, vPedestalName.c_str(),
+							vRawDataList[tRawFileEntry->GetSelected()].c_str());
+			}
+			break;
+
+		case 'P':
+			printf("pedestal mode\n");
+			fPedestalModeProcess(vEventNumber, vPedestalDataFileName);
+			break;
+
+		case 'H':
+			printf("histo mode\n");
+			fHitModeProcess(vEventNumber, vPedestalROOTFileName, vRawDataList);
+			break;
+
+		case 'A': {
+			printf("analysis mode\n");
+			fAnalysisProcess(vRootDataList);
+		}
+			break;
+		case 'C': {
+			printf("Calibration mode\n");
+			fCalibrationProcess(vRootDataList);
+
+		}
+			break;
+
+		default:
+			break;
+		}
+	}
+	Pixel_t green;
+	fClient->GetColorByName("green", green);
+	bConfirmButton->SetBackgroundColor(green);
+	bConfirmButton->SetText("Confirm");
+	bConfirmButton->SetEnabled(kTRUE);
 }
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
@@ -861,6 +862,7 @@ void UserGuiMainFrame::thrHitRun(std::string rawfilename,std::string pedestalnam
 				decoder->HitProcessAllEvents(pedestalname.c_str(),Hit_outname.c_str());
 			}
 }*/
+
 void UserGuiMainFrame::dMenuSetLoadMapping(){
 	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 	const char *datfiletype[]={
