@@ -4,7 +4,7 @@
  
  The current version support MPD version 3.0 which is the version that used in University of Virginia. MPD VME version 4.0 support is under develepment and will be added soon. 
  
-
+![](root_gui.png)
 ## Getting Start
 
 ## Prerequisites
