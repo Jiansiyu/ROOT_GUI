@@ -10,7 +10,7 @@
 
 // user defined classes
 #include "UserGuiMainFrame.h"
-
+#include "ConfigInfor.h"
 ////
 #include <cstdlib>
 #include <cstdio>
@@ -38,6 +38,11 @@ int main(int argc, char **argv)
 	   fprintf(stderr, "%s: cannot run in batch mode\n", argv[0]);
 	         return 1;
    }
+
+   ConfigInfor *test=ConfigInfor::GetInstance();
+   test->ReadConfig();
+   test->PrintConfig();
+   return 0;
    UserGuiMainFrame mainWindows(gClient->GetRoot(),400,200);
    theApp.Run();
 }

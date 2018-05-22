@@ -19,6 +19,10 @@
 //user defined functions
 #include "../GEMDecoder/input_handler.h"
 
+
+
+#define ZERO_CONPRESION_SIGMA_THR  4
+
 // namespace
 using namespace std;
 using namespace evio;
@@ -915,7 +919,7 @@ if(filestream.good()){
 	    			  }
 
 	    			  // apply 5 sigma select the effective hit
-	    			  if(( fadcvalue_temp>5*rms_temp))
+	    			  if(( fadcvalue_temp>ZERO_CONPRESION_SIGMA_THR*rms_temp))
 	    			    {
 	    			      //int detID=mMapping[mpd_id][adc_ch][0];
 	    			      //int planeID=mMapping[mpd_id][adc_ch][1];
@@ -1120,7 +1124,7 @@ std::map<int,std::map<int,std::map<int,int> > > InputHandler::ZeroSProcessSingle
   			  }
 
   			  // apply 5 sigma select the effective hit
-  			  if(( fadcvalue_temp>5*rms_temp))
+  			  if(( fadcvalue_temp>ZERO_CONPRESION_SIGMA_THR*rms_temp))
   			    {
   			      if(mMapping[mpd_id][adc_ch][1]==0){
   			    	  vRaw_Pedestal_return[mMapping[mpd_id][adc_ch][0]][2][RstripPos]=fadcvalue_temp;
@@ -1322,7 +1326,7 @@ if(filestream.good()){
 
 		    			 float fadcvalue_temp =adcSum_temp-hMean->GetBinContent(stripNb+1);
 		    			 float rms_temp=hRMS->GetBinContent(stripNb+1); // get the sigma for this channels
-		    			 if(fadcvalue_temp>5*rms_temp) {
+		    			 if(fadcvalue_temp>ZERO_CONPRESION_SIGMA_THR*rms_temp) {
 		    				 int detID=mMapping[mpd_id][adc_ch][0];
 		    			     int planeID=mMapping[mpd_id][adc_ch][1];
 		    			     for(int i=0; i<TSsize;i++)
@@ -1582,7 +1586,7 @@ if(filestream.good()){
 		    			 float fadcvalue_temp =adcSum_temp-hMean->GetBinContent(stripNb+1);
 		    			 float rms_temp=hRMS->GetBinContent(stripNb+1); // get the sigma for this channels
 
-		    			 if(fadcvalue_temp>5*rms_temp) {
+		    			 if(fadcvalue_temp>ZERO_CONPRESION_SIGMA_THR*rms_temp) {
 
 		    				 int detID=mMapping[mpd_id][adc_ch][0];
 		    			     int planeID=mMapping[mpd_id][adc_ch][1];
@@ -1848,7 +1852,7 @@ int InputHandler::ZeroSProcessAllEvents(int entries, string pedestal_file_name) 
 		    			  if(mMapping[mpd_id][adc_ch][1]==1){hhY->Fill(RstripPos,fadcvalue_temp);}
 
 		    			  // apply 5 sigma select the effective hit
-		    			  if(( fadcvalue_temp>5*rms_temp))
+		    			  if(( fadcvalue_temp>ZERO_CONPRESION_SIGMA_THR*rms_temp))
 		    			    {
 		    			      int detID=mMapping[mpd_id][adc_ch][0];
 		    			      int planeID=mMapping[mpd_id][adc_ch][1];
