@@ -27,3 +27,7 @@ root5.34.36
 	* new QT support
 * 5
 	* new signal transport function
+	
+# Any Contribution is Welcome!
+
+contect me at: jiansiyu@gmail.com
