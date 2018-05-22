@@ -42,7 +42,7 @@ int main(int argc, char **argv)
    ConfigInfor *test=ConfigInfor::GetInstance();
    test->ReadConfig();
    test->PrintConfig();
-   return 0;
+   //return 0;
    UserGuiMainFrame mainWindows(gClient->GetRoot(),400,200);
    theApp.Run();
 }

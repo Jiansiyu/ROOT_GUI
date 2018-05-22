@@ -70,8 +70,6 @@ void ConfigInfor::ReadConfig(std::string fname){
 
 	} catch (libconfig::SettingNotFoundException &nfex) {
 	}
-
-	cfg.writeFile("test.cfg");
 }
 
 // test functions
