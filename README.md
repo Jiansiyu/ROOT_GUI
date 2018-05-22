@@ -13,3 +13,17 @@ evio
 root5.34.36
 
 ## Installing
+
+
+## develep plan
+
+* 1
+	* add the MPD4.0 and MPD_SSP data structure support
+* 2
+	* change the code structure
+* 3
+	* add the multi-thread support in the GUI
+* 4
+	* new QT support
+* 5
+	* new signal transport function
