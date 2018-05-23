@@ -13,15 +13,12 @@
 class GEMInforCenter {
 
 public:
-	GEM::GEMMap& LoadGEMMap(GEM::GEMMap &map){
-		GEMMap = map;
-		return map;
-	};
-	GEM::GEMMap& LoadGEMMapFile(std::string fname);
-
+	void LoadGEMMap();
+	void LoadGEMMapFile(std::string fname);
+	void RegistAPV(GEM::apvMap);
 
 public:
-	GEM::GEMMap GEMMap;
+	std::vector<GEM::apvMap> apvs;
 
 // test functions
 private:

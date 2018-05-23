@@ -845,24 +845,6 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 	}
 }
 
-/*void UserGuiMainFrame::fHitModeThreadProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-}
-
-void UserGuiMainFrame::thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries){
-	string raw_filename(basename(strdup(rawfilename.c_str()))); // get the basename
-	string filename_noappendix = raw_filename.substr(0,raw_filename.find_last_of("."));
-	string number_index = filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789") + 1);
-	std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(), "",atoi(number_index.c_str())));
-	printf("rawname =%s\n pedestal=%s\n mapping= %s\n, entries=%d\n output=%s\n ",rawfilename.c_str(),pedestalname.c_str(),mappingfilename.c_str(),entries,Hit_outname.c_str());
-	InputHandler * decoder = new InputHandler(rawfilename.c_str());
-	if (!mappingfilename.empty())decoder->SetMapping(mappingfilename.c_str());
-	if (entries > 2) {
-		decoder->HitProcessAllEvents(entries,pedestalname.c_str(), Hit_outname.c_str());
-		} else {
-				decoder->HitProcessAllEvents(pedestalname.c_str(),Hit_outname.c_str());
-			}
-}*/
-
 void UserGuiMainFrame::dMenuSetLoadMapping(){
 	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
 	const char *datfiletype[]={
