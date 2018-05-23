@@ -26,6 +26,7 @@ struct DAQConfig{
 	bool OnlinePedestalSubtraction;
 };
 
+
 }
 
 #endif /* GLOBALSTRUCTURE_H_ */

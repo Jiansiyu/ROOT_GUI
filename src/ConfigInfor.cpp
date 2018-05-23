@@ -21,7 +21,6 @@ ConfigInfor *ConfigInfor::GetInstance(){
 }
 
 //
-//
 void ConfigInfor::ReadConfig(std::string fname){
 
 	try {
