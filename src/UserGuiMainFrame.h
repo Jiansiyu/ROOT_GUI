@@ -61,6 +61,7 @@
 #include "TSystemDirectory.h"
 #include "TH1F.h"
 #include "map"
+#include "GEMInforCenter.h"
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -112,6 +113,8 @@ public:
 
 	virtual void CloseWindow();
 	virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
+
+	GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
 
@@ -176,7 +179,7 @@ private:
 	TGCompositeFrame *fWorkZoneTabSubFrame[50];
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
-	int NTabs=5;
+	int NTabs=gemInfor->GetGEMdetectorMap().GetMPDNumber();
 
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;

@@ -95,6 +95,7 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
 	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
+
 	SetWorkZoneTab(NTabs);
 	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 
@@ -171,8 +172,9 @@ void UserGuiMainFrame::SetWorkZone(){
 
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
-	for(unsigned int counter=0;counter<NTabs;counter++){
-		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
+	int counter=0;
+	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
+		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
 		// attach the embeded canvas
 		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
@@ -180,6 +182,15 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
 	}
+//	for(unsigned int counter=0;counter<NTabs;counter++){
+//		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
+//		// attach the embeded canvas
+//		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+//		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+//		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+//	}
 }
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
 
@@ -844,24 +855,6 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 		tRawFileEntry->Layout();
 	}
 }
-
-/*void UserGuiMainFrame::fHitModeThreadProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-}
-
-void UserGuiMainFrame::thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries){
-	string raw_filename(basename(strdup(rawfilename.c_str()))); // get the basename
-	string filename_noappendix = raw_filename.substr(0,raw_filename.find_last_of("."));
-	string number_index = filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789") + 1);
-	std::string Hit_outname(Form(tOutPutfilePattern->GetTitle(), "",atoi(number_index.c_str())));
-	printf("rawname =%s\n pedestal=%s\n mapping= %s\n, entries=%d\n output=%s\n ",rawfilename.c_str(),pedestalname.c_str(),mappingfilename.c_str(),entries,Hit_outname.c_str());
-	InputHandler * decoder = new InputHandler(rawfilename.c_str());
-	if (!mappingfilename.empty())decoder->SetMapping(mappingfilename.c_str());
-	if (entries > 2) {
-		decoder->HitProcessAllEvents(entries,pedestalname.c_str(), Hit_outname.c_str());
-		} else {
-				decoder->HitProcessAllEvents(pedestalname.c_str(),Hit_outname.c_str());
-			}
-}*/
 
 void UserGuiMainFrame::dMenuSetLoadMapping(){
 	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
