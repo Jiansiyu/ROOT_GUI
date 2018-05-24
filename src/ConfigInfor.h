@@ -20,11 +20,14 @@ public:
 	GlobStruct::GEMConfig GetGEMConfInfor(){
 		return gemconfig;
 	}
+	GlobStruct::AnalysisConfig GetAnalysisInfor(){
+		return analysisconfig;
+	}
 private:
 	libconfig::Config cfg;
 	GlobStruct::DAQConfig  daqconfig;
 	GlobStruct::GEMConfig gemconfig;
-
+	GlobStruct::AnalysisConfig analysisconfig;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 public:

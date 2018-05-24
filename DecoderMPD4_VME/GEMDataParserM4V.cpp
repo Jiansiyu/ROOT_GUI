@@ -6,13 +6,57 @@
  */
 
 #include "GEMDataParserM4V.h"
+#include "datastructureM4V.h"
+#include "RawDecoderM4V.h"
+
+#include <string>
+
+#include "evioUtil.hxx"
+#include "evioFileChannel.hxx"
 
 GEMDataParserM4V::GEMDataParserM4V() {
 	// TODO Auto-generated constructor stub
-
 }
 
 GEMDataParserM4V::~GEMDataParserM4V() {
 	// TODO Auto-generated destructor stub
 }
 
+bool GEMDataParserM4V::OpenFileIn(std::string fname) {
+	RawDatfileName = fname;
+//	try {
+//
+//	} catch (evio::evioException e) {
+//	 std::cerr <<e.toString()<<std::endl<<std::endl;
+//	 exit(EXIT_FAILURE);
+//	}
+}
+bool GEMDataParserM4V::ParserRawDat(){
+	try {
+		evio::evioFileChannel chan(RawDatfileName.c_str(),"r");
+		chan.open();
+		while(chan.read()){
+			evio::evioDOMTree event(chan);
+			evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
+
+			for(auto iter = mpdEventList->begin();
+					iter != mpdEventList->end(); iter++){
+				vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
+				if((*iter)->tag == MPD_tag){
+
+					int iend;
+					int vec_size=(*block_vec).size();
+//					for(iend =1 ; iend < vec_size; iend++){
+//						uint32_t tag = (block_vec[iend]>>24)&0xf8;
+//						if(tag==0x90||tag==0x88) break;
+//					}
+
+				}
+			}
+		}
+
+	} catch (evio::evioException e) {
+		std::cerr << e.toString() << std::endl << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}

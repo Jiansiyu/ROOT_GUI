@@ -198,13 +198,20 @@ struct gemAxisMap{
 	}
 };
 
+// single GEM detector
 struct gemModuleMap{
 	int layer;
 	int GEMID;
 	std::vector<gemAxisMap> gemAxis;
+	gemModuleMap(){
+		layer=-1;
+		GEMID=-1;
+		gemAxis.clear();
+	};
 
 };
 
+// multi GEM detector on one layer
 struct GEMLayerMap{
 	int layer;
 	std::vector<gemModuleMap> gemModules;

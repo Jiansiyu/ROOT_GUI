@@ -149,6 +149,12 @@ private :
 	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
 	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
 	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
+
+// signal connection
+public:
+	void SignalSlotTabCanvasRawMPDDraw();
+	void SignalSlotProcessBar();
+	void SignalSlotWorkStatusInfor();
 // dialog process
 private:
 	void dMenuOpenFileDialog();
