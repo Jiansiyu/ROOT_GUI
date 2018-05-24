@@ -95,6 +95,7 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	fWorkZoneCanvasFrame  = new TGVerticalFrame(fWorkZoneFrame, 10,10);
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
 	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
+
 	SetWorkZoneTab(NTabs);
 	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 
@@ -171,8 +172,9 @@ void UserGuiMainFrame::SetWorkZone(){
 
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
-	for(unsigned int counter=0;counter<NTabs;counter++){
-		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
+	int counter=0;
+	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
+		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
 		// attach the embeded canvas
 		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
@@ -180,6 +182,15 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
 	}
+//	for(unsigned int counter=0;counter<NTabs;counter++){
+//		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
+//		// attach the embeded canvas
+//		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+//		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+//		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+//	}
 }
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
 

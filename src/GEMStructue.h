@@ -10,11 +10,13 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <cstddef>
 #include <cstdint>
 #include <algorithm>
 #include <sstream>
-
+#include <stdio.h>
+#include <iostream>
 
 namespace GEM{
 
@@ -25,14 +27,17 @@ namespace GEM{
 #define GEMID_SHIFT
 
 
+
 template <class T>
 T getHashValue(T mpdid,T adcid){
 	return ((mpdid << MPDID_SHIFT)|(adcid << ADCID_SHIFT));
 }
+
 template <class T>
 T getHashValue(T crateid,T mpdid,T adcid){
 	return ((crateid << CRATE_SHIFT)|(mpdid << mpdid)|(adcid << ADCID_SHIFT));
 }
+
 template <class T>
 T getMPDHashValue(T crateid,T mpdid){
 	return ((crateid << CRATE_SHIFT)|(mpdid << mpdid));
@@ -106,19 +111,38 @@ struct apvMap{
 	int GetUniqueMPDID(){
 		return getHashValue(CrateID,MPDID,0);
 	}
-
 };
 
 struct mpdMap{
-	int CrateID=-1;
-	int MPDID=-1;
-	int MPDUniqueID=-1;
+	int CrateID;
+	int MPDID;
+	int MPDUniqueID;
 	std::vector<apvMap> apvs;
+	mpdMap(){
+			apvs.clear();
+			CrateID=-1;
+			MPDID=-1;
+			MPDUniqueID=-1;};
 
-	mpdMap(){apvs.clear();};
-
-	mpdMap(apvMap apv){apvs.clear();RegistAPV(apv);};
-
+	mpdMap(apvMap apv){
+				apvs.clear();
+				CrateID=-1;
+				MPDID=-1;
+				MPDUniqueID=-1;
+				RegistAPV(apv);};
+	int SetMPDUniqueID(int id){
+		MPDUniqueID=id;
+		return MPDUniqueID;
+	}
+	int GetMPDUniqueID(){
+		return MPDUniqueID;
+	}
+	int GetMPDID(){
+		return MPDID;
+	}
+	int GetCrateID(){
+		return CrateID;
+	}
 	bool RegistAPV(apvMap apv){
 		if(MPDUniqueID==-1){
 			CrateID=apv.CrateID;
@@ -135,7 +159,12 @@ struct mpdMap{
 			}
 		}
 	}
-
+	bool operator+(mpdMap &mpd) {
+		if(MPDUniqueID==mpd.MPDUniqueID){
+			apvs.insert(apvs.end(),mpd.apvs.begin(),mpd.apvs.end());
+			return true;
+		}else return false;
+	}
 	bool operator==(mpdMap &mpd) const {
 		return (MPDUniqueID==getHashValue(mpd.CrateID,mpd.MPDID,0));}
 
@@ -148,36 +177,97 @@ struct gemAxisMap{
 	int GEMID;
 	Dimension axis;
 	std::vector<apvMap> apvs;
+	gemAxisMap(){
+		layer=-1;
+		GEMID=-1;
+		apvs.clear();
+	}
+	bool RegistAPV(apvMap apv){
+		if(layer ==-1 && GEMID ==-1){
+			layer=apv.layer;
+			GEMID=apv.GEMID;
+			axis=apv.dim;
+			apvs.push_back(apv);
+			return true;
+		}else{
+			if(layer==apv.layer && GEMID == apv.GEMID && axis == apv.dim){
+				apvs.push_back(apv);
+				return true;
+			}else return false;
+		}
+	}
 };
 
 struct gemModuleMap{
 	int layer;
 	int GEMID;
 	std::vector<gemAxisMap> gemAxis;
+
 };
 
 struct GEMLayerMap{
 	int layer;
 	std::vector<gemModuleMap> gemModules;
+	GEMLayerMap(){};
 };
 
 struct GEMDetectorMap{
+private:
 	std::vector<GEMLayerMap> gemLayers;
 	std::vector<apvMap> apvs;
 	std::vector<mpdMap> mpds;
-	GEMDetectorMap(){};
+	// <crate ID,<mpdid, <apvs> > >
+	std::map<int,std::map<int,std::vector<apvMap>>> CrateMPDList;
+	// < layerID, <GEMid, <  Dimension, <APVs> > > >
+	std::map<int,std::map<int,std::map<Dimension,std::vector<apvMap>>>> LayerAPVList;
+	std::vector<int> MPDUniqueIDList;
+	std::vector<std::string> MPDNameList;
+public:
+	GEMDetectorMap(){
+		gemLayers.clear();
+		apvs.clear();
+		mpds.clear();
+	};
 	bool RegistAPVs(std::vector<apvMap> apvs){
-	 this->apvs.insert(this->apvs.begin(),apvs.begin(),apvs.end());
+		this->apvs.insert(this->apvs.end(),apvs.begin(),apvs.end());
+		for(auto apv : apvs){
+			CrateMPDList[apv.CrateID][apv.MPDID].push_back(apv);
+			LayerAPVList[apv.layer][apv.layer][apv.dim].push_back(apv);
+		}
+		for (auto iter_crate=CrateMPDList.begin();
+				iter_crate!=CrateMPDList.end(); iter_crate++){
+			for(auto iter_mpd = iter_crate->second.begin();
+					iter_mpd != iter_crate->second.end();iter_mpd++){
+				mpdMap mpd;
+				mpd.SetMPDUniqueID(getHashValue(iter_crate->first,iter_mpd->first,0));
+				for ( auto apv : iter_mpd->second){
+					mpd.RegistAPV(apv);
+				}
+				mpds.push_back(mpd);
+				MPDUniqueIDList.push_back(getHashValue(iter_crate->first,iter_mpd->first,0));
+				std::string name("Crate"+std::to_string(iter_crate->first)+"_MPD"+std::to_string(iter_mpd->first));
+				MPDNameList.push_back(name.c_str());
+			};
+		}
 	}
+
 	bool RegistMPD(mpdMap);
 	bool RegistAxis(gemAxisMap);
 	bool RegistGEMModule(gemModuleMap);
-	int GetMPDNumber();
-	std::vector<int> GetMPDIDList();
-	std::vector<mpdMap>GetMPDList();
+	int GetMPDNumber(){
+		return MPDUniqueIDList.size();
+	}
+	std::vector<int> GetMPDIDList(){
+		return MPDUniqueIDList;
+	}
+	std::vector<mpdMap>GetMPDList(){
+		return  mpds;
+	}
+	std::vector<std::string> GetMPDNameList(){
+		return MPDNameList;
+	}
 	std::vector<gemModuleMap> GetGEMModuleList();
 };
-
 }
 
 #endif /* GEMSTRUCTUE_H_ */

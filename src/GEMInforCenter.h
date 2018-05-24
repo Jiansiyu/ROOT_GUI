@@ -17,8 +17,11 @@ public:
 	void LoadGEMMapFile(std::string fname);
 	void RegistAPV(GEM::apvMap);
 
-public:
+
+	GEM::GEMDetectorMap GetGEMdetectorMap(){return gemDetectorMap;};
+private:
 	std::vector<GEM::apvMap> apvs;
+	GEM::GEMDetectorMap gemDetectorMap;
 
 // test functions
 private:

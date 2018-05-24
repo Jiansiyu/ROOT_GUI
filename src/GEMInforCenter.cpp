@@ -45,6 +45,7 @@ void GEMInforCenter::LoadGEMMapFile(std::string fname){
 	}else{
 		std::cout<<"["<<__FUNCTION__<<"("<<__LINE__<<")]: Fatal Error" << fname.c_str()<<" did not found"<<std::endl;
 	}
+	if(apvs.size()!=0) gemDetectorMap.RegistAPVs(apvs);
 }
 
 void GEMInforCenter::RegistAPV(GEM::apvMap){
