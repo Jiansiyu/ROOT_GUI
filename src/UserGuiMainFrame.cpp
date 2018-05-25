@@ -31,6 +31,8 @@
 #include "UserGuiGeneralDialogProcess.h"
 #include "../GUIDialog/UserGUIMapWizard.h"
 
+#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
+
 const char *filetype[] = {
 			"ROOT files", "*.root",
 			"Data files", "*.dat",
@@ -474,12 +476,13 @@ void UserGuiMainFrame::bButtonConfirmProcess(){
 	} else {
 		switch (vWorkMode) {
 		case 'R':
-			printf("raw mode\n");
-			{
-				if (!tRawFileEntry->GetNumberOfEntries())
-					fRawModeProcess(vEventNumber,
-							vRawDataList[tRawFileEntry->GetSelected()].c_str());
-			}
+			fRawModeProcess(1,"test");
+//			printf("raw mode\n");
+//			{
+//				if (!tRawFileEntry->GetNumberOfEntries())
+//					fRawModeProcess(vEventNumber,
+//							vRawDataList[tRawFileEntry->GetSelected()].c_str());
+//			}
 			break;
 		case 'Z':
 			printf("zero mode\n");
@@ -525,72 +528,92 @@ void UserGuiMainFrame::bButtonConfirmProcess(){
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
-	if (!rawfilename.empty()) {
-		printf("Filename: %s\n", rawfilename.c_str());
-		InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
-		if (!vMappingName.empty())
-			inputHandler->SetMapping(vMappingName.c_str());
-		map<int, map<int, map<int, std::vector<int> > > > a;
-		map<int, map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent =
-				inputHandler->RawProcessAllEvents(entries, a);
-		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++) {
-			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++) {
-				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
-					delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
-				}
-			}
-		}
-		dMultiGEMHistoBuffer.clear();
-		// test functions
-		for (map<int, map<int, map<int, std::vector<int> > > >::iterator iter_detectorID =
-				dMultiGEMSingleEvent.begin();
-				iter_detectorID != dMultiGEMSingleEvent.end();
-				iter_detectorID++) {
-			for (map<int, map<int, std::vector<int> > >::iterator itter_mpd =
-					iter_detectorID->second.begin();
-					itter_mpd != iter_detectorID->second.end(); itter_mpd++) {
-				for (map<int, std::vector<int> >::iterator ittter_apv =
-						itter_mpd->second.begin();
-						ittter_apv != itter_mpd->second.end(); ittter_apv++) {
-					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
-							new TH1F(
-									Form("MPD%d_ADC%d", itter_mpd->first,
-											ittter_apv->first),
-									Form("MPD%d_ADC%d", itter_mpd->first,
-											ittter_apv->first), 800, 0, 800);
-					for (unsigned int i = 0; i < (ittter_apv->second).size();
-							i++) {
-						dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(
-								i, (ittter_apv->second)[i]);
-					}
-				}
-			}
-		}
-		unsigned int Canvas_counter = 0;
-		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++) {
-			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
-			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
-			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
-			int canvaspad_counter=0;
-			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++) {
-				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
-					cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
-					ittter_apv->second->SetMaximum(2500);
-					ittter_apv->second->SetMinimum(0);
-					ittter_apv->second->Draw();
-					canvaspad_counter++;
-				}
-			}
-			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
-			cfWorkZoneTabCanvas[Canvas_counter]->Update();
-			Canvas_counter++;
-		}
-		gSystem->ProcessEvents();
-		delete inputHandler;
-	} else {
-		printf("No input file detected\n");
-	}
+
+	GEMDataParserM4V *paser=new GEMDataParserM4V();
+	SetStatusBarDisplay(Form("Reading File"));
+	//paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
+
+	SetStatusBarDisplay(Form("Read done! ready for select the event..."));
+	paser->Connect("emittest(Int_t)","UserGuiMainFrame",this,"testconnect(Int_t)" );
+	paser->Sendtest();
+
 }
+
+void UserGuiMainFrame::testconnect(Int_t v){
+	std::cout<<"Test receive! "<<v<<std::endl;
+}
+
+void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
+	nStatusBarInfor->SetText(infor.c_str());
+
+}
+//void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+//	if (!rawfilename.empty()) {
+//		printf("Filename: %s\n", rawfilename.c_str());
+//		InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
+//		if (!vMappingName.empty())
+//			inputHandler->SetMapping(vMappingName.c_str());
+//		map<int, map<int, map<int, std::vector<int> > > > a;
+//		map<int, map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent =
+//				inputHandler->RawProcessAllEvents(entries, a);
+//		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++) {
+//			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++) {
+//				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
+//					delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
+//				}
+//			}
+//		}
+//		dMultiGEMHistoBuffer.clear();
+//		// test functions
+//		for (map<int, map<int, map<int, std::vector<int> > > >::iterator iter_detectorID =
+//				dMultiGEMSingleEvent.begin();
+//				iter_detectorID != dMultiGEMSingleEvent.end();
+//				iter_detectorID++) {
+//			for (map<int, map<int, std::vector<int> > >::iterator itter_mpd =
+//					iter_detectorID->second.begin();
+//					itter_mpd != iter_detectorID->second.end(); itter_mpd++) {
+//				for (map<int, std::vector<int> >::iterator ittter_apv =
+//						itter_mpd->second.begin();
+//						ittter_apv != itter_mpd->second.end(); ittter_apv++) {
+//					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
+//							new TH1F(
+//									Form("MPD%d_ADC%d", itter_mpd->first,
+//											ittter_apv->first),
+//									Form("MPD%d_ADC%d", itter_mpd->first,
+//											ittter_apv->first), 800, 0, 800);
+//					for (unsigned int i = 0; i < (ittter_apv->second).size();
+//							i++) {
+//						dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(
+//								i, (ittter_apv->second)[i]);
+//					}
+//				}
+//			}
+//		}
+//		unsigned int Canvas_counter = 0;
+//		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++) {
+//			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+//			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+//			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
+//			int canvaspad_counter=0;
+//			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++) {
+//				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
+//					cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
+//					ittter_apv->second->SetMaximum(2500);
+//					ittter_apv->second->SetMinimum(0);
+//					ittter_apv->second->Draw();
+//					canvaspad_counter++;
+//				}
+//			}
+//			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+//			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+//			Canvas_counter++;
+//		}
+//		gSystem->ProcessEvents();
+//		delete inputHandler;
+//	} else {
+//		printf("No input file detected\n");
+//	}
+//}
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
 

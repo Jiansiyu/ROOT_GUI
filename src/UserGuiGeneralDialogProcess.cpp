@@ -32,7 +32,7 @@ UserGuiGeneralDialogProcess::~UserGuiGeneralDialogProcess() {
 
 // set or read the default path for the browser diaglog
 std::string UserGuiGeneralDialogProcess::DefaultPath(std::string setpath ){
-	if(setpath==NULL){
+	if(setpath.empty()){
 		return pDefaultPath;
 	}else{
 		pDefaultPath=setpath;

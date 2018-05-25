@@ -105,6 +105,7 @@ RawDecoderM4V::RawDecoderM4V(std::vector<uint32_t> &buffer, int start, int end) 
 				iter_adc!=iter_mpd->second.end();iter_adc++){
 			TH1F* h = new TH1F(Form("mpd_%d_ch_%d",iter_mpd->first, iter_adc->first), Form("mpd_%d_ch_%d_raw_data",iter_mpd->first, iter_adc->first), 780, 0, 779);
 			int counter=1;
+			(iter_adc->second.shrink_to_fit());
 			for(auto chennal : iter_adc->second){
 				h->Fill(counter++,chennal);
 			}

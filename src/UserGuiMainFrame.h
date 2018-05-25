@@ -107,6 +107,7 @@ enum ETestCommandIdentifiers {
 };
 
 class UserGuiMainFrame: public TGMainFrame {
+
 public:
 	UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h);
 	virtual ~UserGuiMainFrame();
@@ -117,7 +118,7 @@ public:
 	GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
-
+	ClassDef(UserGuiMainFrame,0);
 public:
 	// Interaction functions
 	char GetWorkMode(char & WorkMode);
@@ -125,6 +126,8 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
+	void SetStatusBarDisplay(std::string);
+	void testconnect(Int_t);
 
 private:
 	std::string vPedestalName;

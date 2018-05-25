@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "TH1F.h"
+
 namespace GEM{
 
 #define CRATE_SHIFT 20  // no larger than 4 in sbs
@@ -275,6 +277,57 @@ public:
 	}
 	std::vector<gemModuleMap> GetGEMModuleList();
 };
+
+struct gemChannelAddr{
+	int layer;
+	int GEMID;
+	int mpdID;
+	int ADCID;
+	int stripid;
+	int pos;
+	gemChannelAddr(){};
+	gemChannelAddr(
+			int layer,
+			int GEMID,
+			int mpdID,
+			int ADCID,
+			int stripid,
+			int pos){};
+
+	void SetAddress(){
+
+	};
+};
+
+// GEM data structure
+struct gemChannelData{
+	gemChannelAddr addr;
+	std::vector<int> data;  // buffer all the time samples in one single channel
+};
+
+struct apvData{
+	int layer;
+	int GEMID;
+	int mpdID;
+	int ADCID;
+	std::vector<gemChannelData> data;
+};
+
+
+struct EventDataRaw {
+	int64_t evtID;
+	std::vector<gemChannelData> gem_data;
+
+};
+
+struct EventHistStruct{
+	// mpdID, ADCID
+	std::map<int,std::map<int,TH1F*>> histos;
+	EventHistStruct(std::map<int,std::map<int,TH1F*>> &histos){
+		this->histos = histos;
+	}
+};
+
 }
 
 #endif /* GEMSTRUCTUE_H_ */
