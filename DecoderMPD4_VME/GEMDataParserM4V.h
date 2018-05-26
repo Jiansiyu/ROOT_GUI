@@ -31,23 +31,18 @@ public:
 	bool OpenFileIn(std::string);
 	bool ParserRawDat();
 	void DrawRawDisplay(int evtID){
-		if(EventRawHisto.find(evtID)!=EventRawHisto.end()){
-			GEM::EventHistStruct *histstruct=new GEM::EventHistStruct(EventRawHisto[evtID]);
-			Emit("GEMDrawRaw(GEM::EventHistStruct)",histstruct);
+		if(EventRaw.find(evtID)!=EventRaw.end()){
+			GEM::EventRawStruct *raw=new GEM::EventRawStruct(EventRaw[evtID]);
+			std::cout<<"emmit :"<<raw->raw.size()<<std::endl;
+			Emit("GEMDrawRaw(GEM::EventRawStruct)",raw);
 		}else{
-
+			std::cout<<"ERROR :"<<__FUNCTION__<<std::endl;
 		}
 
 	}
 
-	void Sendtest(){
-		std::cout<<"Test send"<<std::endl;
-		Emit("emittest(Int_t)",v);
-	}
-	Int_t v=5;
 	// signal slot communication mechanism
-	void emittest(Int_t);//*SIGNAL*
-	void GEMDrawRaw(GEM::EventHistStruct);//*SIGNAL*
+	void GEMDrawRaw(GEM::EventRawStruct);//*SIGNAL*
 private:
 
 	std::string RawDatfileName;
@@ -55,6 +50,7 @@ private:
 
 	//<eventid, <mpdid, <apvid,<hist> > > >
 	std::map<int,std::map<int, std::map<int,TH1F*>>> EventRawHisto;
+	//       eventid       MPD         ADC
 	std::map<int,std::map<int, std::map<int,std::vector<int>>>> EventRaw;
 
 	//ClassDef(GEMDataParserM4V,0);

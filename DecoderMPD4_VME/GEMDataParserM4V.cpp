@@ -57,17 +57,18 @@ bool GEMDataParserM4V::ParserRawDat(){
 					}
 
 					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
-					EventRawHisto[evtID]=decoder->GetAPVRawHisto();
 					EventRaw[evtID]=decoder->GetAPVRawData();
 					//delete decoder;
+					evtID++;
 				}
 			}
 
-			evtID++;
 		}
 
 	} catch (evio::evioException e) {
 		std::cerr << e.toString() << std::endl << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+
 }

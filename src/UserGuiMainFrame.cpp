@@ -177,22 +177,15 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 	int counter=0;
 	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
 		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
+		rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
 		// attach the embeded canvas
 		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
 		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
 		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+		counter++;
 	}
-//	for(unsigned int counter=0;counter<NTabs;counter++){
-//		fWorkZoneTabSubFrame[counter] = fWorkZoneTab->AddTab(Form("Tab_%d",counter));
-//		// attach the embeded canvas
-//		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
-//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
-//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
-//		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-//		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
-//	}
 }
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
 
@@ -344,7 +337,9 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			switch (parm1) {
 			case C_WORKMODE_RAW:
 				vWorkMode = 'R';
-				printf("Raw mode selected \n");
+				SetStatusBarDisplay("Raw mode selected ");
+
+				//printf("Raw mode selected \n");
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
@@ -380,9 +375,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
-						//tNumberEntry->SetState(kFALSE);
+						tNumberEntry->SetState(kFALSE);
 						fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
-						//tNumberEntry->SetState(kTRUE);
+						tNumberEntry->SetState(kTRUE);
+						gSystem->ProcessEvents();
 					}
 					string Pedestal_name= vPedestalName;
 					if((vWorkMode=='Z')&&(vRawDataList.size()!=0)&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root")){
@@ -476,13 +472,10 @@ void UserGuiMainFrame::bButtonConfirmProcess(){
 	} else {
 		switch (vWorkMode) {
 		case 'R':
-			fRawModeProcess(1,"test");
-//			printf("raw mode\n");
-//			{
-//				if (!tRawFileEntry->GetNumberOfEntries())
-//					fRawModeProcess(vEventNumber,
-//							vRawDataList[tRawFileEntry->GetSelected()].c_str());
-//			}
+			{
+				if (!tRawFileEntry->GetNumberOfEntries())
+				fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
+			}
 			break;
 		case 'Z':
 			printf("zero mode\n");
@@ -531,21 +524,54 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 
 	GEMDataParserM4V *paser=new GEMDataParserM4V();
 	SetStatusBarDisplay(Form("Reading File"));
-	//paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
+	paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
 
 	SetStatusBarDisplay(Form("Read done! ready for select the event..."));
-	paser->Connect("emittest(Int_t)","UserGuiMainFrame",this,"testconnect(Int_t)" );
-	paser->Sendtest();
+	paser->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
+	paser->DrawRawDisplay(10);
 
 }
 
-void UserGuiMainFrame::testconnect(Int_t v){
-	std::cout<<"Test receive! "<<v<<std::endl;
+void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
+	std::cout<<"catch signal  :"<<event.raw.size()<<std::endl;
+	fCanvasDrawRaw(event.raw);
 }
+void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>>  &event){
+	TH1F *h;
+	for (auto iter = rawCanvasMPDTabCorrolation.begin();iter != rawCanvasMPDTabCorrolation.end();iter++){
+		std::cout<<iter->first<<" "<<iter->second<<std::endl;
+	}
+	for (auto iter_mpd = event.begin();
+		iter_mpd!=event.end();iter_mpd++){
+		if(rawCanvasMPDTabCorrolation.find(Form("Crate0_MPD%d",iter_mpd->first))!=rawCanvasMPDTabCorrolation.end()){
+			int Canvas_counter=rawCanvasMPDTabCorrolation[Form("Crate0_MPD%d",iter_mpd->first)];
+			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5, 5);
+			int histo_counter=1;
+			for(auto iter_apv : iter_mpd->second){
+				cfWorkZoneTabCanvas[Canvas_counter]->cd(histo_counter++);
+				h= new TH1F(Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),779,0,780);
+				int i=1 ;
+				for (auto channel : iter_apv.second){
+					h->Fill(i++,channel);
+				}
+				h->Draw();
+
+				std::cout<<"CanvasID:"<<Canvas_counter<<"  MPD"<< iter_mpd->first<<"  "<< iter_apv.first<<std::endl;
+			}
+			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+		}
+	}
+	gSystem->ProcessEvents();
+}
+
 
 void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 	nStatusBarInfor->SetText(infor.c_str());
-
+//	nStatusBarInfor->SetBackgroundColor()
+	gSystem->ProcessEvents();
 }
 //void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 //	if (!rawfilename.empty()) {

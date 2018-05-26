@@ -127,7 +127,8 @@ public:
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
 	void SetStatusBarDisplay(std::string);
-	void testconnect(Int_t);
+	void fCanvasDrawRaw(GEM::EventRawStruct);
+	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
 
 private:
 	std::string vPedestalName;
@@ -189,7 +190,7 @@ private:
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
 	int NTabs=gemInfor->GetGEMdetectorMap().GetMPDNumber();
-
+	std::map<std::string,int> rawCanvasMPDTabCorrolation;
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;
 

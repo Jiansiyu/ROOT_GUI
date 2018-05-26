@@ -35,6 +35,7 @@ private:
 	unsigned int * buf;
 	int fBuf;
 	std::map<int, std::map<int, std::map<int, std::vector<int>>>> mAPVTSRawData;
+	// mpd     adc
 	std::map<int, std::map<int, std::vector<int>>> mAPVRawData;
 	std::map<int, std::map<int, TH1F*>> mAPVRawHisto;
 	int ChNb[128] = { 1, 33, 65, 97, 9, 41, 73, 105, 17, 49, 81, 113, 25, 57,

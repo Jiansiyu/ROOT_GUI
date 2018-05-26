@@ -320,11 +320,16 @@ struct EventDataRaw {
 
 };
 
-struct EventHistStruct{
+struct EventRawStruct{
 	// mpdID, ADCID
 	std::map<int,std::map<int,TH1F*>> histos;
-	EventHistStruct(std::map<int,std::map<int,TH1F*>> &histos){
+	std::map<int, std::map<int,std::vector<int>>> raw;
+	EventRawStruct(){};
+	EventRawStruct(std::map<int,std::map<int,TH1F*>> &histos){
 		this->histos = histos;
+	}
+	EventRawStruct(std::map<int, std::map<int,std::vector<int>>> &raw){
+		this->raw = raw;
 	}
 };
 

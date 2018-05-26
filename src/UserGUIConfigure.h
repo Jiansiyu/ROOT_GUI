@@ -9,6 +9,8 @@
 #define USERGUICONFIGURE_H_
 
 class UserGUIConfigure {
+	//TODO used for get and configure the GUI singleton function needed
+
 public:
 	UserGUIConfigure();
 	virtual ~UserGUIConfigure();
