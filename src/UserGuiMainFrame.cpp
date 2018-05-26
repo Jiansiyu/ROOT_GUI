@@ -30,21 +30,7 @@
 #include "../GEMDecoder/input_handler.h"
 #include "UserGuiGeneralDialogProcess.h"
 #include "../GUIDialog/UserGUIMapWizard.h"
-
 #include "../DecoderMPD4_VME/GEMDataParserM4V.h"
-
-const char *filetype[] = {
-			"ROOT files", "*.root",
-			"Data files", "*.dat",
-			"All files", "*",
-			0, 0
-	};
-
-const char *datfiletype[]={
-		"Data files", "*.dat",
-		"All files", "*",
-					0, 0
-};
 
 UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	// TODO Auto-generated constructor stub
@@ -411,6 +397,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	}
 	return kTRUE;
 }
+
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::gKCMMenuConfirmProcess(Long_t parm1){
 	switch (parm1) {
@@ -530,17 +517,18 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 	GEMDataParserM4V *paser=new GEMDataParserM4V();
 	SetStatusBarDisplay(Form("Reading File"));
 	paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
-
 	SetStatusBarDisplay(Form("Read done! ready for select the event..."));
 	paser->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
 	paser->DrawRawDisplay(10);
-
 }
 
 void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
+#ifdef __SLOT_DEBUG_MODE
 	std::cout<<"catch signal  :"<<event.raw.size()<<std::endl;
+#endif
 	fCanvasDrawRaw(event.raw);
 }
+
 void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>>  &event){
 	TH1F *h;
 	for (auto iter = rawCanvasMPDTabCorrolation.begin();iter != rawCanvasMPDTabCorrolation.end();iter++){
@@ -575,7 +563,6 @@ void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int
 
 void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 	nStatusBarInfor->SetText(infor.c_str());
-//	nStatusBarInfor->SetBackgroundColor()
 	gSystem->ProcessEvents();
 }
 //void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
@@ -648,9 +635,6 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
 
-	printf("=>Raw Filename: %s\n", rawfilename.c_str());
-	printf("=>Pedestal Filename: %s\n",Pedestal_name.c_str());
-
 	std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
 	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
 
@@ -706,7 +690,6 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 			gSystem->ProcessEvents();
 			Canvas_counter++;
 		}
-
 	}else{
 		printf("Pedestal File structure unrecgnized, only .root allowed\n");
 	}
@@ -903,7 +886,6 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 			tRawFileEntry->AddEntry(
 					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
 					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
-					//printf("%d\n",dialog->GetNumberFromFilename(vRootDataList[file_counter]));
 		}
 		tRawFileEntry->Select(0);
 		tRawFileEntry->MapSubwindows();
