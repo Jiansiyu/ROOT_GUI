@@ -1,0 +1,11 @@
+# list of Micro definations and its function in the compilation
+
+to enable each Micro, need to add the Micro in the makefile with the following rule
+
+gcc -D [Micro]
+
+
+> ::
+
+__GUI_DEBUG_MODE    :: debug mode flag, this well enble the debug display
+

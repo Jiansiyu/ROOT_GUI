@@ -118,7 +118,10 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	// we need to use GetDefault...() to initialize the layout algorithm...
 	Resize();   // resize to default size
 	MapWindow();
+
+#ifdef __GUI_DEBUG_MODE
 	Print();
+#endif
 }
 
 void UserGuiMainFrame::SetMenuFile() {
@@ -195,12 +198,19 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
 	bWorkModeButtonGroup -> SetTitlePos(TGGroupFrame::kCenter);
 	// add the button to the frame
+
 	bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
+
 	bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
+
 	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
+
 	bWorkModeHit = new TGRadioButton(bWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
+
 	bWorkModeAnalysis = new TGRadioButton(bWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
+
 	bWorkModeCalibration = new TGRadioButton(bWorkModeButtonGroup,"&Calibration",C_WORKMODE_CALIBRATION);
+
 	bWorkModeRAW->Associate(this);
 	bWorkModeZeroSubtraction ->Associate(this);
 	bWorkModePedestal ->Associate(this);
@@ -214,7 +224,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 
 	tPedestalFileEntry  =  new TGTextEntry(fDataInputFrame);
 	tPedestalFileEntry->SetTitle("Pedestal(*.root/*.dat)");
-	bPedestalFileButton = new TGTextButton (fDataInputFrame,"Pedestal..",C_RAWFILE_PEDESTAL);
+	bPedestalFileButton = new TGTextButton (fDataInputFrame,"Open..",C_RAWFILE_PEDESTAL);
 	bPedestalFileButton->Associate(this);
 
 	fDataInputFrame->AddFrame(tPedestalFileEntry,new TGLayoutHints(kLHintsExpandX));
@@ -222,7 +232,7 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	tRawFileEntry = new TGListBox(fDataInputFrame);
 	tRawFileEntry->Resize(150,80);
 	tRawFileEntry->AddEntry("*.dat files to be process",0);
-	bRawFileButton = new TGTextButton (fDataInputFrame,"Data..",C_RAWFILE_DAT);
+	bRawFileButton = new TGTextButton (fDataInputFrame,"Open..",C_RAWFILE_DAT);
 	bRawFileButton -> Associate(this);
 
 	fDataInputFrame->AddFrame(tRawFileEntry,new TGLayoutHints(kLHintsLeft|kLHintsExpandX,5,5,5,5));
@@ -254,8 +264,6 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 }
 
 void UserGuiMainFrame::SetStatusBar(){
-
-
 	Pixel_t yellow;
 	fClient->GetColorByName("yellow", yellow);
 	fColorSel = new TGColorSelect(fStatusFrame, yellow, COLORSEL);
@@ -264,7 +272,7 @@ void UserGuiMainFrame::SetStatusBar(){
 	TGVertical3DLine *lStatusbarSeparation0=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation0, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
 
-	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM Analysis Framework Author: Siyu Jian");
+	TGLabel *autor_display= new TGLabel(fStatusFrame,"UVa GEM Analysis Framework @Siyu");
 	fStatusFrame->AddFrame(autor_display,new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,5,5,0,0));
 	TGVertical3DLine *lStatusbarSeparation1=new TGVertical3DLine(fStatusFrame);
 	fStatusFrame->AddFrame(lStatusbarSeparation1, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
@@ -294,7 +302,7 @@ void UserGuiMainFrame::SetStatusBar(){
 }
 
 void UserGuiMainFrame::SetDataFileName(){
-	printf("where am I \n");
+
 }
 
 UserGuiMainFrame::~UserGuiMainFrame() {
@@ -338,16 +346,20 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case C_WORKMODE_RAW:
 				vWorkMode = 'R';
 				SetStatusBarDisplay("Raw mode selected ");
-
-				//printf("Raw mode selected \n");
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
+				SetStatusBarDisplay("ZERO mode selected");
+#ifdef __GUI_DEBUG_MODE
 				printf("ZERO mode selected \n");
+#endif
 				break;
 			case C_WORKMODE_PEDESTAL:
 				vWorkMode = 'P';
+				SetStatusBarDisplay("PEDESTAL mode selected");
+#ifdef __GUI_DEBUG_MODE
 				printf("PEDESTAL mode selected \n");
+#endif
 				break;
 			case C_WORKMODE_HIT:
 				vWorkMode = 'H';
@@ -857,12 +869,12 @@ void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
 				vPedestalDataFileName.clear();
 				vPedestalName=inputfilename;
 
-			}else if(dialog->CheckAppendix(inputfilename,"dat")){
+			}else
+				//if(dialog->CheckAppendix(inputfilename,"dat"))
+			{
 				vPedestalDataFileName=inputfilename;
 				vPedestalROOTFileName.clear();
 				vPedestalName=inputfilename;
-			}else{
-				printf("Unknown data format\n");
 			}
 			std::string filebasename=basename(strdup(vPedestalName.c_str()));
 			tPedestalFileEntry->SetTitle(filebasename.c_str());
@@ -878,7 +890,8 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 			if(dialog->CheckAppendix(RawFilenames[file_counter],"root")){
 				vRootDataList.push_back(RawFilenames[file_counter]);
 			}else{
-				if(dialog->CheckAppendix(RawFilenames[file_counter],"dat")){
+				//if(dialog->CheckAppendix(RawFilenames[file_counter],"dat"))
+				{
 					vRawDataList.push_back(RawFilenames[file_counter]);
 				}
 			}

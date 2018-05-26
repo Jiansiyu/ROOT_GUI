@@ -119,6 +119,7 @@ public:
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
 	ClassDef(UserGuiMainFrame,0);
+
 public:
 	// Interaction functions
 	char GetWorkMode(char & WorkMode);
@@ -126,10 +127,13 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
-	void SetStatusBarDisplay(std::string);
 	void fCanvasDrawRaw(GEM::EventRawStruct);
 	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
 
+	// status bar contro functions
+private:
+	void SetStatusBarDisplay(std::string);
+	void SetStatusBarDisplay(std::string,);
 private:
 	std::string vPedestalName;
 	std::string vPedestalDataFileName;
@@ -159,6 +163,7 @@ public:
 	void SignalSlotTabCanvasRawMPDDraw();
 	void SignalSlotProcessBar();
 	void SignalSlotWorkStatusInfor();
+
 // dialog process
 private:
 	void dMenuOpenFileDialog();
