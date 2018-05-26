@@ -62,6 +62,7 @@
 #include "TH1F.h"
 #include "map"
 #include "GEMInforCenter.h"
+#include "UserGUIDataStructue.h"
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -133,7 +134,8 @@ public:
 	// status bar contro functions
 private:
 	void SetStatusBarDisplay(std::string);
-	void SetStatusBarDisplay(std::string,);
+	void SetStatusBarDisplay(std::string,UserGUI::WorningLevel);
+
 private:
 	std::string vPedestalName;
 	std::string vPedestalDataFileName;

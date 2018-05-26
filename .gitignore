@@ -4,3 +4,4 @@
 *.root
 /Debug/*
 *_rdict.pcm
+*Dic.h

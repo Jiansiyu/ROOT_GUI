@@ -11,18 +11,6 @@
 #include <vector>
 #include <string>
 namespace UserGUI{
-const char *filetype[] = {
-			"ROOT files", "*.root",
-			"Data files", "*.dat",
-			"All files", "*",
-			0, 0
-	};
-
-const char *datfiletype[]={
-		"Data files", "*.dat",
-		"All files", "*",
-					0, 0
-};
 
 enum WorningLevel{
 	WorningLevel_NORMAL,
@@ -32,15 +20,13 @@ enum WorningLevel{
 
 struct WorningColor{
 	WorningColor(){};
-	WorningColor(WorningColor){
-
+	WorningColor(WorningLevel){
 	};
 	TColor GetTColor(){
-
 	}
 };
 
-struct GUIInfor{
+struct GUIInputInfor{
 	char vWorkMode;
 	std::string MapFileName;
 	std::string PedestalDialogString;
@@ -49,8 +35,6 @@ struct GUIInfor{
 };
 
 }
-
-
 
 
 #endif /* USERGUIDATASTRUCTUE_H_ */

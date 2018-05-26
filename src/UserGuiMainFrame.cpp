@@ -350,28 +350,22 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
 				SetStatusBarDisplay("ZERO mode selected");
-#ifdef __GUI_DEBUG_MODE
-				printf("ZERO mode selected \n");
-#endif
 				break;
 			case C_WORKMODE_PEDESTAL:
 				vWorkMode = 'P';
 				SetStatusBarDisplay("PEDESTAL mode selected");
-#ifdef __GUI_DEBUG_MODE
-				printf("PEDESTAL mode selected \n");
-#endif
 				break;
 			case C_WORKMODE_HIT:
 				vWorkMode = 'H';
-				printf("HISTO mode selected \n");
+				SetStatusBarDisplay("Histo mode selected");
 				break;
 			case C_WORKMODE_ANALYSIS:
 				vWorkMode = 'A';
-				printf("Analysis mode selected \n");
+				SetStatusBarDisplay("Analysis mode selected");
 				break;
 			case C_WORKMODE_CALIBRATION:
 				vWorkMode = 'C';
-				printf("Calibration mode selected \n");
+				SetStatusBarDisplay("Calibration mode selected");
 				break;
 			default:
 				break;
@@ -384,7 +378,6 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	case kCM_CHECKBUTTON:
 			switch (parm1) {         //when changed the number control
 				case -1:{
-
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
 						tNumberEntry->SetState(kFALSE);
