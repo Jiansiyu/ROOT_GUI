@@ -17,8 +17,6 @@
 #include "libgen.h"
 #include "string"
 
-
-
 /// gem analysis method
 #include "../analysis/Config.h"
 #include "../analysis/GEMTree.h"
@@ -102,7 +100,7 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	SetWindowName("UVa GEM Analysis Framework");
 	MapSubwindows();
 	// we need to use GetDefault...() to initialize the layout algorithm...
-	Resize();   // resize to default size
+	Resize();   //resize to default size
 	MapWindow();
 
 #ifdef __GUI_DEBUG_MODE
@@ -176,9 +174,27 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 		counter++;
 	}
 }
-void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
 
+void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
+	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
+	if(TabName.size()>=NTabs){
+		int counter=0;
+		for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
+			fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
+			rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
+			// attach the embeded canvas
+			fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+			fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+			cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+			counter++;
+		}
+	}else{
+		exit(EXIT_FAILURE);
+	}
 }
+
 void UserGuiMainFrame::SetWorkZoneButton(){
 
 	bWorkModeButtonGroup   = new TGButtonGroup(fWorkZoneControlFrame,"Work Mode");
@@ -522,12 +538,88 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 	paser->DrawRawDisplay(10);
 }
 
-void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
-#ifdef __SLOT_DEBUG_MODE
-	std::cout<<"catch signal  :"<<event.raw.size()<<std::endl;
-#endif
-	fCanvasDrawRaw(event.raw);
+void UserGuiMainFrame::dMenuOpenFileDialog(){
+		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+		std::string inputfilename=dialog->Browser_file();
+		if(inputfilename!=NULL){
+		printf("OPEN file  %s\n",inputfilename.c_str());
+		}else{
+			printf("on file inputed");
+		}
+		delete dialog;
 }
+
+void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
+		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+		std::string inputfilename=dialog->Browser_file();
+		if(inputfilename!=NULL){
+			if(dialog->CheckAppendix(inputfilename,"root")){
+				vPedestalROOTFileName=inputfilename;
+				vPedestalDataFileName.clear();
+				vPedestalName=inputfilename;
+
+			}else
+				//if(dialog->CheckAppendix(inputfilename,"dat"))
+			{
+				vPedestalDataFileName=inputfilename;
+				vPedestalROOTFileName.clear();
+				vPedestalName=inputfilename;
+			}
+			std::string filebasename=basename(strdup(vPedestalName.c_str()));
+			tPedestalFileEntry->SetTitle(filebasename.c_str());
+		}
+		delete dialog;
+}
+
+void UserGuiMainFrame::dButtonRawOpenFileDialog(){
+	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+	std::vector<std::string> RawFilenames=dialog->Browser_files();
+	if(RawFilenames.size()){
+		for(unsigned int file_counter=0; file_counter<RawFilenames.size();file_counter++){
+			if(dialog->CheckAppendix(RawFilenames[file_counter],"root")){
+				vRootDataList.push_back(RawFilenames[file_counter]);
+			}else{
+					vRawDataList.push_back(RawFilenames[file_counter]);
+			}
+		}
+	}
+	if (vRawDataList.size() || vRootDataList.size()) {
+		tRawFileEntry->RemoveAll();
+		for (unsigned int file_counter = 0; file_counter < vRawDataList.size();
+				file_counter++) {
+			tRawFileEntry->AddEntry(
+					(dialog->GetBaseFileName(vRawDataList[file_counter])).c_str(),
+					file_counter);//dialog->GetNumberFromFilename(vRawDataList[file_counter]));
+		}
+		for (unsigned int file_counter = 0; file_counter < vRootDataList.size();
+				file_counter++) {
+			tRawFileEntry->AddEntry(
+					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
+					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+		}
+		tRawFileEntry->Select(0);
+		tRawFileEntry->MapSubwindows();
+		tRawFileEntry->Layout();
+	}
+}
+
+void UserGuiMainFrame::dMenuSetLoadMapping(){
+	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
+	std::string inputfilename=dialog->Browser_file("");
+	if((!inputfilename.empty()&&(dialog->CheckAppendix(inputfilename,"cfg")))){
+		vMappingName=inputfilename;
+		printf("%s\n",vMappingName.c_str());
+	}
+	delete dialog;
+}
+
+
+void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
+	nStatusBarInfor->SetText(infor.c_str());
+	gSystem->ProcessEvents();
+}
+
+
 
 void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>>  &event){
 	TH1F *h;
@@ -561,10 +653,38 @@ void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int
 }
 
 
-void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
-	nStatusBarInfor->SetText(infor.c_str());
+void UserGuiMainFrame::generalCanvasDraw(std::map<int, std::map<int,TH1F *>> histos,int CanvasID){
+	cfWorkZoneTabCanvas[CanvasID]->Clear();
+	int lCanvasDiv_x=0,lCanvasDiv_y=0;
+	for(auto iter_y = histos.begin();iter_y!=histos.end();iter_y++){
+		if(iter_y->first > lCanvasDiv_y)lCanvasDiv_y=iter_y->first;
+		for(auto iter_x=iter_y->second.begin();iter_x!=iter_y->second.end();iter_x++){
+			if(iter_x->first > lCanvasDiv_x)lCanvasDiv_x=iter_x->first;
+		}
+	}
+	cfWorkZoneTabCanvas[CanvasID]->ResetAttPad();
+	cfWorkZoneTabCanvas[CanvasID]->Divide(lCanvasDiv_x,lCanvasDiv_y);
+
+	int subcanvas_counter=1;
+	for (auto iter_y = histos.begin(); iter_y != histos.end(); iter_y++) {
+		for (auto iter_x = iter_y->second.begin();
+				iter_x != iter_y->second.end(); iter_x++) {
+			cfWorkZoneTabCanvas[CanvasID]->cd(subcanvas_counter++);
+			iter_x->second->Draw();
+		}
+	}
+	cfWorkZoneTabCanvas[CanvasID]->Modified();
+	cfWorkZoneTabCanvas[CanvasID]->Update();
 	gSystem->ProcessEvents();
+};
+
+void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
+#ifdef __SLOT_DEBUG_MODE
+	std::cout<<"catch signal :"<<event.raw.size()<<std::endl;
+#endif
+	fCanvasDrawRaw(event.raw);
 }
+
 //void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 //	if (!rawfilename.empty()) {
 //		printf("Filename: %s\n", rawfilename.c_str());
@@ -635,7 +755,7 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
 
-	std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
+	/*std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
 	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
 
 			InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
@@ -693,12 +813,12 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 	}else{
 		printf("Pedestal File structure unrecgnized, only .root allowed\n");
 	}
-
+*/
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
-	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+/*	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
 	while (iter_filename != Filenames.end()) {
@@ -719,10 +839,11 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Run(-1,savename.c_str());
+	*/
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-	std::ifstream testfile(rawfilename.c_str());
+/*	std::ifstream testfile(rawfilename.c_str());
 	string Pedestal_name= rawfilename;
 	if ((!Pedestal_name.empty())&&testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
 		printf("start pedestal mode\n");
@@ -749,11 +870,11 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 		nStatusBarInfor->SetBackgroundColor(red);
 		nStatusBarInfor->SetText(
 				"Please input the Pedestal file");
-	}
+	}*/
 }
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-	UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
+	/*UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
 	if (rawfilename.size() != 0) {
 		std::ifstream testfile(Pedestal_name.c_str());
 		if ((!testfile.good())|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
@@ -799,11 +920,11 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 					}
 			}
 		}
-	}
+	}*/
 }
 
 void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
-
+/*
 	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
@@ -823,88 +944,5 @@ void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
 	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Calibration",a->GetNumberFromFilename(Filenames[0])));
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Calibration(-1,savename.c_str());
-
-}
-void UserGuiMainFrame::dMenuOpenFileDialog(){
-		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
-		std::string inputfilename=dialog->Browser_file();
-		if(inputfilename!=NULL){
-		printf("OPEN file  %s\n",inputfilename.c_str());
-		}else{
-			printf("on file inputed");
-		}
-		delete dialog;
-}
-
-void UserGuiMainFrame::dButtonPedestalOpenFileDialog(){
-		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
-		std::string inputfilename=dialog->Browser_file();
-		if(inputfilename!=NULL){
-			if(dialog->CheckAppendix(inputfilename,"root")){
-				vPedestalROOTFileName=inputfilename;
-				vPedestalDataFileName.clear();
-				vPedestalName=inputfilename;
-
-			}else
-				//if(dialog->CheckAppendix(inputfilename,"dat"))
-			{
-				vPedestalDataFileName=inputfilename;
-				vPedestalROOTFileName.clear();
-				vPedestalName=inputfilename;
-			}
-			std::string filebasename=basename(strdup(vPedestalName.c_str()));
-			tPedestalFileEntry->SetTitle(filebasename.c_str());
-		}
-		delete dialog;
-}
-
-void UserGuiMainFrame::dButtonRawOpenFileDialog(){
-	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
-	std::vector<std::string> RawFilenames=dialog->Browser_files();
-	if(RawFilenames.size()){
-		for(unsigned int file_counter=0; file_counter<RawFilenames.size();file_counter++){
-			if(dialog->CheckAppendix(RawFilenames[file_counter],"root")){
-				vRootDataList.push_back(RawFilenames[file_counter]);
-			}else{
-				//if(dialog->CheckAppendix(RawFilenames[file_counter],"dat"))
-				{
-					vRawDataList.push_back(RawFilenames[file_counter]);
-				}
-			}
-		}
-	}
-	if (vRawDataList.size() || vRootDataList.size()) {
-		tRawFileEntry->RemoveAll();
-		for (unsigned int file_counter = 0; file_counter < vRawDataList.size();
-				file_counter++) {
-			tRawFileEntry->AddEntry(
-					(dialog->GetBaseFileName(vRawDataList[file_counter])).c_str(),
-					file_counter);//dialog->GetNumberFromFilename(vRawDataList[file_counter]));
-		}
-		for (unsigned int file_counter = 0; file_counter < vRootDataList.size();
-				file_counter++) {
-			tRawFileEntry->AddEntry(
-					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
-					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
-		}
-		tRawFileEntry->Select(0);
-		tRawFileEntry->MapSubwindows();
-		tRawFileEntry->Layout();
-	}
-}
-
-void UserGuiMainFrame::dMenuSetLoadMapping(){
-	UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
-	const char *datfiletype[]={
-				"Mapping files", "*.cfg",
-				"All files", "*",
-							0, 0
-		};
-
-	std::string inputfilename=dialog->Browser_file("",datfiletype);
-	if((!inputfilename.empty()&&(dialog->CheckAppendix(inputfilename,"cfg")))){
-		vMappingName=inputfilename;
-		printf("%s\n",vMappingName.c_str());
-	}
-	delete dialog;
+	*/
 }

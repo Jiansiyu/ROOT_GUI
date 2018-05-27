@@ -223,18 +223,19 @@ private:
 	// read the configure file, and set the default variables
 	void SetDefaultPath();
 	void SaveDefaultPath();   // save the default value
-	void thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries);
+	//void thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries);
 //	void TestFunctions(int i, std::string a);
 public:
 	void fFileBrowse();
 	void SetDataFileName();
-	std::map<std::string,int> GetCanvasNameList();
 
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 /// Main Function
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 private:
-	void generalCanvasDraw(std::map<int, std::map<int,TH1F *>>,int CanvasID);
+	void generalCanvasDraw(std::map<int, std::map<int,TH1F *>>,int CanvasID);  //< Canvas Y Canvas X, Histo
+
+	std::map<std::string,int> GetCanvasNameList();
 
 public:
 	// Interaction functions
@@ -246,7 +247,7 @@ public:
 	void fCanvasDrawRaw(GEM::EventRawStruct);
 	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
 
-	// status bar contro functions
+	// status bar control functions
 private:
 	void SetStatusBarDisplay(std::string);
 	void SetStatusBarDisplay(std::string,UserGUI::WorningLevel);
@@ -263,8 +264,9 @@ private:
 	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
 	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
 	std::string vMappingName;
-private :
 
+
+private :
 	void fRawModeProcess(int entries, std::string rawfilename);
 	void fPedestalModeProcess(int entries, std::string rawfilename);
 	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);

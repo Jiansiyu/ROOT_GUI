@@ -1,6 +1,5 @@
 /*
  * GEMStructue.h
- *
  *  Created on: May 22, 2018
  *      Author: newdriver
  */
@@ -22,12 +21,14 @@
 
 namespace GEM{
 
+//Map need to load before hand, the load efficiency should not be a bit trouble ?
+//
+
 #define CRATE_SHIFT 20  // no larger than 4 in sbs
 #define MPDID_SHIFT 16  // no larger than 32, 5 bits
 #define ADCID_SHIFT 8   // no larger than 16, 4 bits
 #define LAYID_SHIFT
 #define GEMID_SHIFT
-
 
 
 template <class T>
@@ -313,11 +314,9 @@ struct apvData{
 	std::vector<gemChannelData> data;
 };
 
-
 struct EventDataRaw {
 	int64_t evtID;
 	std::vector<gemChannelData> gem_data;
-
 };
 
 struct EventRawStruct{
