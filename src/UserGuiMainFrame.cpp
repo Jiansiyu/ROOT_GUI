@@ -382,9 +382,9 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				case -1:{
 					vEventNumber=tNumberEntry->GetNumberEntry()->GetIntNumber();
 					if((vWorkMode=='R')&&(vRawDataList.size()!=0)){
-						tNumberEntry->SetState(kFALSE);
+						//tNumberEntry->SetState(kFALSE);
 						fRawModeProcess(vEventNumber,vRawDataList[tRawFileEntry->GetSelected()].c_str());
-						tNumberEntry->SetState(kTRUE);
+						//tNumberEntry->SetState(kTRUE);
 						gSystem->ProcessEvents();
 					}
 					string Pedestal_name= vPedestalName;
@@ -604,7 +604,7 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 		}
 
 		for (auto name :vRawDataList ){
-			rawPaserList[name.c_str()]=new UserGuiGeneralDialogProcess();
+			rawPaserList[name.c_str()]=new GEMDataParserM4V();
 			SetStatusBarDisplay(Form("Reading File"));
 			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
 			SetStatusBarDisplay(Form("Reading File Done!"));
