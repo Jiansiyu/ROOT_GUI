@@ -48,6 +48,11 @@ OBJS	+= $(addprefix ./bin/GEMDecoder/, $(notdir ${patsubst %.cpp, %.o, ${wildcar
 OBJS	+= $(addprefix ./bin/GUIDialog/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./GUIDialog/*.cpp}}))
 OBJS	+= $(addprefix ./bin/src/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./src/*.cpp}}))
 
+OBJS	+= $(addprefix ./bin/DecoderMPD4_VME/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./DecoderMPD4_VME/*.cpp}}))
+
+OBJS    += ./bin/DecoderMPD4_VME/GEMDataParserM4VDic.o
+OBJS    += ./bin/src/UserGuiMainFrameDic.o
+
 TARGET = ROOT_GUI
 all: ${TARGET}
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -88,7 +93,7 @@ ROOT_GUI: ${OBJS}
 	@echo 'Finish building: $<'
 	@echo
 	
-./bin/GUIDialog/%.o : ./GUIDialog/%.cpp
+./bin/GUIDialog/%.o : ./GUIDialog/%.cpp 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -100,10 +105,41 @@ ROOT_GUI: ${OBJS}
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
+	@echo
+		
+./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cpp
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	@echo 'Finish building: $<'
 	@echo	
-	
+
+./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cxx
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
+	@echo 'Finish building: $<'
+	@echo
+./DecoderMPD4_VME/GEMDataParserM4VDic.cxx: ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
+	@echo 'Building file: $<'
+	@echo 'Invoking: rootcling Compiler'
+	rootcint -f ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx -c ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
+
+
+./bin/src/%.o : ./src/%.cxx
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
+	@echo 'Finish building: $<'
+	@echo
+
+./src/UserGuiMainFrameDic.cxx : ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
+	@echo 'Building file: $@'
+	@echo 'Invoking: rootcling Compiler'
+	rootcint -f ./src/UserGuiMainFrameDic.cxx -c ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
+
 PHONY: clean
 
 clean:
-	${RM} ${OBJS} ${TARGET} *~	
+	${RM} ${OBJS} ${TARGET} *~ ./src/UserGuiMainFrameDic.cxx ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx	
 	

@@ -1,6 +1,5 @@
 /*
  * GEMStructue.h
- *
  *  Created on: May 22, 2018
  *      Author: newdriver
  */
@@ -18,14 +17,18 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "TH1F.h"
+
 namespace GEM{
+
+//Map need to load before hand, the load efficiency should not be a bit trouble ?
+//
 
 #define CRATE_SHIFT 20  // no larger than 4 in sbs
 #define MPDID_SHIFT 16  // no larger than 32, 5 bits
 #define ADCID_SHIFT 8   // no larger than 16, 4 bits
 #define LAYID_SHIFT
 #define GEMID_SHIFT
-
 
 
 template <class T>
@@ -198,13 +201,20 @@ struct gemAxisMap{
 	}
 };
 
+// single GEM detector
 struct gemModuleMap{
 	int layer;
 	int GEMID;
 	std::vector<gemAxisMap> gemAxis;
+	gemModuleMap(){
+		layer=-1;
+		GEMID=-1;
+		gemAxis.clear();
+	};
 
 };
 
+// multi GEM detector on one layer
 struct GEMLayerMap{
 	int layer;
 	std::vector<gemModuleMap> gemModules;
@@ -268,6 +278,60 @@ public:
 	}
 	std::vector<gemModuleMap> GetGEMModuleList();
 };
+
+struct gemChannelAddr{
+	int layer;
+	int GEMID;
+	int mpdID;
+	int ADCID;
+	int stripid;
+	int pos;
+	gemChannelAddr(){};
+	gemChannelAddr(
+			int layer,
+			int GEMID,
+			int mpdID,
+			int ADCID,
+			int stripid,
+			int pos){};
+
+	void SetAddress(){
+
+	};
+};
+
+// GEM data structure
+struct gemChannelData{
+	gemChannelAddr addr;
+	std::vector<int> data;  // buffer all the time samples in one single channel
+};
+
+struct apvData{
+	int layer;
+	int GEMID;
+	int mpdID;
+	int ADCID;
+	std::vector<gemChannelData> data;
+};
+
+struct EventDataRaw {
+	int64_t evtID;
+	std::vector<gemChannelData> gem_data;
+};
+
+struct EventRawStruct{
+	// mpdID, ADCID
+	std::map<int,std::map<int,TH1F*>> histos;
+	std::map<int, std::map<int,std::vector<int>>> raw;
+	EventRawStruct(){};
+	EventRawStruct(std::map<int,std::map<int,TH1F*>> &histos){
+		this->histos = histos;
+	}
+	EventRawStruct(std::map<int, std::map<int,std::vector<int>>> &raw){
+		this->raw = raw;
+	}
+};
+
 }
 
 #endif /* GEMSTRUCTUE_H_ */

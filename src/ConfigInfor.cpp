@@ -67,6 +67,15 @@ void ConfigInfor::ReadConfig(std::string fname){
 		} catch (libconfig::SettingNotFoundException &npex) {
 		}
 
+		try{
+			const libconfig::Setting &AnalysisConfig = GEMConfig["DataAnalysisConfig"];
+			AnalysisConfig.lookupValue("PedestalFname",analysisconfig.Pedestalfname);
+			AnalysisConfig.lookupValue("ZeroSubtrCutSigma",analysisconfig.ZeroSubtrCutSigma);
+			AnalysisConfig.lookupValue("DecodeWhenLoad",analysisconfig.DecodeWhenLoading);
+			AnalysisConfig.lookupValue("RawStripPosCorrection",analysisconfig.RawStripPosCorrection);
+		}catch (libconfig::SettingNotFoundException &npex) {
+		}
+
 	} catch (libconfig::SettingNotFoundException &nfex) {
 	}
 }
