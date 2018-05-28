@@ -529,13 +529,18 @@ void UserGuiMainFrame::bButtonConfirmProcess(){
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
+		{
+			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
+			rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
+		}
 
-	GEMDataParserM4V *paser=new GEMDataParserM4V();
-	SetStatusBarDisplay(Form("Reading File"));
-	paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
-	SetStatusBarDisplay(Form("Read done! ready for select the event..."));
-	paser->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
-	paser->DrawRawDisplay(10);
+	//GEMDataParserM4V *paser=new GEMDataParserM4V();
+	//SetStatusBarDisplay(Form("Reading File"));
+	//paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
+	//SetStatusBarDisplay(Form("Read done! ready for select the event..."));
+	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
+	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
 }
 
 void UserGuiMainFrame::dMenuOpenFileDialog(){
@@ -596,6 +601,13 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 			tRawFileEntry->AddEntry(
 					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
 					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
+		}
+
+		for (auto name :vRawDataList ){
+			rawPaserList[name.c_str()]=new UserGuiGeneralDialogProcess();
+			SetStatusBarDisplay(Form("Reading File"));
+			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
+			SetStatusBarDisplay(Form("Reading File Done!"));
 		}
 		tRawFileEntry->Select(0);
 		tRawFileEntry->MapSubwindows();

@@ -18,28 +18,45 @@ namespace GEM {
 // ADCID     4 bit
 // MPDID     7 bit
 // CrateID   8 bit
+// need the 0xff term to be the broad mode, to select all the MPDs on the Crate \
+or all the apvs on the MPDs
 
 #define GEM_CHANNELID_SIZE 8
-#define GEM_ADCID_SIZE     4
+#define GEM_ADCID_SIZE     8
 #define GEM_MPDID_SIZE     8
 #define GEM_CRATEID_SIZE   8
+
+
 
 #define GEM_CHANNELID_SHIFT 0
 #define GEM_ADCID_SHIFT     GEM_CHANNELID_SIZE
 #define GEM_MPDID_SHIFT     GEM_CHANNELID_SIZE+GEM_ADCID_SIZE
 #define GEM_CRATEID_SHIFT   GEM_CHANNELID_SIZE+GEM_ADCID_SIZE+GEM_MPDID_SIZE
 
-#define GEM_CHANNELID_POS  0x000000ff
-#define GEM_ADCID_POS	   0x0000000f<<GEM_ADCID_SHIFT
+#define GEM_CHANNELID_POS  0xff
+#define GEM_ADCID_POS	   0xff<<GEM_ADCID_SHIFT
 #define GEM_MPDID_POS	   0xff<<GEM_MPDID_SHIFT
 #define GEM_CRATEID_POS    0xff<<GEM_CRATEID_SHIFT
 
 
 template <class T>
 T GetUID(T CrateID,T mpdID, T adcID,T channelID){
+	if(CrateID == -1){
+		CrateID=GEM_CRATEID_POS>>GEM_CRATEID_SHIFT;
+	}
+	if( mpdID==-1){
+		mpdID=GEM_MPDID_POS>>GEM_MPDID_SHIFT;
+	}
+	if(adcID ==-1){
+		adcID=GEM_ADCID_POS>>GEM_ADCID_SHIFT;
+	}
+	if(channelID == -1){
+		channelID=GEM_CHANNELID_POS>>GEM_CHANNELID_SHIFT;
+	}
 	return ((CrateID << GEM_CRATEID_SHIFT) |
 			(mpdID   << GEM_MPDID_SHIFT)   |
-			(adcID   << GEM_ADCID_SHIFT));
+			(adcID   << GEM_ADCID_SHIFT))|
+			channelID;
 }
 
 struct gemChannelAddr{
@@ -75,10 +92,27 @@ struct gemEventRaw{
 	std::vector<gemChannelData> gem_data;
 	gemEventRaw(){};
 	gemEventRaw(std::vector<gemChannelData> &data){
-
+		gem_data.clear();
+		gem_data.insert(gem_data.begin(),data.begin(),data.end());
 	};
 
-}
+	std::vector<gemChannelData> GetDatasonMPD(int16_t CrateID,int16_t mpdID){
+//		return GetChannelData(GetUID(CrateID,mpdID,0,0))
+	}
+private:
+
+	std::vector<gemChannelData> & GetChannelData(int32_t uid){
+		std::vector<gemChannelData> data;
+		for(auto gem : gem_data){
+			if(gem.addr.UID&uid){
+				data.push_back(gem);
+			}
+		}
+		data.shrink_to_fit();
+		return data;
+	}
+
+};
 
 
 }  // namespace GEM

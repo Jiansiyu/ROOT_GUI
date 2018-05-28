@@ -63,6 +63,8 @@
 #include "map"
 #include "GEMInforCenter.h"
 #include "UserGUIDataStructue.h"
+#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
+
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -265,7 +267,8 @@ private:
 	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
 	std::string vMappingName;
 
-
+private:
+	std::map<std::string,GEMDataParserM4V *> rawPaserList;
 private :
 	void fRawModeProcess(int entries, std::string rawfilename);
 	void fPedestalModeProcess(int entries, std::string rawfilename);
