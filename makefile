@@ -36,7 +36,13 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 
 CXXFLAGS  +=${ROOTCFLAGS} -I${CODA}/Linux-x86_64/include
 LDFLAGS	  +=${ROOTLDFLAGS}
-LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${CODA}/Linux-x86_64/lib -levioxx -levio -lexpat 
+
+ifeq ($(TARGETOS), Linux)
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat -levioxx -levio  
+else
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}/libevioxx.dylib ${EVIO_LIB}/libevio.dylib 
+endif
+
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
 LINKOPTION += -pthread -lm -ldl -lconfig++
 

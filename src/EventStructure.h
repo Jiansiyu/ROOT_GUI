@@ -27,7 +27,6 @@ or all the apvs on the MPDs
 #define GEM_CRATEID_SIZE   8
 
 
-
 #define GEM_CHANNELID_SHIFT 0
 #define GEM_ADCID_SHIFT     GEM_CHANNELID_SIZE
 #define GEM_MPDID_SHIFT     GEM_CHANNELID_SIZE+GEM_ADCID_SIZE
@@ -64,7 +63,8 @@ struct gemChannelAddr{
 	int16_t mpdID;
 	int16_t adcID;
 	int16_t channelID;
-	int32_t UID;
+	uint32_t UID;
+
 	gemChannelAddr(){};
 	gemChannelAddr(
 			int16_t Crateid,
