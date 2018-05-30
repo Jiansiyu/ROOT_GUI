@@ -66,7 +66,8 @@ THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 ROOT_GUI: ${OBJS} 
 	@echo ${THIS_DIR}
 	@echo ${OBJS}
-	@echo 'Building target: $@' 
+	@echo 'Building target: $@'
+	@mkdir -p $(@D)
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
 	@echo 'Finish building: $<'
 	@echo
@@ -74,6 +75,7 @@ ROOT_GUI: ${OBJS}
 ./bin/analysis/%.o : ./analysis/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
@@ -81,6 +83,7 @@ ROOT_GUI: ${OBJS}
 ./bin/analysis/%.o : ./analysis/%.C
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo	
@@ -88,6 +91,7 @@ ROOT_GUI: ${OBJS}
 ./bin/analysis/%.o : ./analysis/%.cxx
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
@@ -95,6 +99,7 @@ ROOT_GUI: ${OBJS}
 ./bin/GEMDecoder/%.o : ./GEMDecoder/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
@@ -102,6 +107,7 @@ ROOT_GUI: ${OBJS}
 ./bin/GUIDialog/%.o : ./GUIDialog/%.cpp 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
@@ -109,6 +115,7 @@ ROOT_GUI: ${OBJS}
 ./bin/src/%.o : ./src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
@@ -116,6 +123,7 @@ ROOT_GUI: ${OBJS}
 ./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo	
@@ -135,6 +143,7 @@ ROOT_GUI: ${OBJS}
 ./bin/src/%.o : ./src/%.cxx
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
 	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
 	@echo 'Finish building: $<'
 	@echo
