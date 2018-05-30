@@ -16,6 +16,7 @@
 
 #include "string.h"
 #include "vector"
+#include <libgen.h>
 
 #include "UserGuiGeneralDialogProcess.h"
 

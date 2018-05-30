@@ -21,7 +21,7 @@ srf         =  c cpp cxx C CPP
 
 #------------------------------------------------------------------------------
 # general make file configuration
-CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
+CC       = g++  -std=c++0x -pthread -O3 -g3 #-Wall
 
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -34,9 +34,9 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
-CXXFLAGS  +=${ROOTCFLAGS} -I${CODA}/Linux-x86_64/include
+CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC}
 LDFLAGS	  +=${ROOTLDFLAGS}
-LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${CODA}/Linux-x86_64/lib -levioxx -levio -lexpat 
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}/libevioxx.dylib ${EVIO_LIB}/libevio.dylib
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
 LINKOPTION += -pthread -lm -ldl -lconfig++
 
@@ -61,6 +61,7 @@ ROOT_GUI: ${OBJS}
 	@echo
 
 ./bin/analysis/%.o : ./analysis/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -68,6 +69,7 @@ ROOT_GUI: ${OBJS}
 	@echo
 	
 ./bin/analysis/%.o : ./analysis/%.C
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -75,6 +77,7 @@ ROOT_GUI: ${OBJS}
 	@echo	
 	
 ./bin/analysis/%.o : ./analysis/%.cxx
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -82,6 +85,7 @@ ROOT_GUI: ${OBJS}
 	@echo
 	
 ./bin/GEMDecoder/%.o : ./GEMDecoder/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -89,6 +93,7 @@ ROOT_GUI: ${OBJS}
 	@echo
 	
 ./bin/GUIDialog/%.o : ./GUIDialog/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
@@ -96,6 +101,7 @@ ROOT_GUI: ${OBJS}
 	@echo
 	
 ./bin/src/%.o : ./src/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
