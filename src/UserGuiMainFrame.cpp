@@ -604,7 +604,7 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 		}
 
 		for (auto name :vRawDataList ){
-			rawPaserList[name.c_str()]=new UserGuiGeneralDialogProcess();
+			rawPaserList[name.c_str()]=new GEMDataParserM4V();
 			SetStatusBarDisplay(Form("Reading File"));
 			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
 			SetStatusBarDisplay(Form("Reading File Done!"));
