@@ -26,6 +26,12 @@ struct DAQConfig{
 	bool OnlinePedestalSubtraction;
 };
 
+struct AnalysisConfig{
+	std::string Pedestalfname;
+	bool DecodeWhenLoading;
+	int ZeroSubtrCutSigma;
+	bool RawStripPosCorrection;
+};
 
 }
 

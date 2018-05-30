@@ -33,7 +33,7 @@ UserGuiGeneralDialogProcess::~UserGuiGeneralDialogProcess() {
 
 // set or read the default path for the browser diaglog
 std::string UserGuiGeneralDialogProcess::DefaultPath(std::string setpath ){
-	if(setpath==NULL){
+	if(setpath.empty()){
 		return pDefaultPath;
 	}else{
 		pDefaultPath=setpath;
@@ -55,7 +55,7 @@ std::string UserGuiGeneralDialogProcess::Browser_file() {
 	fi.fFileTypes = filetype;
 	fi.fIniDir = StrDup(dir);
 	new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-	printf("where am I 0\n");
+
 	if (fi.fMultipleSelection && fi.fFileNamesList) {
 		TObjString *el;
 		TIter next(fi.fFileNamesList);
@@ -65,9 +65,7 @@ std::string UserGuiGeneralDialogProcess::Browser_file() {
 
 		}
 	} else {
-		printf("where am I 2\n");
 		if (fi.fFilename != NULL) {
-			printf("where am I 3\n");
 			std::string filename = (fi.fFilename);
 			std::string FileFullName = filename;
 			tRawFileList.push_back(FileFullName);
@@ -162,7 +160,6 @@ std::string UserGuiGeneralDialogProcess::Browser_file(std::string path,const cha
 		while ((el = (TObjString *) next())) {
 			std::string filename(el->GetString().Data());
 			tRawFileList.push_back(filename);
-
 		}
 	}else if(fi.fFilename != NULL) {
 		std::string filename = (fi.fFilename);
@@ -267,7 +264,6 @@ std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string 
 		while ((el = (TObjString *) next())) {
 			std::string filename(el->GetString().Data());
 			tRawFileList.push_back(filename);
-
 		}
 	}else if(fi.fFilename != NULL) {
 		std::string filename = (fi.fFilename);
@@ -275,8 +271,8 @@ std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(std::string 
 		tRawFileList.push_back(FileFullName);
 	}
 	return tRawFileList;
-
 }
+
 std::vector<std::string> UserGuiGeneralDialogProcess::Browser_files(const char *filetype_in[]) {
 	std::vector<std::string>tRawFileList;
 	static TString dir(pDefaultPath.c_str());

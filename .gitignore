@@ -2,4 +2,6 @@
 *.o
 *.d
 *.root
-/Debug/
+/Debug/*
+*_rdict.pcm
+*Dic.h

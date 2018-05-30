@@ -62,6 +62,9 @@
 #include "TH1F.h"
 #include "map"
 #include "GEMInforCenter.h"
+#include "UserGUIDataStructue.h"
+#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
+
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -107,6 +110,7 @@ enum ETestCommandIdentifiers {
 };
 
 class UserGuiMainFrame: public TGMainFrame {
+
 public:
 	UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h);
 	virtual ~UserGuiMainFrame();
@@ -114,48 +118,18 @@ public:
 	virtual void CloseWindow();
 	virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
 
-	GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
+	ClassDef(UserGuiMainFrame,0);
 
-public:
-	// Interaction functions
-	char GetWorkMode(char & WorkMode);
-	std::vector<std::string > GetProcessList();  // return the raw data list
-	std::string GetPedestalFileName();
-	int GetCurrentEventID();                      // Get the current Evnt id
-	int SetCurrentEventID();
 
-private:
-	std::string vPedestalName;
-	std::string vPedestalDataFileName;
-	std::string vPedestalROOTFileName;
-	std::vector<std::string> vRawDataList;
-	std::vector<std::string> vRootDataList;
-	char vWorkMode;
-	long int vEventNumber;
-
-	// display buffer
-	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
-	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
-
-	std::string vMappingName;
-private :
-
-	void fRawModeProcess(int entries, std::string rawfilename);
-	void fPedestalModeProcess(int entries, std::string rawfilename);
-	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
-	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
-	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
-	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
-	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
 // dialog process
 private:
 	void dMenuOpenFileDialog();
 	void dButtonPedestalOpenFileDialog();
 	void dButtonRawOpenFileDialog();
 	void dMenuSetLoadMapping();
-	///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
+
 
 private:
 	void gKCMMenuConfirmProcess(Long_t parm1);
@@ -179,8 +153,9 @@ private:
 	TGCompositeFrame *fWorkZoneTabSubFrame[50];
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
+	GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
 	int NTabs=gemInfor->GetGEMdetectorMap().GetMPDNumber();
-
+	std::map<std::string,int> rawCanvasMPDTabCorrolation;
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;
 
@@ -243,7 +218,6 @@ private:
 	void SetWorkZone();    // set the workspace
 	void SetWorkZoneTab(unsigned int NTabs=3);
 	void SetWorkZoneTab(unsigned int NTabs,std::vector<std::string>);   // create tab and set the names
-
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
 	void SetStatusBar();
@@ -251,11 +225,59 @@ private:
 	// read the configure file, and set the default variables
 	void SetDefaultPath();
 	void SaveDefaultPath();   // save the default value
-	void thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries);
+	//void thrHitRun(std::string rawfilename,std::string pedestalname, std::string mappingfilename,int entries);
 //	void TestFunctions(int i, std::string a);
 public:
 	void fFileBrowse();
 	void SetDataFileName();
+
+///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
+/// Main Function
+///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
+private:
+	void generalCanvasDraw(std::map<int, std::map<int,TH1F *>>,int CanvasID);  //< Canvas Y Canvas X, Histo
+
+	std::map<std::string,int> GetCanvasNameList();
+
+public:
+	// Interaction functions
+	char GetWorkMode(char & WorkMode);
+	std::vector<std::string > GetProcessList();  // return the raw data list
+	std::string GetPedestalFileName();
+	int GetCurrentEventID();                      // Get the current Evnt id
+	int SetCurrentEventID();
+	void fCanvasDrawRaw(GEM::EventRawStruct);
+	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
+
+	// status bar control functions
+private:
+	void SetStatusBarDisplay(std::string);
+	void SetStatusBarDisplay(std::string,UserGUI::WorningLevel);
+
+private:
+	std::string vPedestalName;
+	std::string vPedestalDataFileName;
+	std::string vPedestalROOTFileName;
+	std::vector<std::string> vRawDataList;
+	std::vector<std::string> vRootDataList;
+	char vWorkMode;
+	long int vEventNumber;
+	// display buffer
+	std::map<int,std::map<int,TH1F*>> dRawHistoBuffer;
+	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
+	std::string vMappingName;
+
+private:
+	std::map<std::string,GEMDataParserM4V *> rawPaserList;
+private :
+	void fRawModeProcess(int entries, std::string rawfilename);
+	void fPedestalModeProcess(int entries, std::string rawfilename);
+	void fZeroSupressionProcess(int entries,std::string Pedestal_name, std::string rawfilename);
+	void fHitModeProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
+	void fHitModeThreadProcess(int entries,std::string Pedestal_name, std::vector<std::string> rawfilename );
+	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
+	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
+
 
 };
 
