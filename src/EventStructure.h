@@ -38,6 +38,11 @@ or all the apvs on the MPDs
 #define GEM_CRATEID_POS    0xff<<GEM_CRATEID_SHIFT
 
 
+// @param CrateID/SSPid: used for the crate identification
+// @param mpdID
+// @param adcID
+// @param channelID
+// id set the param to -1 means select all the modules
 template <class T>
 T GetUID(T CrateID,T mpdID, T adcID,T channelID){
 	if(CrateID == -1){
@@ -56,6 +61,25 @@ T GetUID(T CrateID,T mpdID, T adcID,T channelID){
 			(mpdID   << GEM_MPDID_SHIFT)   |
 			(adcID   << GEM_ADCID_SHIFT))|
 			channelID;
+}
+template <class T>
+T getMPDID(T uid){
+	return (uid & GEM_MPDID_POS)>>GEM_MPDID_SHIFT;
+}
+
+template <class T>
+T getADCID(T uid){
+	return (uid & GEM_ADCID_POS)>>GEM_ADCID_SHIFT;
+}
+
+template <class T>
+T getChannelID(T uid){
+	return (uid&GEM_CHANNELID_POS)>>GEM_CHANNELID_SHIFT;
+}
+
+template <class T>
+T getCrateID(T uid){
+	return (uid & GEM_CRATEID_POS)>>GEM_CRATEID_SHIFT;
 }
 
 struct gemChannelAddr{
@@ -99,12 +123,14 @@ struct gemEventRaw{
 	std::vector<gemChannelData> GetDatasonMPD(int16_t CrateID,int16_t mpdID){
 //		return GetChannelData(GetUID(CrateID,mpdID,0,0))
 	}
+	
 private:
 
 	std::vector<gemChannelData> & GetChannelData(int32_t uid){
 		std::vector<gemChannelData> data;
 		for(auto gem : gem_data){
-			if(gem.addr.UID&uid){
+			// this is not right
+			if(gem.addr.UID&uid==gem.addr.UID){
 				data.push_back(gem);
 			}
 		}
