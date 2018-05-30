@@ -36,6 +36,7 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 
 CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC}
 LDFLAGS	  +=${ROOTLDFLAGS}
+ifeq ($)
 LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}/libevioxx.dylib ${EVIO_LIB}/libevio.dylib
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
 LINKOPTION += -pthread -lm -ldl -lconfig++
