@@ -34,7 +34,7 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
-CXXFLAGS  +=${ROOTCFLAGS} -I${CODA}/Linux-x86_64/include
+CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC}
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
