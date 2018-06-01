@@ -47,28 +47,58 @@ bool GEMDataParserM4V::ParserRawDat(){
 					iter != mpdEventList->end(); iter++){
 				vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
 				if((*iter)->tag == MPD_tag){
-
 					int iend;
 					int vec_size=(*block_vec).size();
-					std::cout <<"Vectsize :"<< vec_size<<"  Eventid : "<<evtID << std::endl;
+					//std::cout <<"Vectsize :"<< vec_size<<"  Eventid : "<<evtID << std::endl;
 					for(iend =1 ; iend < vec_size; iend++){
 						uint32_t tag = (((*block_vec)[iend])>>24)&0xf8;
 						if(tag==0x90||tag==0x88) break;
 					}
-
 					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
 					EventRaw[evtID]=decoder->GetAPVRawData();
 					//delete decoder;
 					evtID++;
 				}
 			}
-
 		}
-
 	} catch (evio::evioException e) {
 		std::cerr << e.toString() << std::endl << std::endl;
 		exit(EXIT_FAILURE);
 	}
+}
 
+void PedestalMode(std::string fname,std::string savename){
+	try {
+		evio::evioFileChannel chan(fname.c_str(),"r");
+		chan.open();
+		int evtID=0;
+		while(chan.read() && evtID <=5000){
+			evio::evioDOMTree event(chan);
+			evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
 
+			for(auto iter = mpdEventList->begin();
+					iter != mpdEventList->end(); iter++){
+				vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
+				if((*iter)->tag == MPD_tag){
+					int iend;
+					int vec_size=(*block_vec).size();
+					//std::cout <<"Vectsize :"<< vec_size<<"  Eventid : "<<evtID << std::endl;
+					for(iend =1 ; iend < vec_size; iend++){
+						uint32_t tag = (((*block_vec)[iend])>>24)&0xf8;
+						if(tag==0x90||tag==0x88) break;
+					}
+					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
+					//EventRaw[evtID]=decoder->GetAPVRawData();
+
+					//TODO
+
+					//delete decoder;
+					evtID++;
+				}
+			}
+		}
+	} catch (evio::evioException e) {
+		std::cerr << e.toString() << std::endl << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }

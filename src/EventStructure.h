@@ -9,7 +9,7 @@
 #define EVENTSTRUCTURE_H_
 #include <cstdint>
 #include <vector>
-
+#include <unordered_map>
 namespace GEM {
 
 // uid componet
@@ -114,18 +114,21 @@ struct gemChannelData{
 
 struct gemEventRaw{
 	std::vector<gemChannelData> gem_data;
+	std::unordered_map<int16_t,>
 	gemEventRaw(){};
 	gemEventRaw(std::vector<gemChannelData> &data){
 		gem_data.clear();
 		gem_data.insert(gem_data.begin(),data.begin(),data.end());
 	};
 
-	std::vector<gemChannelData> GetDatasonMPD(int16_t CrateID,int16_t mpdID){
-//		return GetChannelData(GetUID(CrateID,mpdID,0,0))
-	}
+	std::vector<gemChannelData> GetDataMPD(int16_t CrateID,int16_t mpdID){
+	};
 	
-private:
+	std::vector<gemChannelData> GetData(int16_t CrateID,int16_t mpdID=-1,int16_t APVID=-1,int16_t ChannelID=-1){
 
+	}
+
+private:
 	std::vector<gemChannelData> & GetChannelData(int32_t uid){
 		std::vector<gemChannelData> data;
 		for(auto gem : gem_data){

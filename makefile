@@ -21,7 +21,7 @@ srf         =  c cpp cxx C CPP
 
 #------------------------------------------------------------------------------
 # general make file configuration
-CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
+CC       = g++ #-std=c++0x -pthread -O3 -g3 #-Wall
 
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -34,7 +34,7 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
-CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC}
+CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC} -I./
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
@@ -60,7 +60,9 @@ OBJS    += ./bin/DecoderMPD4_VME/GEMDataParserM4VDic.o
 OBJS    += ./bin/src/UserGuiMainFrameDic.o
 
 TARGET = ROOT_GUI
+
 all: ${TARGET}
+
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ROOT_GUI: ${OBJS} 
@@ -69,7 +71,7 @@ ROOT_GUI: ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
-	@echo 'Finish building: $<'
+	@echo 'Finish building: $@'
 	@echo
 
 ./bin/analysis/%.o : ./analysis/%.cpp
@@ -134,11 +136,11 @@ ROOT_GUI: ${OBJS}
 	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
 	@echo 'Finish building: $<'
 	@echo
+	
 ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx: ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: rootcling Compiler'
 	rootcint -f ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx -c ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
-
 
 ./bin/src/%.o : ./src/%.cxx
 	@echo 'Building file: $<'

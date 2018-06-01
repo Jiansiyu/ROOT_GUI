@@ -534,11 +534,6 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
 			rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
 		}
-
-	//GEMDataParserM4V *paser=new GEMDataParserM4V();
-	//SetStatusBarDisplay(Form("Reading File"));
-	//paser->OpenFileIn("/home/newdriver/Research/Eclipse_Workspace/oxygen/ROOT_GUI/Data/mpd_ssp_2726.dat.0");
-	//SetStatusBarDisplay(Form("Read done! ready for select the event..."));
 	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
 	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
 }
@@ -830,7 +825,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
-/*	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
 	while (iter_filename != Filenames.end()) {
@@ -851,10 +846,11 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Run(-1,savename.c_str());
-	*/
+
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
+
 /*	std::ifstream testfile(rawfilename.c_str());
 	string Pedestal_name= rawfilename;
 	if ((!Pedestal_name.empty())&&testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {

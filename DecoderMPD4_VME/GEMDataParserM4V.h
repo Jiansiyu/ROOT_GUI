@@ -41,8 +41,10 @@ public:
 
 	}
 
+	void PedestalMode(std::string fname,std::string savename);
 	// signal slot communication mechanism
 	void GEMDrawRaw(GEM::EventRawStruct);//*SIGNAL*
+	void GEMDrawZeroSub();               //*SIGNAL*
 private:
 
 	std::string RawDatfileName;

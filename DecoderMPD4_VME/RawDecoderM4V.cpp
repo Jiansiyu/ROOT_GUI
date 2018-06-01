@@ -113,8 +113,63 @@ RawDecoderM4V::RawDecoderM4V(std::vector<uint32_t> &buffer, int start, int end) 
 			delete h;
 		}
 	}
-
  }
+
+std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStripTsAdcMap(){
+
+	std::map<int,std::map<int,std::map<int,std::vector<int>>>> seperated=SeperateSamples(mAPVRawData);
+
+	for(auto iter_mpd=seperated.begin();iter_mpd!=seperated.end();iter_mpd++){
+		for(auto iter_apv=iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
+			for(auto iter_ts=iter_apv->second.begin();iter_ts!=iter_apv->second.end();iter_ts++){
+				std::vector<int> frame_sort;
+				frame_sort.insert(frame_sort.begin(),iter_ts->second.begin(),(iter_ts->second.end()--));
+				std::sort(frame_sort.begin(),frame_sort.end());
+				int commonmode=0;
+				for(int k = 28 ; k < 100; k ++){
+					commonmode+=frame_sort[k];
+				}
+				commonmode=commonmode/72;
+				for(auto element : iter_ts->second){
+					element=element-commonmode;
+					std::cout<<__FUNCTION__<<__LINE__<<"  Check FUNCTION "<<element<<std::endl;
+				}
+			}
+		}
+	}
+	return seperated;
+ }
+
+//!         MPD          APV       129*timesamples
+//!std::map<int, std::map<int, std::vector<int>>>
+//!
+//!
+std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::SeperateSamples(std::map<int, std::map<int, std::vector<int>>> data){
+	std::map<int,std::map<int,std::map<int,std::vector<int>>>>　data_return;
+	for(auto iter_mpd=data.begin();iter_mpd!=data.end();iter_mpd++){
+		for(auto iter_apv=iter_mpd->second.begin();
+				iter_apv!=iter_mpd->second.end();iter_apv++){
+			data_return[iter_mpd->first][iter_apv->first]=SeperateSamples(iter_apv->second);
+		}
+	}
+	return data_return;
+}
+
+std::map<int,std::vector<int>> RawDecoderM4V::SeperateSamples(std::vector<int> data){
+	std::map<int,std::vector<int>> data_return;
+	if(data.size()%129!=0){
+		std::cerr<<__FUNCTION__<<" The Size of the data is not expected!!"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	for(int tsid=0;tsid<(data.size()/129);tsid++){
+		data_return[tsid].insert(data_return[tsid].begin(),&data[129*tsid],&data[129*(tsid+1)]);
+	}
+	return data_return;
+}
+
+
+
 RawDecoderM4V::~RawDecoderM4V() {
 	// TODO Auto-generated destructor stub
 }
