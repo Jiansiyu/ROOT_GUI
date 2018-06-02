@@ -9,8 +9,10 @@
 
 ## Prerequisites
 
-evio
-root5.34.36
+[evio](https://coda.jlab.org/drupal/content/event-io-evio)
+[root6 or higher](https://root.cern.ch/downloading-root)
+[libconfig++](http://www.hyperrealm.com/oss_libconfig.shtml)
+
 
 ## Installing
 
@@ -25,9 +27,9 @@ root5.34.36
 	* add the multi-thread support in the GUI
 * 4
 	* new QT support
-* 5
-	* new signal transport function
 	
+* 5 
+	* 
 # Any Contribution is Welcome!
 
 contect me at: jiansiyu@gmail.com
