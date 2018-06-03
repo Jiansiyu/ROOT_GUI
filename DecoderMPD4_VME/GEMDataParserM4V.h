@@ -40,13 +40,16 @@ public:
 		}
 
 	}
-
+	void HitMode(std::string,std::string);
 	void PedestalMode(std::string fname,std::string savename);
+
+private:
 	// signal slot communication mechanism
 	void GEMDrawRaw(GEM::EventRawStruct);//*SIGNAL*
 	void GEMDrawZeroSub();               //*SIGNAL*
-private:
+	void ProgressStatus(int);			 //*SIGNAL*
 
+private:
 	std::string RawDatfileName;
 	std::vector<std::string> RawDatfileNameList;
 
