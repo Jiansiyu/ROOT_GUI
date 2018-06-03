@@ -9,9 +9,9 @@
 
 ## Prerequisites
 
-[evio](https://coda.jlab.org/drupal/content/event-io-evio)
-[root6 or higher](https://root.cern.ch/downloading-root)
-[libconfig++](http://www.hyperrealm.com/oss_libconfig.shtml)
+*	[evio](https://coda.jlab.org/drupal/content/event-io-evio)
+*	[root6 or higher](https://root.cern.ch/downloading-root)
+*	[libconfig++](http://www.hyperrealm.com/oss_libconfig.shtml)
 
 
 ## Installing
