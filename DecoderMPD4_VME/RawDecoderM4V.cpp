@@ -115,8 +115,10 @@ RawDecoderM4V::RawDecoderM4V(std::vector<uint32_t> &buffer, int start, int end) 
 	}
  }
 
-std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStripTsAdcMap(){
 
+ //      MPD          APV             strip  time samples
+std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStripTsAdcMap(){
+	std::map<int,std::map<int,std::map<int,std::vector<int>>>> data_return;
 	std::map<int,std::map<int,std::map<int,std::vector<int>>>> seperated=SeperateSamples(mAPVRawData);
 
 	for(auto iter_mpd=seperated.begin();iter_mpd!=seperated.end();iter_mpd++){
@@ -130,14 +132,17 @@ std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStr
 					commonmode+=frame_sort[k];
 				}
 				commonmode=commonmode/72;
+				int counter=0;
 				for(auto element : iter_ts->second){
 					element=element-commonmode;
 					std::cout<<__FUNCTION__<<__LINE__<<"  Check FUNCTION "<<element<<std::endl;
+					data_return[iter_mpd->first][iter_apv->first][counter].push_back(element);
+					counter++;
 				}
 			}
 		}
 	}
-	return seperated;
+	return data_return;
  }
 
 //!         MPD          APV       129*timesamples
@@ -145,7 +150,7 @@ std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStr
 //!
 //!
 std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::SeperateSamples(std::map<int, std::map<int, std::vector<int>>> data){
-	std::map<int,std::map<int,std::map<int,std::vector<int>>>>　data_return;
+	std::map<int,std::map<int,std::map<int,std::vector<int>>>>data_return;
 	for(auto iter_mpd=data.begin();iter_mpd!=data.end();iter_mpd++){
 		for(auto iter_apv=iter_mpd->second.begin();
 				iter_apv!=iter_mpd->second.end();iter_apv++){

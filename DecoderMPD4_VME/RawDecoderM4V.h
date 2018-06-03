@@ -54,6 +54,7 @@ private:
 	std::map<int,std::vector<int>> SeperateSamples(std::vector<int>);
 	//   MPDID         ADCid       Timesamples      128 channels
 	std::map<int,std::map<int,std::map<int,std::vector<int>>>> SeperateSamples(std::map<int, std::map<int, std::vector<int>>>);
+public:
 	std::map<int,std::map<int,std::map<int,std::vector<int>>>> GetStripTsAdcMap();
 };
 

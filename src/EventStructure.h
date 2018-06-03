@@ -114,7 +114,6 @@ struct gemChannelData{
 
 struct gemEventRaw{
 	std::vector<gemChannelData> gem_data;
-	std::unordered_map<int16_t,>
 	gemEventRaw(){};
 	gemEventRaw(std::vector<gemChannelData> &data){
 		gem_data.clear();
