@@ -214,7 +214,8 @@ std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> GEMDataParser
 }
 
 // decode hit mode
-void GEMDataParserM4V::HitMode(std::string fname, std::string outfile){
+void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std::string outfile){
+	std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> pedestal=LoadPedestal(pedestal_name.c_str());
 	try {
 		evio::evioFileChannel chan(RawDatfileName.c_str(),"r");
 		chan.open();
@@ -235,8 +236,24 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string outfile){
 						if(tag==0x90||tag==0x88) break;
 					}
 					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
-					//TODO
+					//      MPD          APV             strip  time samples
+					// this is the data after common mode subtraction
+					std::map<int,std::map<int,std::map<int,std::vector<int>>>> eventdata=decoder->GetStripTsAdcMap();
+					// zero subtraction algorithm
+					for(auto iter_mpd = eventdata.begin(); iter_mpd!=eventdata.end();iter_mpd++){
+						for(auto iter_apv = iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
+#ifdef __DEBUG_FLAG
+							if(iter_apv->second.size()==128){
+								std::cout<<"[Debug]"<<__FUNCTION__<<" The frame size match the expectation"<<std::endl;
+							}else{
+								std::cout<<"[Debug]"<<__FUNCTION__<<" The frame size DOES NOT match the expectation"<<std::endl;
+							}
+#endif
+							// TODO
 
+
+						}
+					}
 
 
 					evtID++;

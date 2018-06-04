@@ -121,6 +121,7 @@ std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStr
 	std::map<int,std::map<int,std::map<int,std::vector<int>>>> data_return;
 	std::map<int,std::map<int,std::map<int,std::vector<int>>>> seperated=SeperateSamples(mAPVRawData);
 
+	//common mode subtraction algorithm
 	for(auto iter_mpd=seperated.begin();iter_mpd!=seperated.end();iter_mpd++){
 		for(auto iter_apv=iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
 			for(auto iter_ts=iter_apv->second.begin();iter_ts!=iter_apv->second.end();iter_ts++){

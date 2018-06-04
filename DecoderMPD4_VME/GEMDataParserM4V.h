@@ -40,7 +40,7 @@ public:
 		}
 
 	}
-	void HitMode(std::string,std::string);
+	void HitMode(std::string,std::string,std::string);
 	void PedestalMode(std::string fname,std::string savename);
 	std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> LoadPedestal(std::string);
 private:
