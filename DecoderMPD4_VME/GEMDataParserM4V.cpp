@@ -11,6 +11,7 @@
 #include "datastructureM4V.h"
 #include "RawDecoderM4V.h"
 #include "../src/GEMStructue.h"
+#include "../src/GEMInforCenter.h"
 
 #include <string>
 #include <bitset>
@@ -183,6 +184,35 @@ void PedestalMode(std::string fname,std::string savename){
 	}
 }
 
+// load the pedestal file, and return the pedestals
+std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> GEMDataParserM4V::LoadPedestal(std::string fname){
+	std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> data_return;
+
+	TFile *fileio=new TFile(fname.c_str(),"READ");
+	// searching for the mapping list, and check whether the histogram have the corresponding data
+	GEMInforCenter *geminfor=GEMInforCenter::GetInstance();
+	for(auto mpd : geminfor->GetGEMdetectorMap().GetMPDList()){
+		for(auto apv : mpd.GetAPVs()){
+			// check whether the MPD and apv
+			if((fileio->GetListOfKeys()->Contains(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid())))&&
+					(fileio->GetListOfKeys()->Contains(Form("PedestalRMS_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid())))){
+				TH1F *hmean=(TH1F*) fileio->Get(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid()));
+				TH1F *hrms =(TH1F*) fileio->Get(Form("PedestalRMS_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid()));
+				for(int i =0; i < 128 ; i++){
+					data_return[mpd.GetMPDID()][apv.GetADCid()]["mean"].push_back(hmean->GetBinContent(i+1));
+					data_return[mpd.GetMPDID()][apv.GetADCid()]["rms"].push_back(hrms->GetBinContent(i+1));
+				}
+			} else {
+				std::cout << "[WORNING] " << __FUNCTION__ << " " << __LINE__
+						<< "MPD_" << mpd.GetMPDID() << " APV_" << apv.GetADCid()
+						<< " is declared in the map, but cannot file in the pedestal file"
+						<< std::endl;
+			}
+		}
+	}
+	return data_return;
+}
+
 // decode hit mode
 void GEMDataParserM4V::HitMode(std::string fname, std::string outfile){
 	try {
@@ -206,6 +236,7 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string outfile){
 					}
 					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
 					//TODO
+
 
 
 					evtID++;

@@ -6,6 +6,8 @@
 
 #ifndef GEMSTRUCTUE_H_
 #define GEMSTRUCTUE_H_
+
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -114,6 +116,9 @@ struct apvMap{
 	int GetUniqueMPDID(){
 		return getHashValue(CrateID,MPDID,0);
 	}
+	int GetADCid(){
+		return ADCID;
+	}
 };
 
 struct mpdMap{
@@ -142,6 +147,9 @@ struct mpdMap{
 	}
 	int GetMPDID(){
 		return MPDID;
+	}
+	std::vector<apvMap> GetAPVs(){
+		return apvs;
 	}
 	int GetCrateID(){
 		return CrateID;
