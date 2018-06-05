@@ -215,7 +215,9 @@ std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> GEMDataParser
 
 // decode hit mode
 void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std::string outfile){
+	//       MPD         APV           iterm/ mean/rms        value
 	std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> pedestal=LoadPedestal(pedestal_name.c_str());
+
 	try {
 		evio::evioFileChannel chan(RawDatfileName.c_str(),"r");
 		chan.open();
@@ -239,6 +241,9 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 					//      MPD          APV             strip  time samples
 					// this is the data after common mode subtraction
 					std::map<int,std::map<int,std::map<int,std::vector<int>>>> eventdata=decoder->GetStripTsAdcMap();
+
+					std::map<int,std::map<int,std::map<int,std::vector<int>>>> data_zeroSubtr; // used for save the data after zero subtraction
+
 					// zero subtraction algorithm
 					for(auto iter_mpd = eventdata.begin(); iter_mpd!=eventdata.end();iter_mpd++){
 						for(auto iter_apv = iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
@@ -250,10 +255,42 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 							}
 #endif
 							// TODO
+							// compare each strips with the pedestal
+							if (pedestal.find(iter_mpd->first) != pedestal.end()
+									&& (pedestal[iter_mpd->first].find(
+											iter_apv->first)
+											!= pedestal[iter_mpd->first].end())) {
+								// subtract the mean
+								// loop on the strips
 
+								for(auto iter_strip=iter_apv->second.begin();iter_strip!=iter_apv->second.end();iter_strip++){
+									if(iter_strip->first > pedestal[iter_mpd->first][iter_apv->first]["mean"].size()){
+										std::cerr<<"[Fatal]  : Can NOT find Channel "<<iter_strip->first<<" in the pedestal file !!!"<<std::endl;
+										exit(EXIT_FAILURE);
+									}
+									int channel_sum=0;
+									for(auto tsample : iter_strip->second){
+										channel_sum=channel_sum+tsample-pedestal[iter_mpd->first][iter_apv->first]["mean"][iter_strip->first];
+									}
 
+									// 5 sigma cut
+									if((channel_sum/(iter_strip->second.size()))>=5 * pedestal[iter_mpd->first][iter_apv->first]["mean"][iter_strip->first]){
+										// feed the data after zero subtraction into the out data buffer
+										data_zeroSubtr[iter_mpd->first][iter_apv->first][iter_strip->first]=iter_strip->second;
+									}
+								}
+
+							} else {
+								std::cout << "[Worning] MPD." << iter_mpd->first
+										<< " APV." << iter_apv->first
+										<< " Can NOT find pedestals, skip this cards"
+										<< std::endl;
+							}
 						}
 					}
+					// after zero subtraction
+					// TODO this is the right place to add the display mode of the zero subtraction
+
 
 
 					evtID++;

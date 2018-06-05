@@ -38,7 +38,6 @@ public:
 		}else{
 			std::cout<<"ERROR :"<<__FUNCTION__<<std::endl;
 		}
-
 	}
 	void HitMode(std::string,std::string,std::string);
 	void PedestalMode(std::string fname,std::string savename);
