@@ -262,7 +262,6 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 											!= pedestal[iter_mpd->first].end())) {
 								// subtract the mean
 								// loop on the strips
-
 								for(auto iter_strip=iter_apv->second.begin();iter_strip!=iter_apv->second.end();iter_strip++){
 									if(iter_strip->first > pedestal[iter_mpd->first][iter_apv->first]["mean"].size()){
 										std::cerr<<"[Fatal]  : Can NOT find Channel "<<iter_strip->first<<" in the pedestal file !!!"<<std::endl;
@@ -273,7 +272,7 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 										channel_sum=channel_sum+tsample-pedestal[iter_mpd->first][iter_apv->first]["mean"][iter_strip->first];
 									}
 
-									// 5 sigma cut
+									//5 sigma cut
 									if((channel_sum/(iter_strip->second.size()))>=5 * pedestal[iter_mpd->first][iter_apv->first]["mean"][iter_strip->first]){
 										// feed the data after zero subtraction into the out data buffer
 										data_zeroSubtr[iter_mpd->first][iter_apv->first][iter_strip->first]=iter_strip->second;
@@ -290,9 +289,6 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 					}
 					// after zero subtraction
 					// TODO this is the right place to add the display mode of the zero subtraction
-
-
-
 					evtID++;
 				}
 			}
