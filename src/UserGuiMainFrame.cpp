@@ -850,7 +850,8 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-
+	GEMDataParserM4V * pedestalprocess=new GEMDataParserM4V();
+	pedestalprocess->PedestalMode(rawfilename.c_str(),"pedestal.root");
 /*	std::ifstream testfile(rawfilename.c_str());
 	string Pedestal_name= rawfilename;
 	if ((!Pedestal_name.empty())&&testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {

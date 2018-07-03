@@ -73,7 +73,7 @@ bool GEMDataParserM4V::ParserRawDat(){
 
 
 
-void PedestalMode(std::string fname,std::string savename){
+void GEMDataParserM4V::PedestalMode(std::string fname,std::string savename){
 	try {
 		evio::evioFileChannel chan(fname.c_str(),"r");
 		chan.open();
@@ -126,8 +126,8 @@ void PedestalMode(std::string fname,std::string savename){
 							}
 						}
 					}
-					//delete decoder;
 					evtID++;
+					if(evtID%100==0) std::cout<<"Event :"<<evtID<<std::endl;
 				}
 			}
 

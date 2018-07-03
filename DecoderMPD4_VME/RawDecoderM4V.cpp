@@ -136,7 +136,7 @@ std::map<int,std::map<int,std::map<int,std::vector<int>>>> RawDecoderM4V::GetStr
 				int counter=0;
 				for(auto element : iter_ts->second){
 					element=element-commonmode;
-					std::cout<<__FUNCTION__<<__LINE__<<"  Check FUNCTION "<<element<<std::endl;
+					//std::cout<<__FUNCTION__<<__LINE__<<"  Check FUNCTION "<<element<<std::endl;
 					data_return[iter_mpd->first][iter_apv->first][counter].push_back(element);
 					counter++;
 				}
