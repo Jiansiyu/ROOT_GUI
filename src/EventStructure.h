@@ -13,7 +13,7 @@
 namespace GEM {
 
 // uid componet
-// [	Crate/SSPID],MPDID,ADCID,ChannelID
+// [Crate/SSPID],MPDID,ADCID,ChannelID
 // channelID 7 bit
 // ADCID     4 bit
 // MPDID     7 bit

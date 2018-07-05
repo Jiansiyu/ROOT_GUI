@@ -41,7 +41,6 @@ void GEMInforCenter::LoadGEMMapFile(std::string fname){
 			//std::stringstream ss(line);
 			GEM::apvMap apv(line);
 			apvs.push_back(apv);
-
 		}
 	}else{
 		std::cout<<"["<<__FUNCTION__<<"("<<__LINE__<<")]: Fatal Error" << fname.c_str()<<" did not found"<<std::endl;

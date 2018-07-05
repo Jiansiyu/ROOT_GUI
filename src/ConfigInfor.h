@@ -16,13 +16,9 @@ class ConfigInfor {
 public:
 	void ReadConfig(std::string fname="./cfg/DetConfig.cfg");
 	void PrintConfig();
+	GlobStruct::GEMConfig GetGEMConfInfor(){return gemconfig;};
+	GlobStruct::AnalysisConfig GetAnalysisInfor(){return analysisconfig;}
 
-	GlobStruct::GEMConfig GetGEMConfInfor(){
-		return gemconfig;
-	}
-	GlobStruct::AnalysisConfig GetAnalysisInfor(){
-		return analysisconfig;
-	}
 private:
 	libconfig::Config cfg;
 	GlobStruct::DAQConfig  daqconfig;

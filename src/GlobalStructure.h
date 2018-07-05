@@ -33,6 +33,18 @@ struct AnalysisConfig{
 	bool RawStripPosCorrection;
 };
 
+struct SysConfig{
+	GlobStruct::AnalysisConfig Analysis_cfg;
+	GlobStruct::DAQConfig	   DAQ_cfg;
+	GlobStruct::GEMConfig      GEM_cfg;
+};
+
+enum Dimension_3D {
+	X,
+	Y,
+	Z,
+	null
+};
 }
 
 #endif /* GLOBALSTRUCTURE_H_ */
