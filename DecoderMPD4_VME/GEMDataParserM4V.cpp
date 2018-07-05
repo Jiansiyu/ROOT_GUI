@@ -12,11 +12,12 @@
 #include "RawDecoderM4V.h"
 #include "../src/GEMStructue.h"
 #include "../src/GEMInforCenter.h"
+#include "../src/Benchmark.h"
 
 #include <string>
 #include <bitset>
 #include <numeric>
-
+#include <unordered_map>
 #include "evioUtil.hxx"
 #include "evioFileChannel.hxx"
 
@@ -74,30 +75,41 @@ bool GEMDataParserM4V::ParserRawDat(){
 
 
 void GEMDataParserM4V::PedestalMode(std::string fname,std::string savename){
+
 	try {
 		evio::evioFileChannel chan(fname.c_str(),"r");
 		chan.open();
 		int evtID=0;
 		//        MPD          APV         stripID histo
 		std::map<int,std::map<int,std::map<int,TH1F*>>> histo_temp;
+
+		RawDecoderM4V *decoder=new RawDecoderM4V();
+
 		while(chan.read()){
+
+			Benchmark* time_elapse=new Benchmark();
+
 			evio::evioDOMTree event(chan);
 			evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
-
 			for(auto iter = mpdEventList->begin();
 					iter != mpdEventList->end(); iter++){
+
 				vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
+
 				if((*iter)->tag == MPD_tag){
 					int iend;
 					int vec_size=(*block_vec).size();
-					//std::cout <<"Vectsize :"<< vec_size<<"  Eventid : "<<evtID << std::endl;
+
 					for(iend =1 ; iend < vec_size; iend++){
 						uint32_t tag = (((*block_vec)[iend])>>24)&0xf8;
 						if(tag==0x90||tag==0x88) break;
 					}
-					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
-					 //      MPD          APV             strip  time samples
+
+					//RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
+					decoder->RegistBuffer(*block_vec, 0, iend);
+					//      MPD          APV             strip  time samples
 					std::map<int,std::map<int,std::map<int,std::vector<int>>>> eventdata=decoder->GetStripTsAdcMap();
+
 
 					for(auto iter_mpd = eventdata.begin();iter_mpd!=eventdata.end();iter_mpd++){
 						for(auto iter_apv=iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
@@ -126,12 +138,14 @@ void GEMDataParserM4V::PedestalMode(std::string fname,std::string savename){
 							}
 						}
 					}
+
 					evtID++;
-					if(evtID%100==0) std::cout<<"Event :"<<evtID<<std::endl;
+					if(evtID%100==0) std::cout<<"Event :"<<evtID<<" Time spend(ms/event):"<<(time_elapse->GetElapaedTime()/100)<<std::endl;
 				}
 			}
 
 		}
+
 		// finish the raw histo
 		// get the pedestal value
 		// mpd    apv		strips histo
@@ -194,6 +208,7 @@ std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> GEMDataParser
 	for(auto mpd : geminfor->GetGEMdetectorMap().GetMPDList()){
 		for(auto apv : mpd.GetAPVs()){
 			// check whether the MPD and apv
+
 			if((fileio->GetListOfKeys()->Contains(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid())))&&
 					(fileio->GetListOfKeys()->Contains(Form("PedestalRMS_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid())))){
 				TH1F *hmean=(TH1F*) fileio->Get(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpd.GetMPDID(),apv.GetADCid()));
@@ -215,8 +230,17 @@ std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> GEMDataParser
 
 // decode hit mode
 void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std::string outfile){
+	RawDatfileName=fname;
 	//       MPD         APV           iterm/ mean/rms        value
 	std::map<int,std::map<int,std::map<std::string,std::vector<int>>>> pedestal=LoadPedestal(pedestal_name.c_str());
+
+	for(auto iter_mpd=pedestal.begin();iter_mpd!=pedestal.end();iter_mpd++){
+		for(auto iter_apv=iter_mpd->second.begin();iter_apv!=iter_mpd->second.end();iter_apv++){
+			std::cout<<"Map file Enabled :"<<std::endl
+					<<"MPD		APV"<<std::endl
+					<<iter_mpd->first<<"		"<<iter_apv->first<<std::endl;
+		}
+	}
 
 	try {
 		evio::evioFileChannel chan(RawDatfileName.c_str(),"r");
@@ -238,6 +262,7 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 						if(tag==0x90||tag==0x88) break;
 					}
 					RawDecoderM4V *decoder=new RawDecoderM4V(*block_vec, 0, iend);
+
 					//      MPD          APV             strip  time samples
 					// this is the data after common mode subtraction
 					std::map<int,std::map<int,std::map<int,std::vector<int>>>> eventdata=decoder->GetStripTsAdcMap();
@@ -280,10 +305,12 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 								}
 
 							} else {
+								if(evtID%100==0)
+
 								std::cout << "[Worning] MPD." << iter_mpd->first
 										<< " APV." << iter_apv->first
 										<< " Can NOT find pedestals, skip this cards"
-										<< std::endl;
+										<<"	Working on event "<<evtID<< std::endl;
 							}
 						}
 					}
@@ -297,4 +324,40 @@ void GEMDataParserM4V::HitMode(std::string fname, std::string pedestal_name,std:
 		std::cerr << e.toString() << std::endl << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+
 }
+
+
+
+void GEMDataParserM4V::InitRootFile(){
+	  Vstrip   = new Int_t[20000];
+	  VdetID   = new Int_t[20000];
+	  VplaneID = new Int_t[20000];
+	  adc0     = new Int_t[20000];
+	  adc1     = new Int_t[20000];
+	  adc2     = new Int_t[20000];
+	  adc3     = new Int_t[20000];
+	  adc4     = new Int_t[20000];
+	  adc5     = new Int_t[20000];
+	  fCH      = new Int_t[100];
+	  ftiming  = new Int_t[100];
+	  fadc     = new Int_t[100];
+	  tCH      = new Int_t[100];
+	  ttiming  = new Double_t [100];
+
+	  Hit      = new TTree("GEMHit","Hit list");
+
+	  //-------------GEM----------------------
+	  Hit->Branch("evtID",&EvtID,"evtID/I");
+	  Hit->Branch("nch",&nch,"nch/I");
+	  Hit->Branch("strip",Vstrip,"strip[nch]/I");
+	  Hit->Branch("detID",VdetID,"detID[nch]/I");
+	  Hit->Branch("planeID",VplaneID,"planeID[nch]/I");
+	  Hit->Branch("adc0",adc0,"adc0[nch]/I");
+	  Hit->Branch("adc1",adc1,"adc1[nch]/I");
+	  Hit->Branch("adc2",adc2,"adc2[nch]/I");
+	  Hit->Branch("adc3",adc3,"adc3[nch]/I");
+	  Hit->Branch("adc4",adc4,"adc4[nch]/I");
+	  Hit->Branch("adc5",adc5,"adc5[nch]/I");
+	}

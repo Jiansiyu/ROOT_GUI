@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "iostream"
 #include <TH1F.h>
+#include <TTree.h>
 
 #include "../src/GEMStructue.h"
 
@@ -59,6 +60,23 @@ private:
 	std::map<int,std::map<int, std::map<int,std::vector<int>>>> EventRaw;
 
 	//ClassDef(GEMDataParserM4V,0);
+
+
+private:
+	  //#################rootFileMode-----tree and branch##################
+	  TTree *Hit;
+	  //The only event ID tracker, increament only in routine "ProcessSingleSspEvent()"
+	  Int_t EvtID=0;
+	  //GEM branch
+	  Int_t nch=0,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;
+	  //FADC branch
+	  Int_t nfadc=0,*fCH,*ftiming,*fadc;
+	  //TDC branch
+	  Int_t ntdc=0, *tCH;
+	  Double_t *ttiming;
+	  void InitRootFile();
+	  void hitdatawrite(std::map<int,std::map<int,std::map<int,std::vector<int>>>> &);
+	  int GetStripPosition(int crateID,int MPDID, int adcid);
 
 };
 

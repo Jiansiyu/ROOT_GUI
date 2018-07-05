@@ -64,7 +64,8 @@ enum gemMapFormat{
 
 enum Dimension {
 	X,
-	Y
+	Y,
+	null
 };
 
 struct apvMap{
@@ -119,6 +120,16 @@ struct apvMap{
 	int GetADCid(){
 		return ADCID;
 	}
+
+	void Test(){
+		std::cout<<__FUNCTION__<<"::[Test] Items"<<item
+				<<"	CrateID: "<<CrateID
+				<<"	MPDID: "<<MPDID
+				<<"	layerID: "<<layer
+				<<"	dimension: "<<dimension
+				<<"	ADC: "<<ADCID
+				<<"	i2c: "<<I2C<<std::endl;
+	}
 };
 
 struct mpdMap{
@@ -138,9 +149,15 @@ struct mpdMap{
 				MPDID=-1;
 				MPDUniqueID=-1;
 				RegistAPV(apv);};
-	int SetMPDUniqueID(int id){
-		MPDUniqueID=id;
-		return MPDUniqueID;
+//	int SetMPDUniqueID(int id){
+//		MPDUniqueID=id;
+//		return MPDUniqueID;
+//	}
+	int SetMPDUniqueID(int crateID,int mpdid){
+			MPDUniqueID=getHashValue(crateID,mpdid,0);
+			this->CrateID=crateID;
+			this->MPDID=mpdid;
+			return MPDUniqueID;
 	}
 	int GetMPDUniqueID(){
 		return MPDUniqueID;
@@ -192,6 +209,7 @@ struct gemAxisMap{
 		layer=-1;
 		GEMID=-1;
 		apvs.clear();
+		axis=null;
 	}
 	bool RegistAPV(apvMap apv){
 		if(layer ==-1 && GEMID ==-1){
@@ -256,8 +274,10 @@ public:
 				iter_crate!=CrateMPDList.end(); iter_crate++){
 			for(auto iter_mpd = iter_crate->second.begin();
 					iter_mpd != iter_crate->second.end();iter_mpd++){
+				//std::cout<<__FUNCTION__<<"  [test]  crate:"<<iter_crate->first<<"  MPD"<<iter_mpd->first<<std::endl;
+
 				mpdMap mpd;
-				mpd.SetMPDUniqueID(getHashValue(iter_crate->first,iter_mpd->first,0));
+				mpd.SetMPDUniqueID(iter_crate->first,iter_mpd->first);
 				for ( auto apv : iter_mpd->second){
 					mpd.RegistAPV(apv);
 				}

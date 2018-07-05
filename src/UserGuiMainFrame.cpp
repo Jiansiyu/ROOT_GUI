@@ -532,7 +532,7 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
 		{
 			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
-			rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
+			//rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
 		}
 	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
 	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
@@ -601,7 +601,7 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 		for (auto name :vRawDataList ){
 			rawPaserList[name.c_str()]=new GEMDataParserM4V();
 			SetStatusBarDisplay(Form("Reading File"));
-			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
+//			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
 			SetStatusBarDisplay(Form("Reading File Done!"));
 		}
 		tRawFileEntry->Select(0);
@@ -883,6 +883,14 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 }
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
+
+
+	for(auto filename : rawfilename){
+		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
+		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));
+	}
+
+
 	/*UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
 	if (rawfilename.size() != 0) {
 		std::ifstream testfile(Pedestal_name.c_str());

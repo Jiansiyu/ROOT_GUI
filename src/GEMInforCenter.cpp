@@ -41,6 +41,7 @@ void GEMInforCenter::LoadGEMMapFile(std::string fname){
 			//std::stringstream ss(line);
 			GEM::apvMap apv(line);
 			apvs.push_back(apv);
+
 		}
 	}else{
 		std::cout<<"["<<__FUNCTION__<<"("<<__LINE__<<")]: Fatal Error" << fname.c_str()<<" did not found"<<std::endl;
@@ -95,12 +96,4 @@ void GEMInforCenter::GEMMapCheck(){
 				<<i.other<< "	"
 				<<std::endl;
 	}
-//	for(auto iter = GEMMap.map.begin();
-//			iter!=GEMMap.map.end();
-//			iter++){
-//		std::cout<<"hash : "<<iter->first<<" MPDID:"<<iter->second.MPDid<<
-//				" GEMID:"<<iter->second.GEMid<<" Xis:"<<iter->second.Xis<<
-//				" ADCID:"<<iter->second.ADCid<<" I2C: "<<iter->second.I2C<<
-//				" Pos:"<<iter->second.Pos<<" Inverrt: "<<iter->second.Invert<<std::endl;
-//	}
 }
