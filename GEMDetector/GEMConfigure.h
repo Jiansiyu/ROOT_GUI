@@ -15,7 +15,7 @@
 class GEMConfigure {
 public:
 	GEM::apvMapping GetMapping(){return mapping;};
-	GlobStruct::SysConfig GetConfigure(){return Config;};
+	GlobStruct::SysConfig GetConfigure(){return DetConfig;};
 
 private:
 	GEM::apvMapping mapping;
