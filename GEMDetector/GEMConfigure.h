@@ -29,8 +29,11 @@ private:
 public:
 	static GEMConfigure *GetInstance();
 private:
-	GEMConfigure();
 	static GEMConfigure *m_instance;
+	GEMConfigure(){
+
+	};
+
 	virtual ~GEMConfigure(){
 		std::cout <<"Deconstruct the singleton function: "<<__FUNCTION__<<std::endl;
 	}

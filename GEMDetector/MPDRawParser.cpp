@@ -6,6 +6,10 @@
  */
 
 #include <iostream>
+#include <algorithm>
+#include <math.h>
+#include <vector>
+
 #include "MPDRawParser.h"
 #include "MPDStructure.h"
 #include "GEMIDGenerator.h"
@@ -25,7 +29,8 @@ void MPDRawParser::LoadRawData(std::vector<uint32_t>::iterator begin,std::vector
 	  int mpdid;
 	  int adc_ch;
 	  int UID;
-	for(auto iter= begin;iter!=end;iter++){
+	  clear();
+	  for(auto iter= begin;iter!=end;iter++){
 
 		uint32_t data=*iter;
 		uint32_t header;
@@ -71,9 +76,41 @@ void MPDRawParser::LoadRawData(std::vector<uint32_t>::iterator begin,std::vector
 	}
 }
 
-void MPDRawParser::CModeSubtraction(){
+void MPDRawParser::CommonModeSubtraction(){
+	if(mAPVRawSingleEvent.size()==0){
+		std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> : The data need to be loaded first"<<std::endl;
+	}
+	int crateid=0;
+	int mpdid=0;
+	int adcid=0;
+	// contains all the apvs (UID have mpd and apv)
+	for(auto iter_adc=mAPVRawSingleEvent.begin();iter_adc!=mAPVRawSingleEvent.end();iter_adc++){
+		uint16_t nTSsize=(iter_adc->second.size())/129;    // calculate how many time sample
+		crateid=GEM::getCrateID(iter_adc->first);
+		mpdid=GEM::getMPDID(iter_adc->first);
+		adcid=GEM::getADCID(iter_adc->first);
+		for(int ts_counter=0;ts_counter<nTSsize;ts_counter++ ){
+			std::vector<int> TSimple_data((iter_adc->second)[129*ts_counter],(iter_adc->second)[129*(ts_counter+1)]);
+			std::vector<int> vec_temp(TSimple_data.begin(),TSimple_data.end());
+			std::sort(vec_temp.begin(),vec_temp.end()-1);
+			int iCommonMode=std::accumulate(vec_temp.begin()+28,vec_temp.begin()+100,0)/72; // canculate the common mode
+			for(int channel =0; channel<128 ; channel++){
+				mCommonModeSubtractedEvent[GEM::GetUID(crateid,mpdid,adcid,channel)].push_back(TSimple_data[channel]-iCommonMode);
+			}
 
+		}
+	}
 }
+void MPDRawParser::clear(){
+	mAPVRawSingleEvent.clear();
+	mCommonModeSubtractedEvent.clear();
+	mPedestalTimeSample.clear();
+}
+std::map<int,std::vector<int>> MPDRawParser::GetCommonModeSubtraction(){
+	CommonModeSubtraction();
+	return mCommonModeSubtractedEvent;
+}
+
 std::map<int,std::vector<int>> MPDRawParser::GetDecoded(){
 	return mAPVRawSingleEvent;
 }

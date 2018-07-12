@@ -61,9 +61,9 @@
 #include "TSystemDirectory.h"
 #include "TH1F.h"
 #include "map"
-#include "GEMInforCenter.h"
+//#include "GEMInforCenter.h"
 #include "UserGUIDataStructue.h"
-#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
+//#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
@@ -120,7 +120,7 @@ public:
 
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
-	ClassDef(UserGuiMainFrame,0);
+//ClassDef(UserGuiMainFrame,0);
 
 
 // dialog process
@@ -153,8 +153,10 @@ private:
 	TGCompositeFrame *fWorkZoneTabSubFrame[50];
 	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
 	TCanvas *cfWorkZoneTabCanvas[50];
-	GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
-	int NTabs=gemInfor->GetGEMdetectorMap().GetMPDNumber();
+
+	//GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
+	int NTabs=8;//gemInfor->GetGEMdetectorMap().GetMPDNumber();
+
 	std::map<std::string,int> rawCanvasMPDTabCorrolation;
 	TRootEmbeddedCanvas *fEmnbeddedCanvas;
 	TCanvas *cRawCanvas;
@@ -246,7 +248,7 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
-	void fCanvasDrawRaw(GEM::EventRawStruct);
+	//void fCanvasDrawRaw(GEM::EventRawStruct);
 	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
 
 	// status bar control functions
@@ -267,8 +269,8 @@ private:
 	std::map<int,std::map<int,std::map<int,TH1F*>>> dMultiGEMHistoBuffer;
 	std::string vMappingName;
 
-private:
-	std::map<std::string,GEMDataParserM4V *> rawPaserList;
+//private:
+	//std::map<std::string,GEMDataParserM4V *> rawPaserList;
 private :
 	void fRawModeProcess(int entries, std::string rawfilename);
 	void fPedestalModeProcess(int entries, std::string rawfilename);

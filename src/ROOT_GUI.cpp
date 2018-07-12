@@ -10,8 +10,8 @@
 
 // user defined classes
 #include "UserGuiMainFrame.h"
-#include "ConfigInfor.h"
-#include "GEMInforCenter.h"
+//#include "ConfigInfor.h"
+//#include "GEMInforCenter.h"
 ////
 #include <cstdlib>
 #include <cstdio>
@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 	         return 1;
    }
 
-   ConfigInfor *test=ConfigInfor::GetInstance();
-   test->ReadConfig();
-   GEMInforCenter * infor = GEMInforCenter::GetInstance();
+   //ConfigInfor *test=ConfigInfor::GetInstance();
+   //test->ReadConfig();
+   //GEMInforCenter * infor = GEMInforCenter::GetInstance();
 
    UserGuiMainFrame mainWindows(gClient->GetRoot(),400,200);
    theApp.Run();

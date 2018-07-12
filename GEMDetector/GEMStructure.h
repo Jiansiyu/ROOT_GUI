@@ -79,7 +79,7 @@ struct apvMapping {
 		int crateid=getCrateID(UID);
 		int mpdid=getMPDID(UID);
 		if((apvArray.find(crateid)!=apvArray.end())&&(apvArray[crateid].find(mpdid)!=apvArray[crateid].end())){
-			return apvArray[crateid];
+			return apvArray[crateid][mpdid];
 		}else{
 			std::cerr<<__FUNCTION__<<" Cannot find "<<UID<<std::endl;
 			std::vector<int> test;

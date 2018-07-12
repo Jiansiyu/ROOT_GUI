@@ -25,10 +25,14 @@
 ///
 
 // main decoder lib
-#include "../GEMDecoder/input_handler.h"
+//#include "../GEMDecoder/input_handler.h"
 #include "UserGuiGeneralDialogProcess.h"
 #include "../GUIDialog/UserGUIMapWizard.h"
-#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
+
+// raw decoder
+#include "../GEMDetector/MPDDecoder.h"
+
+//#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 
 UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	// TODO Auto-generated constructor stub
@@ -162,34 +166,34 @@ void UserGuiMainFrame::SetWorkZone(){
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
 	int counter=0;
-	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
-		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
-		rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
-		// attach the embeded canvas
-		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
-		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
-		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
-		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
-		counter++;
-	}
+//	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
+//		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
+//		rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
+//		// attach the embeded canvas
+//		fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+//		fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+//		fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+//		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+//		counter++;
+//	}
 }
 
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
 	if(TabName.size()>=NTabs){
 		int counter=0;
-		for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
-			fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
-			rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
-			// attach the embeded canvas
-			fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
-			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
-			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
-			fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-			cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
-			counter++;
-		}
+//		for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
+//			fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
+//			rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
+//			// attach the embeded canvas
+//			fWorkZoneTabEnbeddedCanvas[counter] = new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[counter], 600,600);
+//			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetBorderMode(0);
+//			fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas()->SetGrid();
+//			fWorkZoneTabSubFrame[counter]->AddFrame(fWorkZoneTabEnbeddedCanvas[counter],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+//			cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
+//			counter++;
+//		}
 	}else{
 		exit(EXIT_FAILURE);
 	}
@@ -527,16 +531,6 @@ void UserGuiMainFrame::bButtonConfirmProcess(){
 	bConfirmButton->SetEnabled(kTRUE);
 }
 
-//ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
-void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
-	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
-		{
-			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
-			//rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
-		}
-	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
-	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
-}
 
 void UserGuiMainFrame::dMenuOpenFileDialog(){
 		UserGuiGeneralDialogProcess *dialog=new UserGuiGeneralDialogProcess();
@@ -599,7 +593,7 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 		}
 
 		for (auto name :vRawDataList ){
-			rawPaserList[name.c_str()]=new GEMDataParserM4V();
+			//rawPaserList[name.c_str()]=new GEMDataParserM4V();
 			SetStatusBarDisplay(Form("Reading File"));
 //			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
 			SetStatusBarDisplay(Form("Reading File Done!"));
@@ -617,6 +611,8 @@ void UserGuiMainFrame::dMenuSetLoadMapping(){
 		vMappingName=inputfilename;
 		printf("%s\n",vMappingName.c_str());
 	}
+	// load the pedestal
+	// TODO
 	delete dialog;
 }
 
@@ -685,142 +681,35 @@ void UserGuiMainFrame::generalCanvasDraw(std::map<int, std::map<int,TH1F *>> his
 	gSystem->ProcessEvents();
 };
 
-void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
-#ifdef __SLOT_DEBUG_MODE
-	std::cout<<"catch signal :"<<event.raw.size()<<std::endl;
-#endif
-	fCanvasDrawRaw(event.raw);
+//void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
+//#ifdef __SLOT_DEBUG_MODE
+//	std::cout<<"catch signal :"<<event.raw.size()<<std::endl;
+//#endif
+//	fCanvasDrawRaw(event.raw);
+//}
+
+
+//ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
+void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+//	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
+//		{
+//			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
+//			//rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
+//		}
+//	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
+//	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
 }
 
-//void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
-//	if (!rawfilename.empty()) {
-//		printf("Filename: %s\n", rawfilename.c_str());
-//		InputHandler *inputHandler = new InputHandler(rawfilename.c_str());
-//		if (!vMappingName.empty())
-//			inputHandler->SetMapping(vMappingName.c_str());
-//		map<int, map<int, map<int, std::vector<int> > > > a;
-//		map<int, map<int, map<int, std::vector<int> > > > dMultiGEMSingleEvent =
-//				inputHandler->RawProcessAllEvents(entries, a);
-//		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorID=dMultiGEMHistoBuffer.begin();iter_detectorID!=dMultiGEMHistoBuffer.end();iter_detectorID++) {
-//			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorID->second.begin();itter_mpd!=iter_detectorID->second.end();itter_mpd++) {
-//				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
-//					delete dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first];
-//				}
-//			}
-//		}
-//		dMultiGEMHistoBuffer.clear();
-//		// test functions
-//		for (map<int, map<int, map<int, std::vector<int> > > >::iterator iter_detectorID =
-//				dMultiGEMSingleEvent.begin();
-//				iter_detectorID != dMultiGEMSingleEvent.end();
-//				iter_detectorID++) {
-//			for (map<int, map<int, std::vector<int> > >::iterator itter_mpd =
-//					iter_detectorID->second.begin();
-//					itter_mpd != iter_detectorID->second.end(); itter_mpd++) {
-//				for (map<int, std::vector<int> >::iterator ittter_apv =
-//						itter_mpd->second.begin();
-//						ittter_apv != itter_mpd->second.end(); ittter_apv++) {
-//					dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first] =
-//							new TH1F(
-//									Form("MPD%d_ADC%d", itter_mpd->first,
-//											ittter_apv->first),
-//									Form("MPD%d_ADC%d", itter_mpd->first,
-//											ittter_apv->first), 800, 0, 800);
-//					for (unsigned int i = 0; i < (ittter_apv->second).size();
-//							i++) {
-//						dMultiGEMHistoBuffer[iter_detectorID->first][itter_mpd->first][ittter_apv->first]->Fill(
-//								i, (ittter_apv->second)[i]);
-//					}
-//				}
-//			}
-//		}
-//		unsigned int Canvas_counter = 0;
-//		for (std::map<int, std::map<int, std::map<int, TH1F*>>>::iterator iter_detectorid=dMultiGEMHistoBuffer.begin();iter_detectorid!=dMultiGEMHistoBuffer.end();iter_detectorid++) {
-//			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
-//			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
-//			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5,5);
-//			int canvaspad_counter=0;
-//			for(std::map<int,std::map<int,TH1F*>>::iterator itter_mpd=iter_detectorid->second.begin();itter_mpd!=iter_detectorid->second.end();itter_mpd++) {
-//				for(std::map<int,TH1F*>::iterator ittter_apv=itter_mpd->second.begin();ittter_apv!=itter_mpd->second.end();ittter_apv++) {
-//					cfWorkZoneTabCanvas[Canvas_counter]->cd(canvaspad_counter+1);
-//					ittter_apv->second->SetMaximum(2500);
-//					ittter_apv->second->SetMinimum(0);
-//					ittter_apv->second->Draw();
-//					canvaspad_counter++;
-//				}
-//			}
-//			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
-//			cfWorkZoneTabCanvas[Canvas_counter]->Update();
-//			Canvas_counter++;
-//		}
-//		gSystem->ProcessEvents();
-//		delete inputHandler;
-//	} else {
-//		printf("No input file detected\n");
-//	}
-//}
+void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
+	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2910.dat.0");
+	MPDDecoder *decoder= new MPDDecoder(fname.c_str());
+	decoder->PedestalMode("test.root");
+
+}
+
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
 
-	/*std::map<int,std::map<int,TH1F*> > ZeroSubHistoBuffer;
-	if(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root"){
-
-			InputHandler *inputHandler= new InputHandler(rawfilename.c_str());
-			if(!vMappingName.empty()) inputHandler->SetMapping(vMappingName.c_str());
-			std::map<int,std::map<int,std::map<int,int> > > a;
-			std::map<int,std::map<int,std::map<int,int> > > ZeroSubRawBuffer=inputHandler->ZeroSProcessSingleEvents(vEventNumber,a,Pedestal_name.c_str(),-1);
-
-			for(std::map<int,std::map<int,std::map<int,int> > > ::iterator iter_detectorID=ZeroSubRawBuffer.begin(); iter_detectorID!=ZeroSubRawBuffer.end();iter_detectorID++){
-				ZeroSubHistoBuffer[iter_detectorID->first][1]=new TH1F("BeforeZeroSupression_X",Form("GEM_%d_BeforeZeroSupression_X",iter_detectorID->first),1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][11]=new TH1F("BeforeZeroSupression_Y",Form("GEM_%d_BeforeZeroSupression_Y",iter_detectorID->first),1600,0,1600);
-
-				ZeroSubHistoBuffer[iter_detectorID->first][2]=new TH1F("AfterZeroSupression_X",Form("GEM_%d_AfterZeroSupression_X",iter_detectorID->first),1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][12]=new TH1F("AfterZeroSupression_Y",Form("GEM_%d_AfterZeroSupression_Y",iter_detectorID->first),1600,0,1600);
-
-				ZeroSubHistoBuffer[iter_detectorID->first][3]=new TH1F("AfterRemoveCrosstalk_X",Form("GEM_%d_AfterRemoveCrosstalk_X",iter_detectorID->first),1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][13]=new TH1F("AfterRemoveCrosstalk_Y",Form("GEM_%d_AfterRemoveCrosstalk_Y",iter_detectorID->first),1600,0,1600);
-
-				ZeroSubHistoBuffer[iter_detectorID->first][4]=new TH1F("CrossTalk_X",Form("GEM_%d_CrossTalk_X",iter_detectorID->first),1600,0,1600);
-				ZeroSubHistoBuffer[iter_detectorID->first][14]=new TH1F("CrossTalk_Y",Form("GEM_%d_CrossTalk_Y",iter_detectorID->first),1600,0,1600);
-
-				for(std::map<int,std::map<int,int> >::iterator itter_dimension=iter_detectorID->second.begin();itter_dimension!=iter_detectorID->second.end();itter_dimension++){
-					for(std::map<int,int>::iterator ittter_strips=itter_dimension->second.begin(); ittter_strips!=itter_dimension->second.end();ittter_strips++) {
-						ZeroSubHistoBuffer[iter_detectorID->first][itter_dimension->first]->Fill(ittter_strips->first,ittter_strips->second);
-					}
-				}
-			}
-		unsigned int Canvas_counter = 0;
-		for(std::map<int,std::map<int,TH1F *>>::iterator iter_detectorID=ZeroSubHistoBuffer.begin();iter_detectorID!=ZeroSubHistoBuffer.end();iter_detectorID++){
-			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
-			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
-			cfWorkZoneTabCanvas[Canvas_counter]->Divide(2, 3);
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(1);
-			iter_detectorID->second[1]->Draw();
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(3);
-			iter_detectorID->second[2]->Draw();
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(5);
-			iter_detectorID->second[3]->Draw();
-			iter_detectorID->second[4]->SetLineColor(2);
-			iter_detectorID->second[4]->Draw("same");
-
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(2);
-			iter_detectorID->second[11]->Draw();
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(4);
-			iter_detectorID->second[12]->Draw();
-			cfWorkZoneTabCanvas[Canvas_counter]->cd(6);
-			iter_detectorID->second[13]->Draw();
-			iter_detectorID->second[14]->SetLineColor(2);
-			iter_detectorID->second[14]->Draw("same");
-
-			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
-			cfWorkZoneTabCanvas[Canvas_counter]->Update();
-			gSystem->ProcessEvents();
-			Canvas_counter++;
-		}
-	}else{
-		printf("Pedestal File structure unrecgnized, only .root allowed\n");
-	}
-*/
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
@@ -849,117 +738,15 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
 }
 
-void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-	GEMDataParserM4V * pedestalprocess=new GEMDataParserM4V();
-	pedestalprocess->PedestalMode(rawfilename.c_str(),"pedestal.root");
-/*	std::ifstream testfile(rawfilename.c_str());
-	string Pedestal_name= rawfilename;
-	if ((!Pedestal_name.empty())&&testfile.good()&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="dat")) {
-		printf("start pedestal mode\n");
 
-		string raw_filename(basename(strdup(vPedestalName.c_str()))); // get the basename
-		string filename_noappendix=raw_filename.substr(0,raw_filename.find_last_of("."));
-		string number_index=filename_noappendix.substr(filename_noappendix.find_last_not_of("0123456789")+1);
-		std::string Pedestal_outname(Form(tOutPutfilePattern->GetTitle(),"_Pedestal",atoi(number_index.c_str())));
-
-		InputHandler * decoder = new InputHandler(vPedestalName.c_str());
-		if(!vMappingName.empty()) decoder->SetMapping(vMappingName.c_str());
-		if (entries > 1) {
-			decoder->PedProcessAllEvents(entries, Pedestal_outname.c_str());
-		} else {
-			decoder->PedProcessAllEvents(Pedestal_outname.c_str());
-		}
-		printf("Pedestal file is saved as: %s\n",Pedestal_outname.c_str());
-		delete decoder;
-	} else {
-		printf("Please input the Pedestal file\n");
-		// set the color
-		Pixel_t red;
-		gClient->GetColorByName("red", red);
-		nStatusBarInfor->SetBackgroundColor(red);
-		nStatusBarInfor->SetText(
-				"Please input the Pedestal file");
-	}*/
-}
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
 
-
-	for(auto filename : rawfilename){
-		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
-		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));
-	}
-
-
-	/*UserGuiGeneralDialogProcess *dialog = new UserGuiGeneralDialogProcess();
-	if (rawfilename.size() != 0) {
-		std::ifstream testfile(Pedestal_name.c_str());
-		if ((!testfile.good())|| (!(dialog->CheckAppendix(Pedestal_name, "root")))) {
-			printf("Please input the Pedestal file\n");
-			nStatusBarInfor->SetText("Please input the Pedestal file");
-		} else {
-				for (unsigned int i = 0; i < rawfilename.size(); i++) {
-					std::ifstream testfile(rawfilename[i].c_str());
-					if (testfile.good()) {
-						printf("Processing  %s\n", rawfilename[i].c_str());
-						nStatusBarInfor->SetText(
-								Form("Processing  %s\n",
-										rawfilename[i].c_str()));
-						InputHandler * decoder = new InputHandler(
-								rawfilename[i].c_str());
-						if (!vMappingName.empty())
-							decoder->SetMapping(vMappingName.c_str());
-
-						string raw_filename(
-								basename(strdup(rawfilename[i].c_str()))); // get the basename
-						string filename_noappendix = raw_filename.substr(0,
-								raw_filename.find_last_of("."));
-						string number_index = filename_noappendix.substr(
-								filename_noappendix.find_last_not_of(
-										"0123456789") + 1);
-						std::string Hit_outname(
-								Form(tOutPutfilePattern->GetTitle(), "",
-										atoi(number_index.c_str())));
-						if (entries > 2) {
-							decoder->HitProcessAllEvents(entries,
-									vPedestalName.c_str(), Hit_outname.c_str());
-						} else {
-							decoder->HitProcessAllEvents(vPedestalName.c_str(),
-									Hit_outname.c_str());
-						}
-						printf("OutPut file is save as %s\n",
-								Hit_outname.c_str());
-						nStatusBarInfor->SetText(
-								Form("OutPut file is save as %s\n",
-										Hit_outname.c_str()));
-						//delete decoder;
-						delete decoder;
-					}
-			}
-		}
-	}*/
+//	for(auto filename : rawfilename){
+//		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
+//		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));
+//	}
 }
 
 void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
-/*
-	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
-	TChain *fChain = new TChain("GEMHit", "");
-	std::vector<std::string>::iterator iter_filename=Filenames.begin();
-	while (iter_filename != Filenames.end()) {
-		Filenamecheck->CheckAppendix((*iter_filename).c_str(), "root");
-		TFile *ff = new TFile((*iter_filename).c_str());
-		if (ff->IsOpen()) {
-			TTree *theTree = (TTree *) ff->Get("GEMHit");
-			if (!(theTree->IsZombie())) {
-				fChain->AddFile((*iter_filename).c_str());
-			} else
-				printf("Tree is not found in the file\n");
-		}
-		iter_filename++;
-	}
-	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
-	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Calibration",a->GetNumberFromFilename(Filenames[0])));
-	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Calibration(-1,savename.c_str());
-	*/
 }

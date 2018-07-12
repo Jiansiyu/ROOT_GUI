@@ -19,8 +19,8 @@ public:
 	virtual ~MPDDecoder();
 
 	void LoadFile(std::string fname);
-	void PedestalMode();
-	void HitMode();
+	void PedestalMode(std::string);
+	void HitMode(std::string,std::string);
 	void RawDisplay();
 	void HitDisplay();
 
@@ -31,10 +31,10 @@ private:
 	void ZeroSubtraction();
 
 private:
-	evio::evioFileChannel chan;
-	vector<uint32_t> *block_vec_mpd;
+	evio::evioFileChannel *chan;
+	vector<uint32_t> block_vec_mpd;
 	bool ReadBlock();
-
+	void clear();
 // GUI interface
 private:
 	void Progressbar(int current); // control the progress bar

@@ -7,6 +7,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <libconfig.h++>
 #include "GEMConfigure.h"
@@ -19,16 +20,13 @@ GEMConfigure *GEMConfigure::GetInstance(){
 	return m_instance;
 }
 
-GEMConfigure::GEMConfigure() {
-	// TODO Auto-generated constructor stub
-	DetConfigParser();
-	MappingParser();
-	GUIcfgParser();
-}
+//GEMConfigure::GEMConfigure() {
+//	// TODO Auto-generated constructor stub
+////	DetConfigParser();
+////	MappingParser();
+////	GUIcfgParser();
+//}
 
-GEMConfigure::~GEMConfigure() {
-	// TODO Auto-generated destructor stub
-}
 
 void GEMConfigure::DetConfigParser(std::string fname="./cfg/DetConfig.cfg"){
 	libconfig::Config cfg;
@@ -95,6 +93,7 @@ void GEMConfigure::MappingParser(std::string fname=""){
 		}
 		fname=DetConfig.GEM_cfg.mapfilename.c_str();
 	}
+	//std::ifstream mapfile();
 	std::ifstream mapfile(fname.c_str(),std::ifstream::in);
 	std::vector<std::string> lines;
 	if(mapfile.good()){

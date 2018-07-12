@@ -17,11 +17,16 @@ public:
 
 	void LoadRawData(std::vector<uint32_t>::iterator begin,std::vector<uint32_t>::iterator end);
 	std::map<int,std::vector<int>> GetDecoded();
-	void  CModeSubtraction();
-	std::map<int,std::vector<int>> GetCModeSubtraction();
+
+	std::map<int,std::vector<int>> GetCommonModeSubtraction();
 private:
-	std::map<int,std::vector<int>> mAPVRawSingleEvent;
+	// UID   data
+	std::map<int,std::vector<int>> mAPVRawSingleEvent;	 // raw data from dat file
+	std::map<int,std::vector<int>> mCommonModeSubtractedEvent;
 	std::map<int,std::vector<int>> mPedestalTimeSample;  // data after common mode subtraction
+
+	void  CommonModeSubtraction();
+	void clear();
 };
 
 #endif /* MPDRAWPARSER_H_ */
