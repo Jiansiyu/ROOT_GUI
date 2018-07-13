@@ -13,12 +13,21 @@
 #include <string>
 #include "iostream"
 #include "stdio.h"
+#include <algorithm>
 
 #include "GEMIDGenerator.h"
 namespace GEM{
 
 struct apvMapping {
-	apvMapping() {apvMap.clear();};
+public:
+	apvMapping() {
+		mpdUIDList.clear();
+		MPDNameList.clear();
+		apvArray.clear();
+		apvUIDList.clear();
+		apvMap.clear();
+	};
+
 	void addAPV(std::string line){
 		std::stringstream ss(line);
 		std::vector<std::string> result;
@@ -44,7 +53,7 @@ struct apvMapping {
 			apvMap[apvUniqueID].push_back(dimension);
 			apvMap[apvUniqueID].push_back(Pos);
 			apvMap[apvUniqueID].push_back(Invert);
-			CalculateMPDList();
+			CalculateMap();
 		} else {
 			std::cerr <<__FUNCTION__<<"<"<<__LINE__<<">"<<"Unknown Mapping format "<<result.size() << std::endl;
 		}
@@ -56,10 +65,10 @@ struct apvMapping {
 		}
 	}
 
-	std::map<int, std::vector<int>> & GetAPVmap(){
+	std::map<int, std::vector<int>> GetAPVmap(){
 		return apvMap;
 	}
-	std::vector<int> &GetAPVmap(int UID){
+	std::vector<int> GetAPVmap(int UID){
 		if(apvMap.find(UID)!=apvMap.end()){
 			return apvMap[UID];
 		}else{
@@ -69,13 +78,13 @@ struct apvMapping {
 			return test;
 		}
 	}
-	std::vector<int> &GetMPDList(){
+	std::vector<int> GetMPDList(){
 		return mpdUIDList;
 	}
-	std::vector<std::string> &GetMPDNameList(){
+	std::vector<std::string> GetMPDNameList(){
 		return MPDNameList;
 	}
-	std::vector<int> &GetAPVList(int UID){
+	std::vector<int> GetAPVList(int UID){
 		int crateid=getCrateID(UID);
 		int mpdid=getMPDID(UID);
 		if((apvArray.find(crateid)!=apvArray.end())&&(apvArray[crateid].find(mpdid)!=apvArray[crateid].end())){
@@ -87,31 +96,47 @@ struct apvMapping {
 			return test;
 		}
 	}
+	std::vector<int> GetAPVList(){
+		std::cout<<"  ***: "<<apvUIDList.size()<<std::endl;
+		return apvUIDList;
+	}
 	void Print(){
-		std::vector<std::string> fname=GetMPDNameList();
-		for(auto name : fname){
+//		std::vector<std::string> fname=GetMPDNameList();
+		for(auto name : MPDNameList){
 			std::cout<<name.c_str()<<std::endl;
 		}
 	}
 private:
-	std::map<int, std::vector<int>> apvMap;
+	std::map<int, std::vector<int>> apvMap;   // unique ID, apv
 	std::vector<int> mpdUIDList;
 	std::vector<std::string> MPDNameList;
-	std::map<int,std::map<int,std::vector<int>>> apvArray;
-	void CalculateMPDList(){
+	std::map<int,std::map<int,std::vector<int>>> apvArray; // crateid, mpdid, apv
+	std::vector<int> apvUIDList;
+	void CalculateMap(){
 		mpdUIDList.clear();
 		MPDNameList.clear();
+		apvArray.clear();
+		apvUIDList.clear();
 		for(auto apv = apvMap.begin();apv!=apvMap.end();apv++){
 			mpdUIDList.push_back(GetUID(getCrateID(apv->first),getMPDID(apv->first),0,0));
 			std::string name("Crate"+std::to_string(getCrateID(apv->first))+"_MPD"+std::to_string(getMPDID(apv->first)));
 			MPDNameList.push_back(name.c_str());
 			apvArray[getCrateID(apv->first)][getMPDID(apv->first)].push_back(getADCID(apv->first));
+			apvUIDList.push_back(apv->first);
 		}
-		MPDNameList.clear();
-	};
-};
 
-}
+		std::sort(mpdUIDList.begin(),mpdUIDList.end());
+		mpdUIDList.erase(std::unique(mpdUIDList.begin(),mpdUIDList.end()),mpdUIDList.end());
+
+		std::sort(MPDNameList.begin(),MPDNameList.end());
+		MPDNameList.erase(std::unique(MPDNameList.begin(),MPDNameList.end()),MPDNameList.end());
+
+		std::sort(apvUIDList.begin(),apvUIDList.end());
+		apvUIDList.erase(std::unique(apvUIDList.begin(),apvUIDList.end()),apvUIDList.end());
+	}
+};  // end of apvmap
+
+} // end of namespace
 
 
 

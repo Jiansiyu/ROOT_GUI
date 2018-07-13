@@ -17,6 +17,7 @@
 #include "MPDStructure.h"
 #include "MPDRawParser.h"
 #include "GEMIDGenerator.h"
+#include "GEMConfigure.h"
 #include "../src/Benchmark.h"
 
 
@@ -42,7 +43,7 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	std::map<int,TH1F *> Pedestal_temp;
 	MPDRawParser *rawparser=new MPDRawParser();
 	int i =0;
-	while(ReadBlock() && (i<300)){
+	while(ReadBlock()){
 		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
 		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction(); // get  the common mode subtracted data
 		// calculate the mean of the six time sample
@@ -88,8 +89,84 @@ void MPDDecoder::PedestalMode(std::string savefname){
 }
 
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
-	// the hit mode  process
+	// uid , value
+	std::map<int,int> mPedestal_mean;
+	std::map<int,int> mPedestal_rms;
 
+
+	// the hit mode  process
+	// get all the apv list
+	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
+	GEMConfigure *cfg= GEMConfigure::GetInstance();
+	for(auto apvlist : (cfg->GetMapping().GetAPVList())){
+		int crateid=GEM::getCrateID(apvlist);
+		int mpdid=GEM::getMPDID(apvlist);
+		int apvid=GEM::getADCID(apvlist);
+		std::string hmean_str=Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, apvid);
+		std::string hRMS_str=Form("PedestalRMS_mpd_%d_ch_%d",mpdid, apvid);
+		if(pfile->GetListOfKeys()->Contains(hmean_str.c_str())&&(pfile->GetListOfKeys()->Contains(hRMS_str.c_str()))){
+			TH1F *hmean=(TH1F *) pfile->Get(hmean_str.c_str());
+			TH1F *hRMS=(TH1F *) pfile->Get(hRMS_str.c_str());
+			for(int i=0;i<128;i++){
+				int uid=GEM::GetUID(crateid,mpdid,apvid,i);
+				mPedestal_mean[uid]=(hmean->GetBinContent(i+1));
+				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
+			}
+		}else{
+			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+					<< "MPD_" << mpdid << " APV_" << apvid
+					<< " is declared in the map, but cannot file in the pedestal file"
+					<< std::endl;
+		}
+	}
+
+	//Create tree and buffer
+	//
+	MPDRawParser *rawparser=new MPDRawParser();
+	while(ReadBlock()){
+		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
+		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction();
+		// zero subtraction
+		for(auto apv : (cfg->GetMapping().GetAPVList())){
+
+			if(data.find(apv+1)!=data.end()){
+				// zero subtraction
+				int crateid=GEM::getCrateID(apv);
+				int mpdid=GEM::getMPDID(apv);
+				int adcid=GEM::getADCID(apv);
+				for(int channel=0; channel<128; channel++){
+					uint8_t tsnumber =data[GEM::GetUID(crateid,mpdid,adcid,channel)].size();
+					int uid=GEM::GetUID(crateid,mpdid,adcid,channel);
+					for (uint8_t i =0; i < tsnumber;i++){
+						data[uid].at(i)-mPedestal_mean[uid];
+					}
+
+					// apply five sigma cut
+					if (std::accumulate(data[uid].begin(), data[uid].end(), 0)
+							/ (data[uid].size())
+							> (cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma)
+									* mPedestal_rms[uid]) {
+						// TODO
+
+					}
+				}
+
+
+			}else{
+				std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+						<< "MPD_" << GEM::getMPDID(apv) << " APV_" << GEM::getADCID(apv)
+						<< " is declared in the map, but cannot file in the raw data file !!!!"
+						<< std::endl;
+			}
+		}
+
+	}
+//	for(auto apvlist : cfg->GetMapping().GetAPVList()){
+//		int crateid=GEM::getCrateID(apvlist);
+//		int mpdid=GEM::getMPDID(apvlist);
+//		int apvid=GEM::getADCID(apvlist);
+//		std::cout<<"Crateid: "<<crateid<<"  mpdid: "<<mpdid<<"   adcid: "<<apvid<<std::endl;
+//	}
 	// load the pedestal file
 //	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
 
