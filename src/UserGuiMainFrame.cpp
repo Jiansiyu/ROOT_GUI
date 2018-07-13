@@ -701,7 +701,7 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2910.dat.0");
+	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2910.dat.0");//("/home/newdriver/Storage/mpdssp_data/mpd_ssp_test_2929.dat.0");
 	MPDDecoder *decoder= new MPDDecoder(fname.c_str());
 	decoder->PedestalMode("test.root");
 
@@ -741,7 +741,10 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-
+	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2911.dat.0");
+	std::string pedestalfname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2911.dat.0");
+	MPDDecoder *decoder=new MPDDecoder(fname.c_str());
+	decoder->HitMode(pedestalfname.c_str(),"test_hit.root");
 //	for(auto filename : rawfilename){
 //		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
 //		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));

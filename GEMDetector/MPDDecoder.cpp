@@ -18,6 +18,8 @@
 #include "MPDRawParser.h"
 #include "GEMIDGenerator.h"
 #include "../src/Benchmark.h"
+
+
 #ifdef __MULT_THREAD
 #include "thread"
 #endif
@@ -33,16 +35,14 @@ MPDDecoder::MPDDecoder(std::string fname){
 
 void MPDDecoder::LoadFile(std::string fname){
 	chan=new evio::evioFileChannel(fname.c_str(),"r");
-//	evio::evioFileChannel chan_temp(fname.c_str(),"r");
-//	chan=chan_temp;
 	chan->open();
 }
 
 void MPDDecoder::PedestalMode(std::string savefname){
 	std::map<int,TH1F *> Pedestal_temp;
 	MPDRawParser *rawparser=new MPDRawParser();
-	while(ReadBlock()){
-		//std::cout<<"Size: "<<block_vec_mpd.size()<<std::endl;
+	int i =0;
+	while(ReadBlock() && (i<300)){
 		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
 		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction(); // get  the common mode subtracted data
 		// calculate the mean of the six time sample
@@ -50,10 +50,10 @@ void MPDDecoder::PedestalMode(std::string savefname){
 			if(Pedestal_temp.find(iter->first)==Pedestal_temp.end()){
 				Pedestal_temp[iter->first] = new TH1F(Form("%d",iter->first),Form("%d",iter->first),9000,-4500,4500);
 			}
+			// the mean of all the time samples
 			Pedestal_temp[iter->first]->Fill((std::accumulate(iter->second.begin(),iter->second.end(),0)/(iter->second.size())));
 		}
 	}
-
 	// save the data into file
 	std::map<int,TH1F *> pedestal_mean;
 	std::map<int,TH1F *> pedestal_rms;
@@ -63,6 +63,7 @@ void MPDDecoder::PedestalMode(std::string savefname){
 		int adcid=GEM::getADCID(iter->first);
 		int channelid=GEM::getChannelID(iter->first);
 		int uid=GEM::GetUID(crateid,mpdid,adcid,0);
+
 		if(pedestal_mean.find(uid)==pedestal_mean.end()){
 			pedestal_mean[uid]=new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
 					Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
@@ -71,8 +72,8 @@ void MPDDecoder::PedestalMode(std::string savefname){
 					Form("PedestalRMS_mpd_%d_ch_%d",mpdid, adcid),
 					128, 0, 128);
 		}
-		pedestal_mean[uid]->Fill(channelid,iter->second->GetMean());
-		pedestal_rms[uid]->Fill(channelid,iter->second->GetRMS());
+		pedestal_mean[uid]->Fill(channelid+1,iter->second->GetMean());
+		pedestal_rms[uid]->Fill(channelid+1,iter->second->GetRMS());
 	}
 
 // save the histogram into root file
@@ -84,21 +85,28 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	}
 	file->Write();
 	file->Close();
-// one way to calculat the mean and rms is us vector
-//	accumulator_set<double, stats<tag::variance> > acc;
-//	for_each(a_vec.begin(), a_vec.end(), bind<void>(ref(acc), _1));
-//
-//	cout << mean(acc) << endl;
-//	cout << sqrt(variance(acc)) << endl;
 }
 
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	// the hit mode  process
+
 	// load the pedestal file
+//	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
 
-
-
-
+//
+//	int i =0;
+//	Benchmark *bench = new Benchmark();
+//	while(ReadBlock()){
+//
+//		MPDRawParser *rawparser=new MPDRawParser();
+//		std::cout<<i++<<std::endl;
+//		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
+//		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction();
+//
+//
+//		std::cout<<"Time : "<< bench->GetElapaedTime()<<" ms"<<std::endl;
+//		bench->Reset();
+//	}
 }
 
 void MPDDecoder::HitDisplay(){
@@ -106,11 +114,10 @@ void MPDDecoder::HitDisplay(){
 }
 
 bool MPDDecoder::ReadBlock(){
-	block_vec_mpd.clear(); // start a new event
+	clear(); // start a new event
 	if(chan->read()){
 		evio::evioDOMTree event(chan);
 		evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
-//		std::cout<<"number of banks: "<<mpdEventList->size()<<std::endl;
 		for(evio::evioDOMNodeList::iterator iter = mpdEventList->begin();
 				iter != mpdEventList->end(); iter++){
 			int banktag=(*iter)->tag;
@@ -127,30 +134,16 @@ bool MPDDecoder::ReadBlock(){
 				default:
 					break;
 			}
-
-
-//			std::vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
-//			if((*iter)->tag == GEM::MPD_tag){
-//				int iend;
-//				int vec_size=(*block_vec).size();
-//				//std::cout <<"Vectsize :"<< vec_size<<"  Eventid : "<<evtID << std::endl;
-//				for(iend =1 ; iend < vec_size; iend++){
-//					uint32_t tag = (((*block_vec)[iend])>>24)&0xf8;
-//					if(tag==0x90||tag==0x88) break;
-//				}
-//				block_vec_mpd->insert(block_vec_mpd->begin(),block_vec->begin(),block_vec->begin()+iend);
-//			}
 		}
 		return true;
+	}else{
+		return false;
 	}
-//	else{
-//		chan->close();
-//		return false;
-//	}
-//chan->close();
 }
 
-
+void MPDDecoder::clear(){
+	block_vec_mpd.clear();
+}
 
 MPDDecoder::~MPDDecoder() {
 	// TODO Auto-generated destructor stub

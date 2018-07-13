@@ -39,14 +39,14 @@ struct apvMapping {
 			int Pos = atoi(result.at(8).c_str());
 			int Invert = atoi(result.at(9).c_str());
 			std::string other = result.at(10);
-			int apvUniqueID = GetUID(CrateID, MPDID, ADCID,0);
+			int apvUniqueID = GEM::GetUID(CrateID, MPDID, ADCID,0);
 			apvMap[apvUniqueID].push_back(GEMID);
 			apvMap[apvUniqueID].push_back(dimension);
 			apvMap[apvUniqueID].push_back(Pos);
 			apvMap[apvUniqueID].push_back(Invert);
 			CalculateMPDList();
 		} else {
-			std::cerr << "Unknown Mapping format" << std::endl;
+			std::cerr <<__FUNCTION__<<"<"<<__LINE__<<">"<<"Unknown Mapping format "<<result.size() << std::endl;
 		}
 	};
 
@@ -88,7 +88,10 @@ struct apvMapping {
 		}
 	}
 	void Print(){
-
+		std::vector<std::string> fname=GetMPDNameList();
+		for(auto name : fname){
+			std::cout<<name.c_str()<<std::endl;
+		}
 	}
 private:
 	std::map<int, std::vector<int>> apvMap;
