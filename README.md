@@ -22,14 +22,14 @@
 * 1
 	* add the MPD4.0 and MPD_SSP data structure support
 * 2
-	* change the code structure
-* 3
 	* add the multi-thread support in the GUI
-* 4
+* 3
 	* new QT support
 	
-* 5 
-	* 
+##TODO LIST
+* 1
+	* change the layout of the code, build the path for the headers and .so seperatly before link
+	
 # Any Contribution is Welcome!
 
 contect me at: jiansiyu@gmail.com

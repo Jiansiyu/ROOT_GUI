@@ -12,16 +12,14 @@
 #+++++++++++++++++++++++++++++++++++++++++++
 # You make need to modify the following paths according to you system setting
 #+++++++++++++++++++++++++++++++++++++++++++
-
-#------------------------------------------------------------------------------
-SOURCEPATH  =  analysis src GEMDeccoder GUIDialog src GEMDetector
-srf         =  c cpp cxx C CPP
-
-#------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
 # general make file configuration
 CC       = g++ #-std=c++0x -pthread -O3 -g3 #-Wall
+CFLAGS=-D ${CFLAG}
+
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+
 
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -34,7 +32,7 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
-CXXFLAGS  +=${ROOTCFLAGS} -I${EVIO_INC} -I./
+CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS} -I${EVIO_INC} -I./
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
@@ -136,9 +134,35 @@ ROOT_GUI: ${OBJS}
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
+
+./bin/src/%.o : ./src/%.cxx
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	@mkdir -p $(@D)
+	@$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
+	@echo 'Finish building: $<'
+	@echo
+
+
+
+#./src/UserGuiMainFrameDic.cxx : ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
+#	@echo 'Building file: $@'
+#	@echo 'Invoking: rootcling Compiler'
+#	rootcint -f ./src/UserGuiMainFrameDic.cxx -c ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
+
+PHONY: clean help test
+
+clean:
+	${RM} ${OBJS} ${TARGET} *~ ./src/UserGuiMainFrameDic.cxx ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx	
+help:
+	cat MicroDefinatonList.df
+
+test: 
+	@echo "this is a test, not added"
+
 #./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cxx
 #	@echo 'Building file: $<'
 #	@echo 'Invoking: GCC C++ Compiler'
@@ -150,24 +174,3 @@ ROOT_GUI: ${OBJS}
 #	@echo 'Building file: $<'
 #	@echo 'Invoking: rootcling Compiler'
 #	rootcint -f ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx -c ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
-
-./bin/src/%.o : ./src/%.cxx
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
-	@echo 'Finish building: $<'
-	@echo
-
-
-
-#./src/UserGuiMainFrameDic.cxx : ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
-#	@echo 'Building file: $@'
-#	@echo 'Invoking: rootcling Compiler'
-#	rootcint -f ./src/UserGuiMainFrameDic.cxx -c ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
-
-PHONY: clean
-
-clean:
-	${RM} ${OBJS} ${TARGET} *~ ./src/UserGuiMainFrameDic.cxx ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx	
-	
