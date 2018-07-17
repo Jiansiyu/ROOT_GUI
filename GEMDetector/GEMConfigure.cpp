@@ -103,10 +103,10 @@ void GEMConfigure::MappingParser(std::string fname=""){
 			lines.push_back(line);
 		}
 	}
-	//for(auto line : lines) std::cout<<line<<std::endl;
-	//std::cout<<"**********"<<std::endl;
 	mapping.addAPVs(lines);
+#ifdef __CONFIGURE_DEBUG_MODE
 	mapping.Print();
+#endif
 }
 
 void GEMConfigure::GUIcfgParser(std::string fname="./cfg/GUIConfig.cfg"){

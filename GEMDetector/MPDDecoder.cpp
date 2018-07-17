@@ -10,6 +10,7 @@
 #include <map>
 #include <TH1F.h>
 #include <TFile.h>
+#include <TTree.h>
 
 #include "evioUtil.hxx"
 #include "evioFileChannel.hxx"
@@ -93,7 +94,6 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	std::map<int,int> mPedestal_mean;
 	std::map<int,int> mPedestal_rms;
 
-
 	// the hit mode  process
 	// get all the apv list
 	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
@@ -120,10 +120,44 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 		}
 	}
 
+
+	TFile *HitFileio=new TFile(savefname.c_str(),"RECREATE");
+	//create the tree
+	TTree *Hit = new TTree("GEMHit","Hit list");
+	Hit->SetDirectory(HitFileio);
+	Int_t EvtID=0;
+	Int_t nch=0,*Vstrip,*VdetID,*VplaneID,*adc0,*adc1,*adc2,*adc3,*adc4,*adc5;//GEM branch
+
+	Vstrip   = new Int_t[20000];  // strip ID
+	VdetID   = new Int_t[20000];
+	VplaneID = new Int_t[20000];
+	adc0     = new Int_t[20000];
+	adc1     = new Int_t[20000];
+	adc2     = new Int_t[20000];
+	adc3     = new Int_t[20000];
+	adc4     = new Int_t[20000];
+	adc5     = new Int_t[20000];
+	Hit->Branch("evtID",&EvtID,"evtID/I");
+	Hit->Branch("nch",&nch,"nch/I");
+	Hit->Branch("strip",Vstrip,"strip[nch]/I");
+	Hit->Branch("detID",VdetID,"detID[nch]/I");
+	Hit->Branch("planeID",VplaneID,"planeID[nch]/I");
+	Hit->Branch("adc0",adc0,"adc0[nch]/I");
+	Hit->Branch("adc1",adc1,"adc1[nch]/I");
+	Hit->Branch("adc2",adc2,"adc2[nch]/I");
+	Hit->Branch("adc3",adc3,"adc3[nch]/I");
+	Hit->Branch("adc4",adc4,"adc4[nch]/I");
+	Hit->Branch("adc5",adc5,"adc5[nch]/I");
+	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
 	//Create tree and buffer
-	//
 	MPDRawParser *rawparser=new MPDRawParser();
 	while(ReadBlock()){
+
+		// start a new event
+		// initialize
+		Int_t nstrips=0;
+		EvtID++;
+
 		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
 		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction();
 		// zero subtraction
@@ -134,11 +168,18 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 				int crateid=GEM::getCrateID(apv);
 				int mpdid=GEM::getMPDID(apv);
 				int adcid=GEM::getADCID(apv);
+				int apvuid=GEM::GetUID(crateid,mpdid,adcid,0);
 				for(int channel=0; channel<128; channel++){
 					uint8_t tsnumber =data[GEM::GetUID(crateid,mpdid,adcid,channel)].size();
 					int uid=GEM::GetUID(crateid,mpdid,adcid,channel);
 					for (uint8_t i =0; i < tsnumber;i++){
+#ifdef __DECODER_DEBUG_MODE
+						std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> before pedestal sub : "<< data[uid].at(i)<<"  - "<<mPedestal_mean[uid];
+#endif
 						data[uid].at(i)-mPedestal_mean[uid];
+#ifdef __DECODER_DEBUG_MODE
+						std::cout<<"(pedestal)  =  "<<data[uid].at(i)<<std::endl;
+#endif
 					}
 
 					// apply five sigma cut
@@ -146,12 +187,26 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 							/ (data[uid].size())
 							> (cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma)
 									* mPedestal_rms[uid]) {
-						// TODO
+						int RstripNb=ChNb[channel];
+						// calculate the invert channels
+						RstripNb=RstripNb+(127-2*RstripNb)*(gemcfg->GetMapping().GetAPVmap()[apvuid].at(3));
+						int RstripPos=RstripNb+128*(gemcfg->GetMapping().GetAPVmap()[apvuid].at(2));
 
+						Vstrip[nstrips]=RstripPos;
+#ifdef __DECODER_DEBUG_MODE
+						std::cout<<__FUNCTION__<<"<"<<__LINE__<<">  time sample(6 by default) :"<<data[uid]>size()<<std::endl;
+#endif
+						adc0[nstrips]=data[uid].at(0);
+						adc1[nstrips]=data[uid].at(1);
+						adc2[nstrips]=data[uid].at(2);
+						adc3[nstrips]=data[uid].at(3);
+						adc4[nstrips]=data[uid].at(4);
+						adc5[nstrips]=data[uid].at(5);
+						VdetID[nstrips]=gemcfg->GetMapping().GetAPVmap()[apvuid].at(0);
+						VplaneID[nstrips]=gemcfg->GetMapping().GetAPVmap()[apvuid].at(1);
+						nstrips++;
 					}
 				}
-
-
 			}else{
 				std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
 						<< "MPD_" << GEM::getMPDID(apv) << " APV_" << GEM::getADCID(apv)
@@ -159,31 +214,11 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 						<< std::endl;
 			}
 		}
-
+		nch=nstrips;
+		Hit->Write();
 	}
-//	for(auto apvlist : cfg->GetMapping().GetAPVList()){
-//		int crateid=GEM::getCrateID(apvlist);
-//		int mpdid=GEM::getMPDID(apvlist);
-//		int apvid=GEM::getADCID(apvlist);
-//		std::cout<<"Crateid: "<<crateid<<"  mpdid: "<<mpdid<<"   adcid: "<<apvid<<std::endl;
-//	}
-	// load the pedestal file
-//	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
-
-//
-//	int i =0;
-//	Benchmark *bench = new Benchmark();
-//	while(ReadBlock()){
-//
-//		MPDRawParser *rawparser=new MPDRawParser();
-//		std::cout<<i++<<std::endl;
-//		rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
-//		std::map<int,std::vector<int>> data =rawparser->GetCommonModeSubtraction();
-//
-//
-//		std::cout<<"Time : "<< bench->GetElapaedTime()<<" ms"<<std::endl;
-//		bench->Reset();
-//	}
+	HitFileio->Write();
+	HitFileio->Class();
 }
 
 void MPDDecoder::HitDisplay(){

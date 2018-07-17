@@ -1,4 +1,7 @@
+#
 # list of Micro definations and its function in the compilation
+#
+# Autor: Siyu Jian
 
 to enable each Micro, need to add the Micro in the makefile with the following rule
 
@@ -9,4 +12,11 @@ gcc -D [Micro]
 
 __GUI_DEBUG_MODE    :: debug mode flag, this well enble the debug display
 __SLOT_DEBUG_MODE
+__DECODER_DEBUG_MODE :: debug mode flag, this will print all the debug informations
 
+__CONFIGURE_DEBUG_MODE :: 
+
+__TIMESAMPLE6
+__TIMESAMPLE5
+__TIMESAMPLE4
+__TIMESAMPLE3
