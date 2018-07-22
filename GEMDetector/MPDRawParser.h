@@ -10,12 +10,15 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 class MPDRawParser {
 public:
 	MPDRawParser();
 	virtual ~MPDRawParser();
 
 	void LoadRawData(std::vector<uint32_t>::iterator begin,std::vector<uint32_t>::iterator end);
+	void LoadRawData(const std::vector<uint32_t> &);
+
 	std::map<int,std::vector<int>> GetDecoded();
 
 	std::map<int,std::vector<int>> GetCommonModeSubtraction();
@@ -24,6 +27,7 @@ private:
 	std::map<int,std::vector<int>> mAPVRawSingleEvent;	 // raw data from dat file
 	std::map<int,std::vector<int>> mCommonModeSubtractedEvent;
 	std::map<int,std::vector<int>> mPedestalTimeSample;  // data after common mode subtraction
+
 
 	void  CommonModeSubtraction();
 	void clear();

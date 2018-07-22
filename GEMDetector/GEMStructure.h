@@ -97,7 +97,7 @@ public:
 		}
 	}
 	std::vector<int> GetAPVList(){
-		std::cout<<"  ***: "<<apvUIDList.size()<<std::endl;
+		//std::cout<<"  ***: "<<apvUIDList.size()<<std::endl;
 		return apvUIDList;
 	}
 	void Print(){

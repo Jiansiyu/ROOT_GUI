@@ -27,6 +27,7 @@
 	* new QT support
 	
 ##TODO LIST
+
 * 1
 	* change the layout of the code, build the path for the headers and .so seperatly before link
 	

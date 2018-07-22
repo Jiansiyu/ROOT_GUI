@@ -28,9 +28,12 @@ struct DAQConfig{
 
 struct AnalysisConfig{
 	std::string Pedestalfname;
+	std::string PedestalSavePattern;
+	std::string HitSavePattern;
 	bool DecodeWhenLoading;
 	int ZeroSubtrCutSigma;
 	bool RawStripPosCorrection;
+
 };
 
 struct SysConfig{

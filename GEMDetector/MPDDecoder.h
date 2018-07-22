@@ -21,6 +21,7 @@ public:
 	void LoadFile(std::string fname);
 	void PedestalMode(std::string);
 	void HitMode(std::string,std::string);
+	void HitMode(std::string,std::string,std::string);
 	void RawDisplay();
 	void HitDisplay();
 

@@ -16,6 +16,7 @@ public:
 	virtual ~Benchmark();
 	void Reset();
 	unsigned int GetElapaedTime();
+	void Print(uint64_t );
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 };

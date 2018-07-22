@@ -69,7 +69,10 @@ void GEMConfigure::DetConfigParser(std::string fname="./cfg/DetConfig.cfg"){
 
 
 		const libconfig::Setting &AnalysisConfig = GEMConfig["DataAnalysisConfig"];
+
 					AnalysisConfig.lookupValue("PedestalFname",DetConfig.Analysis_cfg.Pedestalfname);
+					AnalysisConfig.lookupValue("PedestalSavePattern",DetConfig.Analysis_cfg.PedestalSavePattern);
+					AnalysisConfig.lookupValue("HitSavePattern",DetConfig.Analysis_cfg.HitSavePattern);
 					AnalysisConfig.lookupValue("ZeroSubtrCutSigma",DetConfig.Analysis_cfg.ZeroSubtrCutSigma);
 					AnalysisConfig.lookupValue("DecodeWhenLoad",DetConfig.Analysis_cfg.DecodeWhenLoading);
 					AnalysisConfig.lookupValue("RawStripPosCorrection",DetConfig.Analysis_cfg.RawStripPosCorrection);
@@ -98,7 +101,6 @@ void GEMConfigure::MappingParser(std::string fname=""){
 			line = line.substr(0,line.find("#",0));
 			line = line.substr(0,line.find("//",0));
 			line = line.substr(0,line.find("!",0));
-			//std::cout<<line<<std::endl;
 			if(line.size()==0) continue;
 			lines.push_back(line);
 		}

@@ -13,13 +13,14 @@
 # You make need to modify the following paths according to you system setting
 #+++++++++++++++++++++++++++++++++++++++++++
 # general make file configuration
-CC       = g++ #-std=c++0x -pthread -O3 -g3 #-Wall
-CFLAGS=-D ${CFLAG}
+CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
+
+CFLAGS= ${CFLAG}
 
 #------------------------------------------------------------------------------
+current_path=`cd "\`dirname \"$0\"\`";pwd`
 
 #------------------------------------------------------------------------------
-
 
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -71,6 +72,7 @@ ROOT_GUI: ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
+	
 	@echo 'Finish building: $@'
 	@echo
 
@@ -162,7 +164,7 @@ help:
 
 test: 
 	@echo "this is a test, not added"
-
+	@echo ${CFLAGS}
 #./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cxx
 #	@echo 'Building file: $<'
 #	@echo 'Invoking: GCC C++ Compiler'

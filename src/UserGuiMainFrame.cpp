@@ -31,6 +31,7 @@
 
 // raw decoder
 #include "../GEMDetector/MPDDecoder.h"
+#include "../GEMDetector/GEMConfigure.h"
 
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 
@@ -164,8 +165,15 @@ void UserGuiMainFrame::SetWorkZone(){
 }
 
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
+	// remove the previous tabs
+	int tabnumber = fWorkZoneTab->GetCounter();
+	for( int i =1; i <tabnumber; i ++){fWorkZoneTab->RemoveTab(1);};
+
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
-	int counter=0;
+//	int counter=0;
+//	for(unsigned int i ; i < NTabs; i ++){
+//		fWorkZoneTabSubFrame[i]=fWorkZoneTab->AddTab(Form("%d",i));
+//	}
 //	for(auto mpdname : gemInfor->GetGEMdetectorMap().GetMPDNameList()){
 //		fWorkZoneTabSubFrame[counter]=fWorkZoneTab->AddTab(mpdname.c_str());
 //		rawCanvasMPDTabCorrolation[mpdname.c_str()]=counter;
@@ -177,6 +185,8 @@ void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs) {
 //		cfWorkZoneTabCanvas[counter]= fWorkZoneTabEnbeddedCanvas[counter]->GetCanvas();
 //		counter++;
 //	}
+
+	gSystem->ProcessEvents();
 }
 
 void UserGuiMainFrame::SetWorkZoneTab(unsigned int NTabs,std::vector<std::string> TabName){
@@ -406,10 +416,10 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			break;
 	case kC_COLORSEL:
 		for(int i =0; i <NTabs; i++){
-			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
-			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Modified();
-			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Update();
-			gSystem->ProcessEvents();
+//			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
+//			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Modified();
+//			fWorkZoneTabEnbeddedCanvas[i]->GetCanvas()->Update();
+//			gSystem->ProcessEvents();
 		}
 		break;
 	default:
@@ -624,62 +634,62 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 
 
 
-void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>>  &event){
-	TH1F *h;
-	for (auto iter = rawCanvasMPDTabCorrolation.begin();iter != rawCanvasMPDTabCorrolation.end();iter++){
-		std::cout<<iter->first<<" "<<iter->second<<std::endl;
-	}
-	for (auto iter_mpd = event.begin();
-		iter_mpd!=event.end();iter_mpd++){
-		if(rawCanvasMPDTabCorrolation.find(Form("Crate0_MPD%d",iter_mpd->first))!=rawCanvasMPDTabCorrolation.end()){
-			int Canvas_counter=rawCanvasMPDTabCorrolation[Form("Crate0_MPD%d",iter_mpd->first)];
-			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
-			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
-			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5, 5);
-			int histo_counter=1;
-			for(auto iter_apv : iter_mpd->second){
-				cfWorkZoneTabCanvas[Canvas_counter]->cd(histo_counter++);
-				h= new TH1F(Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),779,0,780);
-				int i=1 ;
-				for (auto channel : iter_apv.second){
-					h->Fill(i++,channel);
-				}
-				h->Draw();
-
-				std::cout<<"CanvasID:"<<Canvas_counter<<"  MPD"<< iter_mpd->first<<"  "<< iter_apv.first<<std::endl;
-			}
-			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
-			cfWorkZoneTabCanvas[Canvas_counter]->Update();
-		}
-	}
-	gSystem->ProcessEvents();
-}
-
-
-void UserGuiMainFrame::generalCanvasDraw(std::map<int, std::map<int,TH1F *>> histos,int CanvasID){
-	cfWorkZoneTabCanvas[CanvasID]->Clear();
-	int lCanvasDiv_x=0,lCanvasDiv_y=0;
-	for(auto iter_y = histos.begin();iter_y!=histos.end();iter_y++){
-		if(iter_y->first > lCanvasDiv_y)lCanvasDiv_y=iter_y->first;
-		for(auto iter_x=iter_y->second.begin();iter_x!=iter_y->second.end();iter_x++){
-			if(iter_x->first > lCanvasDiv_x)lCanvasDiv_x=iter_x->first;
-		}
-	}
-	cfWorkZoneTabCanvas[CanvasID]->ResetAttPad();
-	cfWorkZoneTabCanvas[CanvasID]->Divide(lCanvasDiv_x,lCanvasDiv_y);
-
-	int subcanvas_counter=1;
-	for (auto iter_y = histos.begin(); iter_y != histos.end(); iter_y++) {
-		for (auto iter_x = iter_y->second.begin();
-				iter_x != iter_y->second.end(); iter_x++) {
-			cfWorkZoneTabCanvas[CanvasID]->cd(subcanvas_counter++);
-			iter_x->second->Draw();
-		}
-	}
-	cfWorkZoneTabCanvas[CanvasID]->Modified();
-	cfWorkZoneTabCanvas[CanvasID]->Update();
-	gSystem->ProcessEvents();
-};
+//void UserGuiMainFrame::fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>>  &event){
+//	TH1F *h;
+//	for (auto iter = rawCanvasMPDTabCorrolation.begin();iter != rawCanvasMPDTabCorrolation.end();iter++){
+//		std::cout<<iter->first<<" "<<iter->second<<std::endl;
+//	}
+//	for (auto iter_mpd = event.begin();
+//		iter_mpd!=event.end();iter_mpd++){
+//		if(rawCanvasMPDTabCorrolation.find(Form("Crate0_MPD%d",iter_mpd->first))!=rawCanvasMPDTabCorrolation.end()){
+//			int Canvas_counter=rawCanvasMPDTabCorrolation[Form("Crate0_MPD%d",iter_mpd->first)];
+//			cfWorkZoneTabCanvas[Canvas_counter]->Clear();
+//			cfWorkZoneTabCanvas[Canvas_counter]->ResetAttPad();
+//			cfWorkZoneTabCanvas[Canvas_counter]->Divide(5, 5);
+//			int histo_counter=1;
+//			for(auto iter_apv : iter_mpd->second){
+//				cfWorkZoneTabCanvas[Canvas_counter]->cd(histo_counter++);
+//				h= new TH1F(Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),Form("MPD%d_ADC%d",iter_mpd->first,iter_apv.first),779,0,780);
+//				int i=1 ;
+//				for (auto channel : iter_apv.second){
+//					h->Fill(i++,channel);
+//				}
+//				h->Draw();
+//
+//				std::cout<<"CanvasID:"<<Canvas_counter<<"  MPD"<< iter_mpd->first<<"  "<< iter_apv.first<<std::endl;
+//			}
+//			cfWorkZoneTabCanvas[Canvas_counter]->Modified();
+//			cfWorkZoneTabCanvas[Canvas_counter]->Update();
+//		}
+//	}
+//	gSystem->ProcessEvents();
+//}
+//
+//
+//void UserGuiMainFrame::generalCanvasDraw(std::map<int, std::map<int,TH1F *>> histos,int CanvasID){
+//	cfWorkZoneTabCanvas[CanvasID]->Clear();
+//	int lCanvasDiv_x=0,lCanvasDiv_y=0;
+//	for(auto iter_y = histos.begin();iter_y!=histos.end();iter_y++){
+//		if(iter_y->first > lCanvasDiv_y)lCanvasDiv_y=iter_y->first;
+//		for(auto iter_x=iter_y->second.begin();iter_x!=iter_y->second.end();iter_x++){
+//			if(iter_x->first > lCanvasDiv_x)lCanvasDiv_x=iter_x->first;
+//		}
+//	}
+//	cfWorkZoneTabCanvas[CanvasID]->ResetAttPad();
+//	cfWorkZoneTabCanvas[CanvasID]->Divide(lCanvasDiv_x,lCanvasDiv_y);
+//
+//	int subcanvas_counter=1;
+//	for (auto iter_y = histos.begin(); iter_y != histos.end(); iter_y++) {
+//		for (auto iter_x = iter_y->second.begin();
+//				iter_x != iter_y->second.end(); iter_x++) {
+//			cfWorkZoneTabCanvas[CanvasID]->cd(subcanvas_counter++);
+//			iter_x->second->Draw();
+//		}
+//	}
+//	cfWorkZoneTabCanvas[CanvasID]->Modified();
+//	cfWorkZoneTabCanvas[CanvasID]->Update();
+//	gSystem->ProcessEvents();
+//};
 
 //void UserGuiMainFrame::fCanvasDrawRaw(GEM::EventRawStruct event){
 //#ifdef __SLOT_DEBUG_MODE
@@ -701,9 +711,17 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2910.dat.0");//("/home/newdriver/Storage/mpdssp_data/mpd_ssp_test_2929.dat.0");
-	MPDDecoder *decoder= new MPDDecoder(fname.c_str());
-	decoder->PedestalMode("test.root");
+	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
+	std::string name=generalprocess->GetBaseFileName(rawfilename.c_str());
+	GEMConfigure *cfg=GEMConfigure::GetInstance();
+	std::cout<<"Working on "<<rawfilename.c_str()<<std::endl;
+	std::string savefilename=Form(cfg->GetSysCondfig().Analysis_cfg.PedestalSavePattern.c_str(),
+			generalprocess->GetNumberFromFilename(
+					generalprocess->GetAppendixLess_FileName(
+							name.c_str())));
+	std::cout<<"File will save as "<<savefilename.c_str()<<std::endl;
+	MPDDecoder *decoder= new MPDDecoder(rawfilename.c_str());
+	decoder->PedestalMode(savefilename.c_str());
 
 }
 
@@ -741,10 +759,10 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-	std::string fname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2911.dat.0");
-	std::string pedestalfname("/home/newdriver/Storage/INFN_GEM/mpd_ssp_2911.dat.0");
+	std::string fname("/home/newdriver/Storage/mpdssp_data/mpd_ssp_test_3119.dat.0");
+	std::string pedestalfname("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/pedestal.root");
 	MPDDecoder *decoder=new MPDDecoder(fname.c_str());
-	decoder->HitMode(pedestalfname.c_str(),"test_hit.root");
+	decoder->HitMode(pedestalfname.c_str(),"test_hit.root","");
 //	for(auto filename : rawfilename){
 //		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
 //		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));

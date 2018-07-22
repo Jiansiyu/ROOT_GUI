@@ -362,7 +362,7 @@ std::string UserGuiGeneralDialogProcess::GetBaseFileName(std::string filename){
 
 std::string UserGuiGeneralDialogProcess::GetAppendixLess_FileName(std::string filename) {
 	std::string filebasename=basename(strdup(filename.c_str()));
-	return filebasename.substr(0,filebasename.find_last_of("."));
+	return filebasename.substr(0,filebasename.find_first_of("."));
 
 }
 int UserGuiGeneralDialogProcess::GetNumberFromFilename(std::string filename){

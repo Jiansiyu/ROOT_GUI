@@ -64,7 +64,7 @@
 //#include "GEMInforCenter.h"
 #include "UserGUIDataStructue.h"
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
-
+#include "GUIInforCenter.h"
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -150,9 +150,14 @@ private:
 	// set the workzone tab
 	TGTab *fWorkZoneTab;
 	TGCompositeFrame *fWorkZoneTabDefultFrame;
-	TGCompositeFrame *fWorkZoneTabSubFrame[50];
-	TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
-	TCanvas *cfWorkZoneTabCanvas[50];
+
+	// the embeded tab and canvas
+	std::vector<TGCompositeFrame *>*fWorkZoneTabSubFrame;
+	std::vector<TRootEmbeddedCanvas *>*fWorkZoneTabEnbeddedCanvas;
+	std::vector<TCanvas *> *cfWorkZoneTabCanvas;
+	//TGCompositeFrame *fWorkZoneTabSubFrame[50];
+	//TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
+	//TCanvas *cfWorkZoneTabCanvas[50];
 
 	//GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
 	int NTabs=8;//gemInfor->GetGEMdetectorMap().GetMPDNumber();
@@ -248,8 +253,11 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
-	//void fCanvasDrawRaw(GEM::EventRawStruct);
-	void fCanvasDrawRaw(std::map<int, std::map<int,std::vector<int>>> &);
+
+	// *SIGNAL CATCH FUNCTION
+	void fCanvasDraw(GUICanvasDataStream *);
+	void fStatusBarDraw(GUIStatusBarDataStream *);
+	void fMainTabDraw(GUIMainTabDataStream *);
 
 	// status bar control functions
 private:
