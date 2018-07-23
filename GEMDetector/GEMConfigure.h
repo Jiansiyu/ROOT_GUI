@@ -17,6 +17,11 @@ public:
 	GEM::apvMapping GetMapping(){return mapping;};
 	GlobStruct::SysConfig GetSysCondfig(){return DetConfig;};
 
+public:
+	void LoadNewMapping(std::string fname){
+		MappingParser(fname.c_str());
+	}
+
 
 private:
 	void DetConfigParser(std::string);

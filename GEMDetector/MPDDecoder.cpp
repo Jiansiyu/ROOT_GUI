@@ -23,11 +23,12 @@
 #include "unordered_map"
 #include <math.h>
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #ifdef __MULT_THREAD
 #include "thread"
 #endif
 
-MPDDecoder::MPDDecoder() {
+MPDDecoder::MPDDecoder() : GUIInforCenter(){
 	// TODO Auto-generated constructor stub
 
 }
@@ -37,10 +38,39 @@ MPDDecoder::MPDDecoder(std::string fname){
 }
 
 void MPDDecoder::LoadFile(std::string fname){
+	rawfilename=fname;
 	chan=new evio::evioFileChannel(fname.c_str(),"r");
 	chan->open();
 }
 
+void MPDDecoder::RawDisplay(uint evtid) {
+	if (!boost::filesystem::exists(
+			Form(".data/%s.root", rawfilename.c_str()))) {
+
+		// looking for the initial data value
+		GEMConfigure *cfg = GEMConfigure::GetInstance();
+		uint64_t mpdnumber = cfg->GetMapping().GetMPDNameList().size();
+		int_fast64_t evid=0;
+		int_fast64_t nch;
+		int_fast64_t mpdid[mpdnumber];
+		int_fast16_t value[mpdnumber][800];
+		TFile *HitFileio=new TFile(Form(".data/%s.root", rawfilename.c_str()),"RECREATE");
+		//create the tree
+		TTree *Hit = new TTree("GEMRaw","raw Hit list");
+		Hit->Branch("evtID",&evtid,"evtID/I");
+		Hit->Branch("nch",&nch,"nch/I");
+		for(int i = 0 ; i < mpdnumber ; i ++){
+			Hit->Branch(Form("mpd%d",i),&(mpdid[i]),Form("mpd%d/I",i));
+			Hit->Branch(Form("data%d",i),value[i],Form("data[%d][nch]",i));
+		}
+		MPDRawParser *rawparser = new MPDRawParser();
+		while (ReadBlock()) {
+			rawparser->LoadRawData(block_vec_mpd);
+			rawparser->GetDecoded();
+		}
+
+	}
+}
 void MPDDecoder::PedestalMode(std::string savefname){
 	std::unordered_map<int,TH1F *> Pedestal_temp;
 	MPDRawParser *rawparser=new MPDRawParser();
@@ -91,6 +121,7 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	file->Write();
 	file->Close();
 }
+
 
 
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){

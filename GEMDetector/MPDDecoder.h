@@ -12,7 +12,8 @@
 #include "evioUtil.hxx"
 #include "evioFileChannel.hxx"
 #include "MPDStructure.h"
-class MPDDecoder {
+#include "../src/GUIInforCenter.h"
+class MPDDecoder : public GUIInforCenter {
 public:
 	MPDDecoder();
 	MPDDecoder(std::string fname);
@@ -22,7 +23,7 @@ public:
 	void PedestalMode(std::string);
 	void HitMode(std::string,std::string);
 	void HitMode(std::string,std::string,std::string);
-	void RawDisplay();
+	void RawDisplay(uint evtid);
 	void HitDisplay();
 
 private:
@@ -41,10 +42,14 @@ private:
 			126 }; // infn GEM APV card mapping
 
 private:
+	std::string rawfilename;
 	evio::evioFileChannel *chan;
 	vector<uint32_t> block_vec_mpd;
 	bool ReadBlock();
 	void clear();
+
+private:
+	std::map<int/*evtid*/,std::map<int/*mpdid*/,std::vector<TH1F *>>> rawHistoBuffer;
 // GUI interface
 private:
 	void Progressbar(int current); // control the progress bar

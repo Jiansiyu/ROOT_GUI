@@ -147,26 +147,16 @@ private:
 	// set the work zone variables
 	TGHorizontalFrame *fWorkZoneFrame;
 	TGLayoutHints *fWorkZoneLayout;//, *fWorkZoneItemLayout;
-	// set the workzone tab
+
+// tab related
+private:
 	TGTab *fWorkZoneTab;
 	TGCompositeFrame *fWorkZoneTabDefultFrame;
+	std::vector<TGCompositeFrame *> fWorkZoneTabSubFrame;
+	std::vector<TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
+	std::vector<TCanvas *> cfWorkZoneTabCanvas;
 
-	// the embeded tab and canvas
-	std::vector<TGCompositeFrame *>*fWorkZoneTabSubFrame;
-	std::vector<TRootEmbeddedCanvas *>*fWorkZoneTabEnbeddedCanvas;
-	std::vector<TCanvas *> *cfWorkZoneTabCanvas;
-	//TGCompositeFrame *fWorkZoneTabSubFrame[50];
-	//TRootEmbeddedCanvas *fWorkZoneTabEnbeddedCanvas[50];
-	//TCanvas *cfWorkZoneTabCanvas[50];
-
-	//GEMInforCenter *gemInfor=GEMInforCenter::GetInstance();
-	int NTabs=8;//gemInfor->GetGEMdetectorMap().GetMPDNumber();
-
-	std::map<std::string,int> rawCanvasMPDTabCorrolation;
-	TRootEmbeddedCanvas *fEmnbeddedCanvas;
-	TCanvas *cRawCanvas;
-
-
+private:
 	TGVerticalFrame *fWorkZoneControlFrame;
 	TGLayoutHints *fWorkZoneControlFrameLayout;
 	TGVerticalFrame *fWorkZoneCanvasFrame;
@@ -223,8 +213,10 @@ private:
 
 private:
 	void SetWorkZone();    // set the workspace
-	void SetWorkZoneTab(unsigned int NTabs=3);
-	void SetWorkZoneTab(unsigned int NTabs,std::vector<std::string>);   // create tab and set the names
+	// set the tab
+	void SetWorkZoneTab();
+	void SetWorkZoneTab(std::vector<std::string> tablist);
+
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
 	void SetStatusBar();

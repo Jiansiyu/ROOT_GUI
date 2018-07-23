@@ -16,3 +16,7 @@ SysMsgCenter::~SysMsgCenter() {
 	// TODO Auto-generated destructor stub
 }
 
+
+/*	Log information Record interface
+ *
+ */
