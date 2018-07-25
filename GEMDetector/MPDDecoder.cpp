@@ -23,7 +23,6 @@
 #include "unordered_map"
 #include <math.h>
 #include <algorithm>
-#include <boost/filesystem.hpp>
 #ifdef __MULT_THREAD
 #include "thread"
 #endif
@@ -38,37 +37,32 @@ MPDDecoder::MPDDecoder(std::string fname){
 }
 
 void MPDDecoder::LoadFile(std::string fname){
+	Rawstream.clear();
 	rawfilename=fname;
+
 	chan=new evio::evioFileChannel(fname.c_str(),"r");
 	chan->open();
 }
 
-void MPDDecoder::RawDisplay(uint evtid) {
-	if (!boost::filesystem::exists(
-			Form(".data/%s.root", rawfilename.c_str()))) {
+void MPDDecoder::RawDisplay(uint id) {
 
-		// looking for the initial data value
-		GEMConfigure *cfg = GEMConfigure::GetInstance();
-		uint64_t mpdnumber = cfg->GetMapping().GetMPDNameList().size();
-		int_fast64_t evid=0;
-		int_fast64_t nch;
-		int_fast64_t mpdid[mpdnumber];
-		int_fast16_t value[mpdnumber][800];
-		TFile *HitFileio=new TFile(Form(".data/%s.root", rawfilename.c_str()),"RECREATE");
-		//create the tree
-		TTree *Hit = new TTree("GEMRaw","raw Hit list");
-		Hit->Branch("evtID",&evtid,"evtID/I");
-		Hit->Branch("nch",&nch,"nch/I");
-		for(int i = 0 ; i < mpdnumber ; i ++){
-			Hit->Branch(Form("mpd%d",i),&(mpdid[i]),Form("mpd%d/I",i));
-			Hit->Branch(Form("data%d",i),value[i],Form("data[%d][nch]",i));
-		}
+	if ((Rawstream.size() == 0 )|| (id>Rawstream.end()->first)) {
+		std::cout<<"read raw "<<(Rawstream.end()->first)<< " to " << Rawstream.end()->first+50<<std::endl;
 		MPDRawParser *rawparser = new MPDRawParser();
-		while (ReadBlock()) {
+		uint64_t evtid = 0;
+		while (ReadBlock() && (evtid < Rawstream.end()->first+50)) {
+			evtid++;
 			rawparser->LoadRawData(block_vec_mpd);
-			rawparser->GetDecoded();
+			GUICanvasDataStream *stream = new GUICanvasDataStream();
+			stream->LoadData(rawparser->GetDecoded());
+			Rawstream[evtid] = stream;
 		}
+	}
 
+	if(Rawstream.find(id)!=Rawstream.end()){
+		CanvasTabDisplay(Rawstream[id]);      // load to display
+	}else{
+		std::cout<<"miao miao miao"<<std::endl;
 	}
 }
 void MPDDecoder::PedestalMode(std::string savefname){
@@ -188,7 +182,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
 	//Create tree and buffer
 	MPDRawParser *rawparser=new MPDRawParser();
-	while(ReadBlock()&&(EvtID<300)){
+	while(ReadBlock()){
 
 		// start a new event
 		// initialize

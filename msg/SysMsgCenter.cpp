@@ -6,7 +6,7 @@
  */
 
 #include "SysMsgCenter.h"
-
+/*
 SysMsgCenter::SysMsgCenter() {
 	// TODO Auto-generated constructor stub
 
@@ -16,7 +16,7 @@ SysMsgCenter::~SysMsgCenter() {
 	// TODO Auto-generated destructor stub
 }
 
-
+*/
 /*	Log information Record interface
  *
  */

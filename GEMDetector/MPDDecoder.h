@@ -48,6 +48,8 @@ private:
 	bool ReadBlock();
 	void clear();
 
+	std::map<int/**/,GUICanvasDataStream*> Rawstream;
+
 private:
 	std::map<int/*evtid*/,std::map<int/*mpdid*/,std::vector<TH1F *>>> rawHistoBuffer;
 // GUI interface

@@ -152,9 +152,13 @@ private:
 private:
 	TGTab *fWorkZoneTab;
 	TGCompositeFrame *fWorkZoneTabDefultFrame;
-	std::vector<TGCompositeFrame *> fWorkZoneTabSubFrame;
-	std::vector<TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
-	std::vector<TCanvas *> cfWorkZoneTabCanvas;
+	//std::vector<TGCompositeFrame *> fWorkZoneTabSubFrame;
+//	std::vector<TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
+//	std::vector<TCanvas *> cfWorkZoneTabCanvas;
+	std::map<int /*tab id*/,TGCompositeFrame *>fWorkZoneTabSubFrame;
+	std::map<int /*tab id*/,TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
+	std::map<int ,TCanvas *> cfWorkZoneTabCanvas;
+
 
 private:
 	TGVerticalFrame *fWorkZoneControlFrame;
@@ -215,7 +219,7 @@ private:
 	void SetWorkZone();    // set the workspace
 	// set the tab
 	void SetWorkZoneTab();
-	void SetWorkZoneTab(std::vector<std::string> tablist);
+	void SetWorkZoneTab(std::vector<int> );
 
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
@@ -245,11 +249,11 @@ public:
 	std::string GetPedestalFileName();
 	int GetCurrentEventID();                      // Get the current Evnt id
 	int SetCurrentEventID();
-
+public:
 	// *SIGNAL CATCH FUNCTION
-	void fCanvasDraw(GUICanvasDataStream *);
-	void fStatusBarDraw(GUIStatusBarDataStream *);
-	void fMainTabDraw(GUIMainTabDataStream *);
+	void fCanvasDraw( GUICanvasDataStream *);
+	void fStatusBarDraw( GUIStatusBarDataStream *);
+	void fMainTabDraw( GUIMainTabDataStream *);
 
 	// status bar control functions
 private:

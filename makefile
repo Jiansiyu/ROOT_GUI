@@ -14,14 +14,11 @@
 #+++++++++++++++++++++++++++++++++++++++++++
 # general make file configuration
 CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
-
 CFLAGS= ${CFLAG}
+THIS_DIR =`cd "\`dirname \"$0\"\`";pwd`
+#THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 #------------------------------------------------------------------------------
-current_path=`cd "\`dirname \"$0\"\`";pwd`
-
-#------------------------------------------------------------------------------
-
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLDFLAGS  := $(shell root-config --ldflags)
@@ -33,7 +30,7 @@ ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
 
-CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS} -I${EVIO_INC} -I./
+CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS} -I${EVIO_INC} -I./ 
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
@@ -45,26 +42,22 @@ endif
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
 LINKOPTION += -pthread -lm -ldl -lconfig++
 
-OBJS	+= $(addprefix ./bin/analysis/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./analysis/*.cpp}}))
-OBJS	+= $(addprefix ./bin/analysis/, $(notdir ${patsubst %.C, %.o, ${wildcard ./analysis/*.C}}))
-OBJS	+= $(addprefix ./bin/analysis/, $(notdir ${patsubst %.cxx, %.o, ${wildcard ./analysis/*.cxx}}))
 
-OBJS	+= $(addprefix ./bin/GEMDecoder/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./GEMDecoder/*.cpp}}))
-OBJS	+= $(addprefix ./bin/GUIDialog/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./GUIDialog/*.cpp}}))
-OBJS	+= $(addprefix ./bin/src/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./src/*.cpp}}))
+# searching for the link files and its source file
+SLOT_SOURCE +=${patsubst %LinkDef.h, %.cpp,  ${wildcard ./*/*LinkDef.h}}
+EXCLUDE_SOURCE +=     #${SLOT_SOURCE} 
+ALLSOURCE += ${wildcard ./*/*.cpp}
+ALLSOURCE += ${wildcard ./*/*.C}
+ALLSOURCE += ${wildcard ./*/*.cxx}
+SOURCE =${ALLSOURCE} #${filter-out ${EXCLUDE_SOURCE},${ALLSOURCE}}
 
-OBJS	+= $(addprefix ./bin/GEMDetector/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./GEMDetector/*.cpp}}))
+SLOT_TARGET += ${patsubst %.cpp, %Dic.cxx, ${SLOT_SOURCE}}
+SLOT_OBJS   += ${patsubst ./%, ./bin/%, ${patsubst %.cpp, %Dic.o, ${SLOT_SOURCE}}}
+SOURCE_OBJS += ${patsubst ./%, ./bin/%, ${addsuffix .o, ${basename ${SOURCE}}}}
+OBJS    +=  ${SOURCE_OBJS} ${SLOT_OBJS}
 
-#OBJS    += ./bin/DecoderMPD4_VME/GEMDataParserM4VDic.o
-#OBJS    += ./bin/src/UserGuiMainFrameDic.o
-
-TARGET = ROOT_GUI
-
+TARGET = ROOT_GUI 
 all: ${TARGET}  
-# $(addprefix ./bin/src/, $(notdir ${patsubst %.cpp, %.o, ${wildcard ./GEMDetector/*.cpp}}))
-
-
-THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 ROOT_GUI: ${OBJS} 
 	@echo ${THIS_DIR}
@@ -72,11 +65,11 @@ ROOT_GUI: ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
-	
+	@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
 	@echo
 
-./bin/analysis/%.o : ./analysis/%.cpp
+./bin/%.o : %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
@@ -84,15 +77,7 @@ ROOT_GUI: ${OBJS}
 	@echo 'Finish building: $<'
 	@echo
 	
-./bin/analysis/%.o : ./analysis/%.C
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
-	@echo 'Finish building: $<'
-	@echo	
-	
-./bin/analysis/%.o : ./analysis/%.cxx
+./bin/%.o : %.cxx
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
@@ -100,7 +85,7 @@ ROOT_GUI: ${OBJS}
 	@echo 'Finish building: $<'
 	@echo
 	
-./bin/GEMDecoder/%.o : ./GEMDecoder/%.cpp
+bin/%.o : %.C
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
@@ -108,71 +93,42 @@ ROOT_GUI: ${OBJS}
 	@echo 'Finish building: $<'
 	@echo
 	
-./bin/GUIDialog/%.o : ./GUIDialog/%.cpp 
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
+./src/%Dic.cxx : ./src/%.h ./src/%LinkDef.h
+	@echo 'Building file: $@'
+	@echo 'Invoking: rootcling Compiler'
 	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
-	@echo 'Finish building: $<'
-	@echo
+	rootcint -f "$@" -c  ${patsubst %Dic.cxx, %.h, $@} ${patsubst %Dic.cxx, %LinkDef.h, $@}
 	
-./bin/src/%.o : ./src/%.cpp
+./bin/src/%Dic.o : ./src/%Dic.cxx 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
-	@echo 'Finish building: $<'
-	@echo
-		
-./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cpp
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
-	@echo 'Finish building: $<'
-	@echo	
-
-./bin/GEMDetector/%.o : ./GEMDetector/%.cpp
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
 	@echo 'Finish building: $<'
 	@echo
 
-./bin/src/%.o : ./src/%.cxx
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C++ Compiler'
-	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
-	@echo 'Finish building: $<'
-	@echo
-
-
-
-#./src/UserGuiMainFrameDic.cxx : ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
-#	@echo 'Building file: $@'
-#	@echo 'Invoking: rootcling Compiler'
-#	rootcint -f ./src/UserGuiMainFrameDic.cxx -c ./src/UserGuiMainFrame.h ./src/UserGuiMainFrameLinkDef.h 
-
+#	
+JUNK_L1 = *~ ./*~ ./*/*~
+JUNK_L2 = ${OBJS}
+JUNK_L3 = *_rdict.pcm ./*_rdict.pcm ./*/*_rdict.pcm  ${TARGET}
+	 
 PHONY: clean help test
 
 clean:
-	${RM} ${OBJS} ${TARGET} *~ ./src/UserGuiMainFrameDic.cxx ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx	
+	${RM} ${OBJS} ${TARGET} *~ ./*/*Dic.cxx ./*/*rdict.pcm *rdict.pcm ./*/*~
+	${RM} ./bin/* -r
 help:
 	cat MicroDefinatonList.df
 
 test: 
-	@echo "this is a test, not added"
-	@echo ${CFLAGS}
-#./bin/DecoderMPD4_VME/%.o : ./DecoderMPD4_VME/%.cxx
-#	@echo 'Building file: $<'
-#	@echo 'Invoking: GCC C++ Compiler'
-#	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
-#	@echo 'Finish building: $<'
-#	@echo
-	
-#./DecoderMPD4_VME/GEMDataParserM4VDic.cxx: ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
-#	@echo 'Building file: $<'
-#	@echo 'Invoking: rootcling Compiler'
-#	rootcint -f ./DecoderMPD4_VME/GEMDataParserM4VDic.cxx -c ./DecoderMPD4_VME/GEMDataParserM4V.h ./DecoderMPD4_VME/GEMDataParserM4VLinkDef.h
+	@echo "Build Target"
+	@echo ${TARGET}
+	@echo
+	@echo "slot source "
+	@echo ${SLOT_SOURCE}
+	@echo "slot Dic"
+	@echo  ${SLOT_TARGET}
+	@echo 
+	@echo "Source"
+	@echo ${SOURCE}
+

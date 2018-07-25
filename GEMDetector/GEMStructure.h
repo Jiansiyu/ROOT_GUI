@@ -84,9 +84,17 @@ public:
 	std::vector<std::string> GetMPDNameList(){
 		return MPDNameList;
 	}
+
+	const std::string GetMPDName(int uid){
+		int crateid=GEM::getCrateID(uid);
+		int mpdid=GEM::getMPDID(uid);
+		std::string name("Crate"+std::to_string(crateid)+"_MPD"+std::to_string(mpdid));
+		return name;
+	}
+
 	std::vector<int> GetAPVList(int UID){
-		int crateid=getCrateID(UID);
-		int mpdid=getMPDID(UID);
+		int crateid=GEM::getCrateID(UID);
+		int mpdid=GEM::getMPDID(UID);
 		if((apvArray.find(crateid)!=apvArray.end())&&(apvArray[crateid].find(mpdid)!=apvArray[crateid].end())){
 			return apvArray[crateid][mpdid];
 		}else{
@@ -106,6 +114,7 @@ public:
 			std::cout<<name.c_str()<<std::endl;
 		}
 	}
+
 private:
 	std::map<int, std::vector<int>> apvMap;   // unique ID, apv
 	std::vector<int> mpdUIDList;

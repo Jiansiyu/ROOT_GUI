@@ -5,8 +5,8 @@
  *      Author: newdriver
  */
 
-#ifndef SYSMSGCENTER_H_
-#define SYSMSGCENTER_H_
+#ifndef USERSYSMSGCENTER_H_
+#define USERSYSMSGCENTER_H_
 #include <string>
 #include <ctime>
 //! Terminal color out put color defination

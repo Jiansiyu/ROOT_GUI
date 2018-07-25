@@ -38,7 +38,7 @@ void GEMConfigure::DetConfigParser(std::string fname="./cfg/DetConfig.cfg"){
 
 	try {
 		std::string name = cfg.lookup("name");
-		std::cout << "Store name: " << name << std::endl << std::endl;
+		//std::cout << "Store name: " << name << std::endl << std::endl;
 	} catch (const libconfig::SettingNotFoundException &nfex) {
 		std::cerr << "No 'name' setting in configuration file." << std::endl;
 	}
@@ -117,7 +117,7 @@ void GEMConfigure::GUIcfgParser(std::string fname="./cfg/GUIConfig.cfg"){
 
 GEMConfigure::GEMConfigure() {
 //	// TODO Auto-generated constructor stub
-	std::cout<<"Initialize the singleton function:"<<std::endl;
+	//std::cout<<"Initialize the singleton function:"<<std::endl;
 	DetConfigParser("./cfg/DetConfig.cfg");
 	MappingParser("");
 }

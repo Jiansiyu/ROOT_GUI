@@ -175,24 +175,30 @@ void UserGuiMainFrame::SetWorkZoneTab(){
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
 	// this is just used for draw the GUI, so efficency is not the first concen
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
-	SetWorkZoneTab(cfg->GetMapping().GetMPDNameList());
+	cfg->GetMapping().GetMPDList();
+	SetWorkZoneTab(cfg->GetMapping().GetMPDList());
 	gSystem->ProcessEvents();
 }
 
 /*
  *
  */
-void UserGuiMainFrame::SetWorkZoneTab(std::vector<std::string> tablist){
+void UserGuiMainFrame::SetWorkZoneTab(std::vector<int>tablist){
 	fWorkZoneTabSubFrame.clear();
 	fWorkZoneTabEnbeddedCanvas.clear();
 	cfWorkZoneTabCanvas.clear();
 	for(auto tab:tablist){
-		fWorkZoneTabSubFrame.push_back((fWorkZoneTab->AddTab(tab.c_str())));
-		fWorkZoneTabEnbeddedCanvas.push_back(new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame.back(), 600,600));
-		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetBorderMode(0);
-		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetGrid();
-		fWorkZoneTabSubFrame.back()->AddFrame(fWorkZoneTabEnbeddedCanvas.back(),new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-		cfWorkZoneTabCanvas.push_back(fWorkZoneTabEnbeddedCanvas.back()->GetCanvas());
+		fWorkZoneTabSubFrame[tab]=((fWorkZoneTab->AddTab(Form("crate%d_mpd%d",GEM::getCrateID(tab),GEM::getMPDID(tab)))));
+		fWorkZoneTabEnbeddedCanvas[tab]=new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[tab], 600,600);
+		fWorkZoneTabEnbeddedCanvas[tab]->GetCanvas()->SetBorderMode(0);
+		fWorkZoneTabEnbeddedCanvas[tab]->GetCanvas()->SetGrid();
+		fWorkZoneTabSubFrame[tab]->AddFrame(fWorkZoneTabEnbeddedCanvas[tab],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+		cfWorkZoneTabCanvas[tab]=fWorkZoneTabEnbeddedCanvas[tab]->GetCanvas();
+//		fWorkZoneTabEnbeddedCanvas.push_back(new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame.back(), 600,600));
+//		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetBorderMode(0);
+//		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetGrid();
+//		fWorkZoneTabSubFrame.back()->AddFrame(fWorkZoneTabEnbeddedCanvas.back(),new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+//		cfWorkZoneTabCanvas.push_back(fWorkZoneTabEnbeddedCanvas.back()->GetCanvas());
 		gSystem->ProcessEvents();
 	}
 }
@@ -404,10 +410,12 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			}
 			break;
 	case kC_COLORSEL:
-		for(auto canvas : fWorkZoneTabEnbeddedCanvas){
+		for(auto canvas_iter = fWorkZoneTabEnbeddedCanvas.begin();canvas_iter != fWorkZoneTabEnbeddedCanvas.end(); canvas_iter++ ){
+			auto canvas=canvas_iter->second;
 			canvas->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
-			canvas->GetCanvas()->Modified();
+//			canvas->GetCanvas()->Modified();
 			canvas->GetCanvas()->Update();
+			canvas->GetCanvas()->Draw();
 			gSystem->ProcessEvents();
 		}
 		break;
@@ -624,6 +632,9 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
+	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
+	decoder->RawDisplay(entries);
 
 //	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
 //		{
@@ -688,10 +699,60 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 	std::string pedestalfname("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/pedestal.root");
 	MPDDecoder *decoder=new MPDDecoder(fname.c_str());
 	decoder->HitMode(pedestalfname.c_str(),"test_hit.root","");
-//	for(auto filename : rawfilename){
-//		GEMDataParserM4V *hitmode=new GEMDataParserM4V();
-//		hitmode->HitMode(filename.c_str(),Pedestal_name,Form("hit_%s.root",filename.c_str()));
-//	}
+}
+
+void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
+
+	std::map<int/**/,std::vector<int>> rawdata = data->GetRaw();
+	std::map<int/*tab*/,std::vector<std::vector<int>>> tabrawdata;
+	for(auto apv = rawdata.begin();apv!=rawdata.end();apv++){
+		int crateid=GEM::getCrateID(apv->first);
+		int mpdid=GEM::getMPDID(apv->first);
+		int id=GEM::GetUID(crateid,mpdid,0,0);
+		tabrawdata[id].push_back(apv->second);
+	}
+	// solve the issues that if there is no data, it would show the previous data
+	if (tabrawdata.size() == 0) {
+		for (auto i = cfWorkZoneTabCanvas.begin();
+				i != cfWorkZoneTabCanvas.end(); i++) {
+			i->second->Clear();
+			i->second->Update();
+			i->second->Draw();
+		}
+	}
+	for(auto mpd_iter = tabrawdata.begin();mpd_iter!=tabrawdata.end();mpd_iter++){
+		int tabcanvasid=mpd_iter->first;
+		if(cfWorkZoneTabCanvas.find(tabcanvasid)!=cfWorkZoneTabCanvas.end()){
+			cfWorkZoneTabCanvas[tabcanvasid]->Clear();
+			cfWorkZoneTabCanvas[tabcanvasid]->ResetAttPad();
+			cfWorkZoneTabCanvas[tabcanvasid]->Divide(4,4);
+			int canvas_counter=1;
+			for(auto apv : mpd_iter->second){
+				TH1F *h = new TH1F(
+						Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+								GEM::getMPDID(tabcanvasid)),
+						Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+								GEM::getMPDID(tabcanvasid)), 800, 0, 800);
+				for(int i = 0; i <apv.size();i++){
+					h->Fill(i+1,apv.at(i));
+					h->SetYTitle("ADC");
+					h->SetXTitle("channel");
+
+				}
+				cfWorkZoneTabCanvas[tabcanvasid]->cd(canvas_counter++);
+//				/h->SetMarkerStyle(21);
+				h->Draw("HIST");
+			}
+
+		}else{
+			std::cout<<"cannot find"<<GEM::getCrateID(tabcanvasid)<<" "<<GEM::getMPDID(tabcanvasid)<<std::endl;
+		}
+		//cfWorkZoneTabCanvas[tabcanvasid]->Modified();
+		cfWorkZoneTabCanvas[tabcanvasid]->Update();
+		cfWorkZoneTabCanvas[tabcanvasid]->Draw();
+	}
+	gSystem->ProcessEvents();
+
 }
 
 void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){
