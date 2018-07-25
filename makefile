@@ -93,13 +93,13 @@ bin/%.o : %.C
 	@echo 'Finish building: $<'
 	@echo
 	
-./src/%Dic.cxx : ./src/%.h ./src/%LinkDef.h
+./%Dic.cxx : ./%.h ./%LinkDef.h
 	@echo 'Building file: $@'
 	@echo 'Invoking: rootcling Compiler'
 	@mkdir -p $(@D)
 	rootcint -f "$@" -c  ${patsubst %Dic.cxx, %.h, $@} ${patsubst %Dic.cxx, %LinkDef.h, $@}
 	
-./bin/src/%Dic.o : ./src/%Dic.cxx 
+./bin/%Dic.o : ./%Dic.cxx 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
