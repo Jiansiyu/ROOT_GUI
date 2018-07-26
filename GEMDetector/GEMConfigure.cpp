@@ -67,6 +67,13 @@ void GEMConfigure::DetConfigParser(std::string fname="./cfg/DetConfig.cfg"){
 		GEMDetectorConfig.lookupValue("ReadOutStripBin",
 				DetConfig.GEM_cfg.GEMReadoutBin);
 
+		const libconfig::Setting &nch_array =GEMDetectorConfig.lookup("stripMapping");
+		//std::cout<<"  nch "<< nch_array.<<std::endl;
+		DetConfig.Analysis_cfg.nch=new int[nch_array.getLength()];
+		for(int n =0 ; n < nch_array.getLength();n++){
+			DetConfig.Analysis_cfg.nch[n]=int(nch_array[n]);
+		}
+
 
 		const libconfig::Setting &AnalysisConfig = GEMConfig["DataAnalysisConfig"];
 

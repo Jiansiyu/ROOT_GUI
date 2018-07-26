@@ -689,16 +689,24 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Run(-1,savename.c_str());
-
 }
 
 
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
-	std::string fname("/home/newdriver/Storage/mpdssp_data/mpd_ssp_test_3119.dat.0");
-	std::string pedestalfname("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/pedestal.root");
-	MPDDecoder *decoder=new MPDDecoder(fname.c_str());
-	decoder->HitMode(pedestalfname.c_str(),"test_hit.root","");
+	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
+	GEMConfigure *cfg=GEMConfigure::GetInstance();
+	for(auto file : rawfilename){
+		std::string fname(file);
+		std::string pedestalfname(Pedestal_name.c_str());
+		MPDDecoder *decoder=new MPDDecoder(file.c_str());
+
+		std::string savefilename=Form(cfg->GetSysCondfig().Analysis_cfg.HitSavePattern.c_str(),
+					generalprocess->GetNumberFromFilename(
+							generalprocess->GetAppendixLess_FileName(
+									file.c_str())));
+		decoder->HitMode(pedestalfname.c_str(),savefilename.c_str());
+	}
 }
 
 void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
@@ -737,17 +745,13 @@ void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 					h->Fill(i+1,apv.at(i));
 					h->SetYTitle("ADC");
 					h->SetXTitle("channel");
-
 				}
 				cfWorkZoneTabCanvas[tabcanvasid]->cd(canvas_counter++);
-//				/h->SetMarkerStyle(21);
 				h->Draw("HIST");
 			}
-
 		}else{
 			std::cout<<"cannot find"<<GEM::getCrateID(tabcanvasid)<<" "<<GEM::getMPDID(tabcanvasid)<<std::endl;
 		}
-		//cfWorkZoneTabCanvas[tabcanvasid]->Modified();
 		cfWorkZoneTabCanvas[tabcanvasid]->Update();
 		cfWorkZoneTabCanvas[tabcanvasid]->Draw();
 	}

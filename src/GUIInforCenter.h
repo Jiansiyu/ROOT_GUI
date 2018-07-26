@@ -24,6 +24,13 @@ struct GUICanvasDataStream{
 public:
 	GUICanvasDataStream(){
 	};
+	TVector2 GetCanvasDivied(){
+		TVector2 size(histo_1h_arry.begin()->second.size(),histo_1h_arry.begin()->second.begin()->second.size());
+		return size;
+	}
+	const unsigned int GetCanvasNumber(){
+		return histo_1h_arry.size();
+	}
 	std::map<int/*tab*/,std::vector<TH1F*>> GetHisto1D(){
 		generateHisto(data);
 		return histo_1h;
@@ -37,18 +44,23 @@ public:
 private:
 	void generateHisto(const std::map<int/**/,std::vector<int>> &data){
 		// tab should be the same number of tabs
-		for(auto apv = data.begin(); apv!=data.end(); apv++){
-			int crateid=GEM::getCrateID(apv->first);
-			int mpdid=GEM::getMPDID(apv->first);
-			int adcid=GEM::getADCID(apv->first);
-			TH1F *histo=new TH1F(Form("mpd%d_apv%d",mpdid,adcid),Form("mpd%d_apv%d",mpdid,adcid),800,0,800);
-			std::vector<int> data=apv->second;
-			for(int i = 0 ; i < data.size();i++){
-				histo->Fill(i+1,data.at(i));
+		for (auto apv = data.begin(); apv != data.end(); apv++) {
+			int crateid = GEM::getCrateID(apv->first);
+			int mpdid = GEM::getMPDID(apv->first);
+			int adcid = GEM::getADCID(apv->first);
+
+			histo_1h[GEM::GetUID(crateid, mpdid, 0, 0)].push_back(new TH1F(Form("mpd%d_apv%d", mpdid, adcid),
+					Form("mpd%d_apv%d", mpdid, adcid), 800, 0, 800));
+			std::vector<int> data = apv->second;
+			for (int i = 0; i < data.size(); i++) {
+				histo_1h[GEM::GetUID(crateid, mpdid, 0, 0)].back()->Fill(i + 1, data.at(i));
 			}
-//			std::cout <<__func__<<" this is a test"<<GEM::GetUID(crateid,mpdid,0,0)<<std::endl;
-			histo_1h[GEM::GetUID(crateid,mpdid,0,0)].push_back(histo);
-			delete histo;
+		}
+		// fill into the map
+		for(auto mpd  = histo_1h.begin(); mpd!=histo_1h.end();mpd++){
+			for(int histo_id=0;histo_id<(mpd->second.size());histo_id++){
+				histo_1h_arry[mpd->first][histo_id/4][histo_id%4]=(mpd->second.at(histo_id));
+			}
 		}
 	}
 private:

@@ -33,6 +33,7 @@ struct AnalysisConfig{
 	bool DecodeWhenLoading;
 	int ZeroSubtrCutSigma;
 	bool RawStripPosCorrection;
+	int *nch;
 
 };
 

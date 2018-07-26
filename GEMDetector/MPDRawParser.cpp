@@ -134,30 +134,60 @@ void MPDRawParser::LoadRawData(const std::vector<uint32_t>  & data_in){
 //
 //
 void MPDRawParser::CommonModeSubtraction(){
-//	if(mAPVRawSingleEvent.size()==0){
-//		std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> : The data need to be loaded first"<<std::endl;
-//	}
-	int crateid=0;
-	int mpdid=0;
-	int adcid=0;
-	// contains all the apvs (UID have mpd and apv)
+
+	int crateid = 0;
+	int mpdid = 0;
+	int adcid = 0;
+
 	for(auto iter_adc=mAPVRawSingleEvent.begin();iter_adc!=mAPVRawSingleEvent.end();iter_adc++){
-		uint16_t nTSsize=(iter_adc->second.size())/129;    // calculate how many time sample
-
-		crateid=GEM::getCrateID(iter_adc->first);
-		mpdid=GEM::getMPDID(iter_adc->first);
-		adcid=GEM::getADCID(iter_adc->first);
-
-		for(int ts_counter=0;ts_counter<nTSsize;ts_counter++ ){
-			std::vector<int> TSimple_data(&(iter_adc->second)[129*ts_counter],&(iter_adc->second)[129*(ts_counter+1)]);
-			std::vector<int> vec_temp(TSimple_data.begin(),TSimple_data.end());
-			std::sort(vec_temp.begin(),vec_temp.end()-1);
-			int iCommonMode=std::accumulate(vec_temp.begin()+28,vec_temp.begin()+100,0)/72; // canculate the common mode
-			for(int channel =0; channel<128 ; channel++){
-				mCommonModeSubtractedEvent[GEM::GetUID(crateid,mpdid,adcid,channel)].push_back(TSimple_data[channel]-iCommonMode);
+		int uid=iter_adc->first;
+		crateid=GEM::getCrateID(uid);
+		mpdid=GEM::getMPDID(uid);
+		adcid=GEM::getADCID(uid);
+		std::vector<int> adc_temp=iter_adc->second;
+		// single adc data
+		int TSsize=adc_temp.size()/129;
+		for(int ts_counter=0; ts_counter<TSsize;ts_counter++){
+			std::vector<int> singleTSadc_temp;
+			singleTSadc_temp.insert(singleTSadc_temp.end(),&adc_temp[129*ts_counter],&adc_temp[129*(ts_counter+1)]);
+			std::vector<int> singleTSadc_temp_sorting;
+			singleTSadc_temp_sorting.insert(singleTSadc_temp_sorting.end(),singleTSadc_temp.begin(),singleTSadc_temp.end());
+			std::sort(singleTSadc_temp_sorting.begin(),singleTSadc_temp_sorting.end()-1);
+			int commonmode=0;
+			for(int k =28; k <100; k ++){
+				commonmode+=singleTSadc_temp_sorting.at(k);
 			}
+			commonmode=commonmode/72;
+			for(int k =0; k < singleTSadc_temp.size()-1;k++){
+				singleTSadc_temp[k]-=commonmode;
+			}
+			for(int i = 0; i < 128; i ++){
+				mCommonModeSubtractedEvent[iter_adc->first+i].push_back(singleTSadc_temp[i]);
+			}
+
 		}
 	}
+//	int crateid=0;
+//	int mpdid=0;
+//	int adcid=0;
+//	// contains all the apvs (UID have mpd and apv)
+//	for(auto iter_adc=mAPVRawSingleEvent.begin();iter_adc!=mAPVRawSingleEvent.end();iter_adc++){
+//		uint16_t nTSsize=(iter_adc->second.size())/129;    // calculate how many time sample
+//
+//		crateid=GEM::getCrateID(iter_adc->first);
+//		mpdid=GEM::getMPDID(iter_adc->first);
+//		adcid=GEM::getADCID(iter_adc->first);
+//
+//		for(int ts_counter=0;ts_counter<nTSsize;ts_counter++ ){
+//			std::vector<int> TSimple_data(&(iter_adc->second)[129*ts_counter],&(iter_adc->second)[129*(ts_counter+1)]);
+//			std::vector<int> vec_temp(TSimple_data.begin(),TSimple_data.end());
+//			std::sort(vec_temp.begin(),vec_temp.end()-1);
+//			int iCommonMode=std::accumulate(vec_temp.begin()+28,vec_temp.begin()+100,0.0)/72; // canculate the common mode
+//			for(int channel =0; channel<128 ; channel++){
+//				mCommonModeSubtractedEvent[GEM::GetUID(crateid,mpdid,adcid,channel)].push_back(TSimple_data[channel]-iCommonMode);
+//			}
+//		}
+//	}
 }
 
 void MPDRawParser::clear(){
