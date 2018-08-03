@@ -632,6 +632,10 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
+#ifdef __DECODER_DEBUG_MODE
+
+	rawfilename="/home/newdriver/Storage/Server/JLabFarm/mpd_ssp_3300.dat.0";
+#endif
 	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
 	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
 	decoder->RawDisplay(entries);
@@ -694,6 +698,12 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
+
+#ifdef __DECODER_DEBUG_MODE
+	Pedestal_name="/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/results/Pedestal_run3320.root";
+	rawfilename.push_back("/home/newdriver/Storage/Server/JLabFarm/mpd_ssp_3300.dat.0");
+#endif
+
 	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
 	for(auto file : rawfilename){
@@ -704,59 +714,62 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 		std::string savefilename=Form(cfg->GetSysCondfig().Analysis_cfg.HitSavePattern.c_str(),
 					generalprocess->GetNumberFromFilename(
 							generalprocess->GetAppendixLess_FileName(
-									file.c_str())));
+									file.c_str())),generalprocess->GetDividedNumber(file.c_str()));
+		std::cout<<"Working on file : "<< file.c_str()<<std::endl
+				<<"Pedestal file    : "<<pedestalfname.c_str()<<std::endl
+				<<"Save file name   : "<<savefilename.c_str()<<std::endl;
 		decoder->HitMode(pedestalfname.c_str(),savefilename.c_str());
 	}
 }
 
 void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 
-	std::map<int/**/,std::vector<int>> rawdata = data->GetRaw();
-	std::map<int/*tab*/,std::vector<std::vector<int>>> tabrawdata;
+	std::map<int,std::vector<int>> rawdata = data->GetRaw();
+	std::map<int,std::vector<std::vector<int>>> tabrawdata;
 	for(auto apv = rawdata.begin();apv!=rawdata.end();apv++){
 		int crateid=GEM::getCrateID(apv->first);
 		int mpdid=GEM::getMPDID(apv->first);
 		int id=GEM::GetUID(crateid,mpdid,0,0);
 		tabrawdata[id].push_back(apv->second);
 	}
-	// solve the issues that if there is no data, it would show the previous data
-	if (tabrawdata.size() == 0) {
-		for (auto i = cfWorkZoneTabCanvas.begin();
-				i != cfWorkZoneTabCanvas.end(); i++) {
-			i->second->Clear();
-			i->second->Update();
-			i->second->Draw();
-		}
-	}
-	for(auto mpd_iter = tabrawdata.begin();mpd_iter!=tabrawdata.end();mpd_iter++){
-		int tabcanvasid=mpd_iter->first;
-		if(cfWorkZoneTabCanvas.find(tabcanvasid)!=cfWorkZoneTabCanvas.end()){
-			cfWorkZoneTabCanvas[tabcanvasid]->Clear();
-			cfWorkZoneTabCanvas[tabcanvasid]->ResetAttPad();
-			cfWorkZoneTabCanvas[tabcanvasid]->Divide(4,4);
-			int canvas_counter=1;
-			for(auto apv : mpd_iter->second){
-				TH1F *h = new TH1F(
-						Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
-								GEM::getMPDID(tabcanvasid)),
-						Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
-								GEM::getMPDID(tabcanvasid)), 800, 0, 800);
-				for(int i = 0; i <apv.size();i++){
-					h->Fill(i+1,apv.at(i));
-					h->SetYTitle("ADC");
-					h->SetXTitle("channel");
-				}
-				cfWorkZoneTabCanvas[tabcanvasid]->cd(canvas_counter++);
-				h->Draw("HIST");
-			}
-		}else{
-			std::cout<<"cannot find"<<GEM::getCrateID(tabcanvasid)<<" "<<GEM::getMPDID(tabcanvasid)<<std::endl;
-		}
-		cfWorkZoneTabCanvas[tabcanvasid]->Update();
-		cfWorkZoneTabCanvas[tabcanvasid]->Draw();
-	}
-	gSystem->ProcessEvents();
 
+
+	std::map<int, std::vector<TH1F *>> tabHistoArray;
+	for(auto mpd_iter = tabrawdata.begin();mpd_iter!=tabrawdata.end();mpd_iter++){
+			int tabcanvasid=mpd_iter->first;
+			if(cfWorkZoneTabCanvas.find(tabcanvasid)!=cfWorkZoneTabCanvas.end()){
+				for(auto apv : mpd_iter->second){
+								TH1F *h = new TH1F(
+										Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+												GEM::getMPDID(tabcanvasid)),
+										Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+												GEM::getMPDID(tabcanvasid)), 800, 0, 800);
+								for(int i = 0; i <apv.size();i++){
+										h->Fill(i+1,apv.at(i));
+										h->GetYaxis()->SetRangeUser(0,3000);
+										h->SetYTitle("ADC");
+										h->SetXTitle("channel");
+												}
+								tabHistoArray[tabcanvasid].push_back(h);
+				}
+			}
+	}
+
+	for(auto tabhisto = tabHistoArray.begin();tabhisto!=tabHistoArray.end();tabhisto++){
+		auto tabcanvasid=tabhisto->first;
+		cfWorkZoneTabCanvas[tabcanvasid]->Clear();
+		cfWorkZoneTabCanvas[tabcanvasid]->ResetAttPad();
+		cfWorkZoneTabCanvas[tabcanvasid]->Divide(4, 4);
+		int canvas_counter=1;
+		for(auto apv : tabhisto->second){
+			cfWorkZoneTabCanvas[tabcanvasid]->cd(canvas_counter++);
+			apv->Draw("HIST");
+		}
+		cfWorkZoneTabCanvas[tabcanvasid]->Modified();
+		cfWorkZoneTabCanvas[tabcanvasid]->Update();
+	}
+
+	gSystem->ProcessEvents();
 }
 
 void UserGuiMainFrame::fCalibrationProcess(std::vector<std::string> Filenames){

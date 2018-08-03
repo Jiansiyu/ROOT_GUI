@@ -29,10 +29,10 @@ or all the apvs on the MPDs
 #define GEM_MPDID_SHIFT     GEM_CHANNELID_SIZE+GEM_ADCID_SIZE
 #define GEM_CRATEID_SHIFT   GEM_CHANNELID_SIZE+GEM_ADCID_SIZE+GEM_MPDID_SIZE
 
-#define GEM_CHANNELID_POS  0xff
-#define GEM_ADCID_POS	   0xff<<GEM_ADCID_SHIFT
-#define GEM_MPDID_POS	   0xff<<GEM_MPDID_SHIFT
-#define GEM_CRATEID_POS    0xff<<GEM_CRATEID_SHIFT
+#define GEM_CHANNELID_POS  (0xff)
+#define GEM_ADCID_POS	   (0xff<<GEM_ADCID_SHIFT)
+#define GEM_MPDID_POS	   (0xff<<GEM_MPDID_SHIFT)
+#define GEM_CRATEID_POS    (0xff<<GEM_CRATEID_SHIFT)
 
 // @param CrateID/SSPid: used for the crate identification
 // @param mpdID
@@ -42,19 +42,19 @@ or all the apvs on the MPDs
 template<class T>
 T GetUID(T CrateID, T mpdID, T adcID, T channelID) {
 	if (CrateID == -1) {
-		CrateID = GEM_CRATEID_POS >> GEM_CRATEID_SHIFT;
+		CrateID = (GEM_CRATEID_POS >> GEM_CRATEID_SHIFT);
 	}
 	if (mpdID == -1) {
-		mpdID = GEM_MPDID_POS >> GEM_MPDID_SHIFT;
+		mpdID = (GEM_MPDID_POS >> GEM_MPDID_SHIFT);
 	}
 	if (adcID == -1) {
-		adcID = GEM_ADCID_POS >> GEM_ADCID_SHIFT;
+		adcID = (GEM_ADCID_POS >> GEM_ADCID_SHIFT);
 	}
 	if (channelID == -1) {
 		channelID = GEM_CHANNELID_POS >> GEM_CHANNELID_SHIFT;
 	}
-	return ((CrateID << GEM_CRATEID_SHIFT) | (mpdID << GEM_MPDID_SHIFT)
-			| (adcID << GEM_ADCID_SHIFT)) | channelID;
+	return (((CrateID << GEM_CRATEID_SHIFT) | (mpdID << GEM_MPDID_SHIFT)
+			| (adcID << GEM_ADCID_SHIFT)) | channelID);
 }
 template<class T>
 T getMPDID(T uid) {

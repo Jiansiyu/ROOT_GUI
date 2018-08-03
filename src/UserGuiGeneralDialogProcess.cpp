@@ -363,7 +363,10 @@ std::string UserGuiGeneralDialogProcess::GetBaseFileName(std::string filename){
 std::string UserGuiGeneralDialogProcess::GetAppendixLess_FileName(std::string filename) {
 	std::string filebasename=basename(strdup(filename.c_str()));
 	return filebasename.substr(0,filebasename.find_first_of("."));
-
+}
+int UserGuiGeneralDialogProcess::GetDividedNumber(std::string filename){
+	std::string filebasename=basename(strdup(filename.c_str()));
+	return atoi(filebasename.substr(filebasename.find_last_of(".")+1).c_str());
 }
 int UserGuiGeneralDialogProcess::GetNumberFromFilename(std::string filename){
 	std::string filebasename=GetAppendixLess_FileName(filename);

@@ -45,6 +45,7 @@ public:
 	std::string GetFileName(std::string filename, char *processmode);//
 	std::string GetBaseFileName(std::string filename);
 	std::string GetAppendixLess_FileName(std::string);  // get the filename with out appendix
+	int GetDividedNumber(std::string);          // get the last digit of the name xxx_1095.dat.0   the last 0
 	std::string GetFileNameAppendix(std::string);
 	int GetNumberFromFilename(std::string filename);
 	Bool_t CheckAppendix(std::string filename, std::string appendix);
