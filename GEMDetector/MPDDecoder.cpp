@@ -135,7 +135,6 @@ void MPDDecoder::PedestalMode(std::string savefname){
 		pedestal_meanhisto[uid]->Fill(iter->second->GetMean());
 		pedestal_rmshisto[uid]->Fill(iter->second->GetRMS());
 		pedestal_rms_allhisto->Fill(iter->second->GetRMS());
-
 	}
 
 	// generate the 2-d histo for the pedestal
@@ -148,9 +147,6 @@ void MPDDecoder::PedestalMode(std::string savefname){
 		int crateid = GEM::getCrateID(uid);
 		int mpdid = GEM::getMPDID(uid);
 		int apvid = GEM::getADCID(uid);
-//		for(int i=0;i<128;i++){
-//			pedestal_rms_2d_distri->Fill(counter_temp,iter->second->GetBinContent(i+1));
-//		}
 
 		pedestal_rms_2d_histo->Fill(counter_temp,iter->second->GetMean());
 		pedestal_rms_2d_histo->SetBinError(counter_temp+1,iter->second->GetRMS());
@@ -165,10 +161,8 @@ void MPDDecoder::PedestalMode(std::string savefname){
 		for(int i=0;i<128;i++){
 			pedestal_rms_2d_distri->Fill(counter_temp,iter->second->GetBinContent(i+1));
 		}
-
 		counter_temp++;
 	}
-
 
 
 // save the histogram into root file
@@ -272,9 +266,9 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 			// loop on all the apvs, if this apv is not included in the mapping, then skip it
 			if(mPedestal_mean.find(uid)==mPedestal_mean.end()) {
 				continue;
-//#ifdef __DECODER_DEBUG_MODE
+#ifdef __DECODER_DEBUG_MODE
 			std::cout<<"[Warning]: EvtID: "<<EvtID<<"  MPD:" <<GEM::getMPDID(uid) <<" adc"<<GEM::getADCID(uid)<<"   detected in the data, but not in the mapping, skip it"<<std::endl;
-//#endif
+#endif
 			}
 			std::vector<int> adc_temp=apv->second;
 			int totalsize=adc_temp.size();
