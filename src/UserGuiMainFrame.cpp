@@ -413,9 +413,8 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 		for(auto canvas_iter = fWorkZoneTabEnbeddedCanvas.begin();canvas_iter != fWorkZoneTabEnbeddedCanvas.end(); canvas_iter++ ){
 			auto canvas=canvas_iter->second;
 			canvas->GetCanvas()->SetFillColor(TColor::GetColor(fColorSel->GetColor()));
-//			canvas->GetCanvas()->Modified();
+			canvas->GetCanvas()->Modified();
 			canvas->GetCanvas()->Update();
-			canvas->GetCanvas()->Draw();
 			gSystem->ProcessEvents();
 		}
 		break;
@@ -633,7 +632,6 @@ void  UserGuiMainFrame::SetStatusBarDisplay(std::string infor){
 //ooooooooooooooooooooooooooo00000000000000000000000oooooooooooooooooooooooooooooooooooo
 void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 #ifdef __DECODER_DEBUG_MODE
-
 	rawfilename="/home/newdriver/Storage/Server/JLabFarm/mpd_ssp_3300.dat.0";
 #endif
 	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
