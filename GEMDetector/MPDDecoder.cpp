@@ -29,11 +29,20 @@
 
 MPDDecoder::MPDDecoder() : GUIInforCenter(){
 	// TODO Auto-generated constructor stub
-
+	Initialize();
 }
 
 MPDDecoder::MPDDecoder(std::string fname){
 	LoadFile(fname.c_str());
+	Initialize();
+}
+
+
+void MPDDecoder::Initialize(){
+	GEMConfigure *cfg=GEMConfigure::GetInstance();
+	for(int i = 0 ; i <128; i ++){
+	ChNb[i]=(cfg->GetSysCondfig().Analysis_cfg.nch)[i];
+	}
 }
 
 void MPDDecoder::LoadFile(std::string fname){
