@@ -43,6 +43,7 @@ void MPDDecoder::Initialize(){
 	for(int i = 0 ; i <128; i ++){
 	ChNb[i]=(cfg->GetSysCondfig().Analysis_cfg.nch)[i];
 	}
+	//HitCut_sigma=cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
 }
 
 void MPDDecoder::LoadFile(std::string fname){
@@ -193,7 +194,166 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	file->Close();
 }
 
+//! the zero subttraction mode display
+void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
+	// uid , value
+	std::unordered_map<int,int> mPedestal_mean;
+	std::unordered_map<int,int> mPedestal_rms;
+	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
+	if(!pfile->IsOpen()){
+		std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> [ERROR]: Pedestal file cannot open: "<<pedestalfname.c_str()<<std::endl;
+		return;
+	}
+	GEMConfigure *cfg= GEMConfigure::GetInstance();
+	for(auto apvlist : (cfg->GetMapping().GetAPVList())){
+		int crateid=GEM::getCrateID(apvlist);
+		int mpdid=GEM::getMPDID(apvlist);
+		int apvid=GEM::getADCID(apvlist);
+		std::string hmean_str=Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, apvid);
+		std::string hRMS_str=Form("PedestalRMS_mpd_%d_ch_%d",mpdid, apvid);
+		if(pfile->GetListOfKeys()->Contains(hmean_str.c_str())&&(pfile->GetListOfKeys()->Contains(hRMS_str.c_str()))){
+			TH1F *hmean=(TH1F *) pfile->Get(hmean_str.c_str());
+			TH1F *hRMS=(TH1F *) pfile->Get(hRMS_str.c_str());
+			for(int i=0;i<128;i++){
+				int uid=GEM::GetUID(crateid,mpdid,apvid,i);
+				mPedestal_mean[uid]=(hmean->GetBinContent(i+1));
+				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
+			}
+		}else{
+			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+					<< "MPD_" << mpdid << " APV_" << apvid
+					<< " is declared in the map, but cannot file in the pedestal file"
+					<< std::endl;
+		}
+	}
+	pfile->Close();
+	// end of loading the pedestal
 
+	int sigma_cut=cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
+	std::map<int, std::vector<int>>mMapping=cfg->GetMapping().GetAPVmap();
+	MPDRawParser *rawparser=new MPDRawParser();
+	// moduleID,         dimension histo
+	std::map<int,std::map<int,std::vector<TH1F *>>> GEMModuleHisto;
+	GEMModuleHisto.clear();
+	for(auto moduleid:cfg->GetMapping().GetGEMModuleList()){
+		std::cout<<"GEM Module ID: "<<moduleid<<std::endl;
+		GEMModuleHisto[moduleid][0][0]=new TH1F(Form("module%d_x_raw",moduleid),Form("module%d_x_raw",moduleid),1600,0,1600);
+		GEMModuleHisto[moduleid][1][0]=new TH1F(Form("module%d_y_raw",moduleid),Form("module%d_y_raw",moduleid),1600,0,1600);
+
+		GEMModuleHisto[moduleid][0][1]=new TH1F(Form("module%d_x_msub",moduleid),Form("module%d_x_msub",moduleid),1600,0,1600);
+		GEMModuleHisto[moduleid][1][1]=new TH1F(Form("module%d_y_msub",moduleid),Form("module%d_y_msub",moduleid),1600,0,1600);
+
+		GEMModuleHisto[moduleid][0][2]=new TH1F(Form("module%d_x_csub",moduleid),Form("module%d_x_csub",moduleid),1600,0,1600);
+		GEMModuleHisto[moduleid][1][2]=new TH1F(Form("module%d_y_csub",moduleid),Form("module%d_y_csub",moduleid),1600,0,1600);
+
+		GEMModuleHisto[moduleid][0][3]=new TH1F(Form("module%d_x_hit",moduleid),Form("module%d_x_hit",moduleid),1600,0,1600);
+		GEMModuleHisto[moduleid][1][3]=new TH1F(Form("module%d_y_hit",moduleid),Form("module%d_y_hit",moduleid),1600,0,1600);
+
+	}
+	Int_t EvtID=0;
+	while(ReadBlock()){
+		if(EvtID<eventid) continue;
+		Int_t nstrips=0;
+		rawparser->LoadRawData(block_vec_mpd);
+		const std::map<int,std::vector<int>> raw_data=rawparser->GetDecoded();//       uid,          // the 6 time sample data 744
+		for(auto  apv = raw_data.begin();apv!=raw_data.end();apv++){
+			int uid=apv->first;
+			if (mPedestal_mean.find(uid) == mPedestal_mean.end()) {
+				continue;
+				std::cout << "[Warning]: EvtID: " << EvtID << "  MPD:"
+						<< GEM::getMPDID(uid) << " adc" << GEM::getADCID(uid)
+						<< "   detected in the data, but not in the mapping, skip it"
+						<< std::endl;
+			}  // skip the apv that not defined in the map file
+			std::vector<int> adc_temp=apv->second;
+
+			int totalsize=adc_temp.size();
+			if (totalsize % 129 != 0) {
+				std::cout << "[WORNING]: " << __FUNCTION__ << "< " << __LINE__
+						<< "> the size of the raw data is not expexted!!"
+						<< std::endl;
+				continue;
+			}
+			int TSsize = totalsize / 129;
+
+			for(int channel=0;channel<128;channel++){
+				int RstripPos = channel;
+				int RstripNb = ChNb[channel];
+				RstripNb = RstripNb + (127 - 2 * RstripNb) * (mMapping[apv->first].at(3));
+				RstripPos = RstripNb + 128 * (mMapping[apv->first].at(2));
+				int dimension = mMapping[apv->first].at(1);    // x/y dimension
+				int planeID = mMapping[apv->first].at(0);		// GEM Module ID
+				int adcsum_temp=0;
+				for (int ts_counter = 0; ts_counter < TSsize; ts_counter++) {
+					adcsum_temp = adcsum_temp+ adc_temp[channel + 129 * ts_counter];
+				}
+				adcsum_temp=adcsum_temp/TSsize;
+				GEMModuleHisto[planeID][dimension][0]->Fill(RstripPos,adcsum_temp);
+			}
+
+			// subtract the common mode
+			for (int counter = 0; counter < totalsize; counter++) {
+				if ((counter % 129) != 128)
+					adc_temp[counter] = adc_temp[counter]
+							- mPedestal_mean[apv->first + (counter % 129)];
+			}
+
+			for(int channel=0;channel<128;channel++){
+				int RstripPos = channel;
+				int RstripNb = ChNb[channel];
+				RstripNb = RstripNb + (127 - 2 * RstripNb) * (mMapping[apv->first].at(3));
+				RstripPos = RstripNb + 128 * (mMapping[apv->first].at(2));
+				int dimension = mMapping[apv->first].at(1);    // x/y dimension
+				int planeID = mMapping[apv->first].at(0);		// GEM Module ID
+				int adcsum_temp=0;
+				for (int ts_counter = 0; ts_counter < TSsize; ts_counter++) {
+					adcsum_temp = adcsum_temp+ adc_temp[channel + 129 * ts_counter];
+				}
+				adcsum_temp=adcsum_temp/TSsize;
+				GEMModuleHisto[planeID][dimension][1]->Fill(RstripPos,adcsum_temp);
+			}
+
+			int commonMode[TSsize];
+			for(uint16_t ts_counter=0;ts_counter<TSsize;ts_counter++){
+				commonMode[ts_counter]=0;
+				std::vector<int> singleTSadc_temp_sorting;
+				singleTSadc_temp_sorting.insert(singleTSadc_temp_sorting.end(),&adc_temp[129*ts_counter],&adc_temp[129*(ts_counter+1)]);
+				std::sort(singleTSadc_temp_sorting.begin(),singleTSadc_temp_sorting.end()-1);
+				for(int k =28; k < 100; k ++){
+					commonMode[ts_counter]+=singleTSadc_temp_sorting[k];
+				}
+				commonMode[ts_counter]=commonMode[ts_counter]/72;
+			}
+
+			// loop on one apv card
+			for(int channel=0;channel<128;channel++){
+				int adcsum_temp=0;
+				for(int ts_counter=0;ts_counter<TSsize; ts_counter++){
+					adcsum_temp=adcsum_temp+adc_temp[channel+129*ts_counter]-commonMode[ts_counter];
+				}
+				// write to histogram
+				adcsum_temp=adcsum_temp/TSsize;
+				// calculate the address
+				int RstripPos=channel;
+				int RstripNb=ChNb[channel];
+				RstripNb=RstripNb+(127-2*RstripNb)*(mMapping[apv->first].at(3));
+				RstripPos=RstripNb+128*(mMapping[apv->first].at(2));
+				int dimension = mMapping[apv->first].at(1);    // x/y dimension
+				int planeID=mMapping[apv->first].at(0);			// GEM Module ID
+
+				GEMModuleHisto[planeID][dimension][2]->Fill(RstripPos,adcsum_temp);
+				if( adcsum_temp > (sigma_cut*mPedestal_rms[apv->first+channel]) ){
+					GEMModuleHisto[planeID][dimension][3]->Fill(RstripPos,adcsum_temp);
+				}
+			}
+		}
+		EvtID++;
+	}
+
+}
+
+//
+//
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	// uid , value
 	std::unordered_map<int,int> mPedestal_mean;
@@ -346,9 +506,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	HitFileio->Close();
 }
 
-void MPDDecoder::HitDisplay(){
 
-}
 
 bool MPDDecoder::ReadBlock(){
 	clear(); // start a new event

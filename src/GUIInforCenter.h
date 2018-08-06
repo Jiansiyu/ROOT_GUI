@@ -64,11 +64,13 @@ private:
 		}
 	}
 private:
+
 	std::map<int/**/,std::vector<int>> data;
 	std::map<int/*tab*/,std::vector<TH1F*>> histo_1h;
 	std::map<int/*tab*/,std::vector<TH2F*>> histo_2h;
 	std::map<int/*tab*/,std::map<int /*x*/,std::map<int/*y*/,TH1F *>>> histo_1h_arry;
 	std::map<int/*tab*/,std::map<int/*x*/,std::map<int/*y*/,TH1F*>>> histo_2h_arry;
+
 };
 
 struct GUIStatusBarDataStream{

@@ -24,7 +24,7 @@ public:
 	void HitMode(std::string,std::string);
 	//void HitMode(std::string,std::string,std::string);
 	void RawDisplay(uint evtid);
-	void HitDisplay();
+	void HitDisplay(std::string,int);
 
 private:
 

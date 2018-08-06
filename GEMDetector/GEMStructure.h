@@ -104,12 +104,21 @@ public:
 			return test;
 		}
 	}
+
+	std::vector<int> GetGEMModuleList(){
+		std::vector<int> GEMModuleList;
+		for(auto apv=apvMap.begin();apv!=apvMap.end();apv++){
+			GEMModuleList.push_back((apv->second)[0]);
+		}
+		std::sort(GEMModuleList.begin(),GEMModuleList.end());
+		GEMModuleList.erase(unique(GEMModuleList.begin(),GEMModuleList.end()),GEMModuleList.end());
+		return GEMModuleList;
+	}
+
 	std::vector<int> GetAPVList(){
-		//std::cout<<"  ***: "<<apvUIDList.size()<<std::endl;
 		return apvUIDList;
 	}
 	void Print(){
-//		std::vector<std::string> fname=GetMPDNameList();
 		for(auto name : MPDNameList){
 			std::cout<<name.c_str()<<std::endl;
 		}
