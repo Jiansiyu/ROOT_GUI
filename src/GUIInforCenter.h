@@ -25,52 +25,102 @@ public:
 	GUICanvasDataStream(){
 	};
 	TVector2 GetCanvasDivied(){
-		TVector2 size(histo_1h_arry.begin()->second.size(),histo_1h_arry.begin()->second.begin()->second.size());
+
 		return size;
 	}
 	const unsigned int GetCanvasNumber(){
 		return histo_1h_arry.size();
 	}
 	std::map<int/*tab*/,std::vector<TH1F*>> GetHisto1D(){
-		generateHisto(data);
+		generateHisto();
 		return histo_1h;
+	}
+	const std::map<int/*tab*/,std::map<int /*x*/,std::map<int/*y*/,TH1F *>>> GetHisto1dArray(){
+		return histo_1h_arry;
 	}
 	std::map<int/**/,std::vector<int>> GetRaw(){
 		return data;
 	}
 	void LoadData(const std::map<int/**/,std::vector<int>> &data){
+		clear();
 		this->data=data;
+		//generateHisto(data);
+	}
+	void LoadData(std::map<int, std::map<int,std::vector<TH1F *>>> const data){
+		clear();
+		this->canvasedDisplay=data;
+	}
+
+	void generateHisto(){
+		if(data.size()!=0) RawGenerateHisto();
+		if(canvasedDisplay.size())ZeroSubGenerateHisto();
 	}
 private:
-	void generateHisto(const std::map<int/**/,std::vector<int>> &data){
-		// tab should be the same number of tabs
-		for (auto apv = data.begin(); apv != data.end(); apv++) {
-			int crateid = GEM::getCrateID(apv->first);
-			int mpdid = GEM::getMPDID(apv->first);
-			int adcid = GEM::getADCID(apv->first);
+	void RawGenerateHisto(){
+		std::map<int,std::vector<int>> rawdata = this->data;
+		std::map<int,std::vector<std::vector<int>>> tabrawdata;
+		for(auto apv = rawdata.begin();apv!=rawdata.end();apv++){
+			int crateid=GEM::getCrateID(apv->first);
+			int mpdid=GEM::getMPDID(apv->first);
+			int id=GEM::GetUID(crateid,mpdid,0,0);
+			tabrawdata[id].push_back(apv->second);
+		}
 
-			histo_1h[GEM::GetUID(crateid, mpdid, 0, 0)].push_back(new TH1F(Form("mpd%d_apv%d", mpdid, adcid),
-					Form("mpd%d_apv%d", mpdid, adcid), 800, 0, 800));
-			std::vector<int> data = apv->second;
-			for (int i = 0; i < data.size(); i++) {
-				histo_1h[GEM::GetUID(crateid, mpdid, 0, 0)].back()->Fill(i + 1, data.at(i));
+		std::map<int, std::vector<TH1F *>> tabHistoArray;
+
+		for(auto mpd_iter = tabrawdata.begin();mpd_iter!=tabrawdata.end();mpd_iter++){
+				int tabcanvasid=mpd_iter->first;
+				{
+					int i =0;
+					for(auto apv : mpd_iter->second){
+									TH1F *h = new TH1F(
+											Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+													GEM::getMPDID(tabcanvasid)),
+											Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+													GEM::getMPDID(tabcanvasid)), 800, 0, 800);
+									for(int i = 0; i <apv.size();i++){
+											h->Fill(i+1,apv.at(i));
+											h->GetYaxis()->SetRangeUser(0,3000);
+											h->SetYTitle("ADC");
+											h->SetXTitle("channel");
+													}
+									histo_1h[tabcanvasid].push_back(h);
+									histo_1h_arry[tabcanvasid][i%4][i/4]=h;//->Clone("test");
+									histo_1h_arry[tabcanvasid][i%4][i/4]->SetTitle(Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
+											GEM::getMPDID(tabcanvasid)));
+									i++;
+					}
+				}
+		}
+		size.Set(4.0,4.0);
+	}
+	void ZeroSubGenerateHisto(){
+		histo_1h_arry.clear();
+		for (auto tab = canvasedDisplay.begin(); tab != canvasedDisplay.end(); tab++) {
+			for (auto dimension = tab->second.begin();
+					dimension != tab->second.end(); dimension++) {
+				for (unsigned int i = 0; i < (dimension->second).size(); i++) {
+					histo_1h_arry[tab->first][dimension->first][i] =
+							dimension->second.at(i);
+				}
 			}
 		}
-		// fill into the map
-		for(auto mpd  = histo_1h.begin(); mpd!=histo_1h.end();mpd++){
-			for(int histo_id=0;histo_id<(mpd->second.size());histo_id++){
-				histo_1h_arry[mpd->first][histo_id/4][histo_id%4]=(mpd->second.at(histo_id));
-			}
-		}
+		size.Set(2., 4.);
 	}
 private:
-
+	TVector2 size;
 	std::map<int/**/,std::vector<int>> data;
 	std::map<int/*tab*/,std::vector<TH1F*>> histo_1h;
-	std::map<int/*tab*/,std::vector<TH2F*>> histo_2h;
 	std::map<int/*tab*/,std::map<int /*x*/,std::map<int/*y*/,TH1F *>>> histo_1h_arry;
-	std::map<int/*tab*/,std::map<int/*x*/,std::map<int/*y*/,TH1F*>>> histo_2h_arry;
+	std::map<int, std::map<int,std::vector<TH1F *>>> canvasedDisplay;
 
+	void clear(){
+		data.clear();
+		histo_1h.clear();
+		histo_1h_arry.clear();
+		canvasedDisplay.clear();
+
+	}
 };
 
 struct GUIStatusBarDataStream{

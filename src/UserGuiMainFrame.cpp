@@ -87,7 +87,7 @@ UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMa
 	TGVertical3DLine * WorkZoneSeparation= new TGVertical3DLine(fWorkZoneFrame,10,10);
 	fWorkZoneTab= new TGTab(fWorkZoneCanvasFrame);
 
-	SetWorkZoneTab();
+//	SetWorkZoneTab();
 	fWorkZoneCanvasFrame->AddFrame(fWorkZoneTab, new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 
 	fWorkZoneFrame ->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
@@ -170,14 +170,35 @@ void UserGuiMainFrame::SetWorkZone(){
 void UserGuiMainFrame::SetWorkZoneTab(){
 	int tabnumber = fWorkZoneTab->GetCounter();
 	for (int i = 0; i < tabnumber; i++) {
-		fWorkZoneTab->RemoveTab(1);
+		fWorkZoneTab->RemoveTab(0);
 	};
+
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
 	// this is just used for draw the GUI, so efficency is not the first concen
-	GEMConfigure *cfg=GEMConfigure::GetInstance();
-	cfg->GetMapping().GetMPDList();
-	SetWorkZoneTab(cfg->GetMapping().GetMPDList());
-	gSystem->ProcessEvents();
+	std::map<int,std::string> tablist;
+	GEMConfigure *cfg = GEMConfigure::GetInstance();
+
+	if (vWorkMode == 'R') {
+
+		for(auto apv : cfg->GetMapping().GetMPDList()){
+			//std::string name=Form("crate%d_mpd%d",GEM::getCrateID(apv),GEM::getMPDID(apv));
+			//std::cout<<"This is a test"<<name.c_str()<<std::endl;
+			tablist[apv]=Form("crate%d_mpd%d",GEM::getCrateID(apv),GEM::getMPDID(apv));
+		}
+
+		//SetWorkZoneTab(cfg->GetMapping().GetMPDList());
+	}else if(vWorkMode == 'Z'){
+		for(auto module :cfg->GetMapping().GetGEMModuleList()){
+			tablist[module]=Form("Module%d",module);
+		}
+
+	}
+	SetWorkZoneTab(tablist);
+	MapSubwindows();
+	Resize();   //resize to default size
+//	MapWindow();
+	//gSystem->ProcessEvents();
+	//Resize();
 }
 
 /*
@@ -199,10 +220,24 @@ void UserGuiMainFrame::SetWorkZoneTab(std::vector<int>tablist){
 //		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetGrid();
 //		fWorkZoneTabSubFrame.back()->AddFrame(fWorkZoneTabEnbeddedCanvas.back(),new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 //		cfWorkZoneTabCanvas.push_back(fWorkZoneTabEnbeddedCanvas.back()->GetCanvas());
-		gSystem->ProcessEvents();
+//		gSystem->ProcessEvents();
 	}
 }
 
+void UserGuiMainFrame::SetWorkZoneTab(std::map<int,std::string> tablist){
+	fWorkZoneTabSubFrame.clear();
+	fWorkZoneTabEnbeddedCanvas.clear();
+	cfWorkZoneTabCanvas.clear();
+	for(auto tab = tablist.begin();tab!=tablist.end();tab++){
+		fWorkZoneTabSubFrame[tab->first]=fWorkZoneTab->AddTab(tab->second.c_str());
+		fWorkZoneTabEnbeddedCanvas[tab->first]=new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame[tab->first], 600,600);
+		fWorkZoneTabEnbeddedCanvas[tab->first]->GetCanvas()->SetBorderMode(0);
+		fWorkZoneTabEnbeddedCanvas[tab->first]->GetCanvas()->SetGrid();
+		fWorkZoneTabSubFrame[tab->first]->AddFrame(fWorkZoneTabEnbeddedCanvas[tab->first],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+		cfWorkZoneTabCanvas[tab->first]=fWorkZoneTabEnbeddedCanvas[tab->first]->GetCanvas();
+
+	}
+}
 
 void UserGuiMainFrame::SetWorkZoneButton(){
 
@@ -360,6 +395,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 				break;
 			case C_WORKMODE_ZEROSUBTRACTION:
 				vWorkMode = 'Z';
+				SetWorkZoneTab();
 				SetStatusBarDisplay("ZERO mode selected");
 				break;
 			case C_WORKMODE_PEDESTAL:
@@ -381,6 +417,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 			default:
 				break;
 			}
+			SetWorkZoneTab();
 			break;
 		default:
 			break;
@@ -398,10 +435,7 @@ Bool_t UserGuiMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 					}
 					string Pedestal_name= vPedestalName;
 					if((vWorkMode=='Z')&&(vRawDataList.size()!=0)&&(Pedestal_name.substr(Pedestal_name.find_last_of(".")+1)=="root")){
-						//tNumberEntry->SetState(kFALSE);
-						//fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[0].c_str());
 						fZeroSupressionProcess(vEventNumber,vPedestalName.c_str(),vRawDataList[tRawFileEntry->GetSelected()].c_str());
-						//tNumberEntry->SetState(kTRUE);
 					};
 					}
 					break;
@@ -665,7 +699,13 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
-
+//#ifdef __DECODER_DEBUG_MODE
+	Pedestal_name="/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/results/Pedestal_run3300.root";
+	rawfilename=("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/mpd_ssp_3300.dat.0");
+//#endif
+	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
+	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
+	decoder->HitDisplay(Pedestal_name.c_str(),entries);
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
@@ -721,7 +761,37 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 }
 
 void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
+	std::cout<<"[Test]"<<__func__<<" "<<__LINE__<<"This is a test"<<std::endl;
+	// new canvas functions
+	data->generateHisto();
+	std::map<int/*tab*/,std::map<int /*x*/,std::map<int/*y*/,TH1F *>>> histArr=data->GetHisto1dArray();
+	int x_divide=data->GetCanvasDivied().X(),y_divide=data->GetCanvasDivied().Y();
+	for(auto tab = histArr.begin(); tab!=histArr.end();tab++){
+		int tabid=tab->first;
+		if(cfWorkZoneTabCanvas.find(tabid)!=cfWorkZoneTabCanvas.end()){
 
+			cfWorkZoneTabCanvas[tabid]->Clear();
+			cfWorkZoneTabCanvas[tabid]->ResetAttPad();
+			cfWorkZoneTabCanvas[tabid]->Divide(x_divide,y_divide);//int(data->GetCanvasDivied().X()), int(data->GetCanvasDivied().Y()));
+
+
+			for(auto x_canvas = (tab->second).begin(); x_canvas!=(tab->second).end();x_canvas++){
+				for(auto y_canvas = (x_canvas->second).begin();y_canvas!=(x_canvas->second).end();y_canvas++){
+					int canvasid=(y_canvas->first)*int(x_divide)+x_canvas->first;
+					//std::cout<<tabid<<"   "<<(y_canvas->first)<<" "<< (x_canvas->first)  <<"test :"<< canvasid<<std::endl;
+					cfWorkZoneTabCanvas[tabid]->cd(canvasid+1);
+					y_canvas->second->Draw("HIST");
+				}
+			}
+
+			cfWorkZoneTabCanvas[tabid]->Modified();
+			cfWorkZoneTabCanvas[tabid]->Update();
+
+		}else{
+			std::cout<<__FUNCTION__<<__LINE__<< " [WORNING] "<<"Can NOT find "<< tab ->first<<" in the canvas"<<std::endl;
+		}
+	}
+/*
 	std::map<int,std::vector<int>> rawdata = data->GetRaw();
 	std::map<int,std::vector<std::vector<int>>> tabrawdata;
 	for(auto apv = rawdata.begin();apv!=rawdata.end();apv++){
@@ -766,7 +836,7 @@ void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 		cfWorkZoneTabCanvas[tabcanvasid]->Modified();
 		cfWorkZoneTabCanvas[tabcanvasid]->Update();
 	}
-
+*/
 	gSystem->ProcessEvents();
 }
 

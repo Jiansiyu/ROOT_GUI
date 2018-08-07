@@ -67,6 +67,7 @@ ROOT_GUI: ${OBJS}
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
 	@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
+	#@{RM} ${OBJS}
 	@echo
 
 ./bin/%.o : %.cpp
@@ -97,13 +98,13 @@ bin/%.o : %.C
 	@echo 'Building file: $@'
 	@echo 'Invoking: rootcling Compiler'
 	@mkdir -p $(@D)
-	rootcint -f "$@" -c  ${patsubst %Dic.cxx, %.h, $@} ${patsubst %Dic.cxx, %LinkDef.h, $@}
+	@rootcint -f "$@" -c  ${patsubst %Dic.cxx, %.h, $@} ${patsubst %Dic.cxx, %LinkDef.h, $@}
 	
 ./bin/%Dic.o : ./%Dic.cxx 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
+	@$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
 	@echo 'Finish building: $<'
 	@echo
 

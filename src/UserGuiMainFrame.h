@@ -219,7 +219,8 @@ private:
 	void SetWorkZone();    // set the workspace
 	// set the tab
 	void SetWorkZoneTab();
-	void SetWorkZoneTab(std::vector<int> );
+	void SetWorkZoneTab(std::vector<int>);
+	void SetWorkZoneTab(std::map<int,std::string>);
 
 	void SetWorkZoneButton();
 	void SetWorkZoneDataInput();
