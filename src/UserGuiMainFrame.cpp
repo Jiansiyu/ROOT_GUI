@@ -710,7 +710,7 @@ void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, 
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 
-	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+/*	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	std::vector<std::string>::iterator iter_filename=Filenames.begin();
 	while (iter_filename != Filenames.end()) {
@@ -730,10 +730,41 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Run(-1,savename.c_str());
+	pGEMTrack->Run(-1,savename.c_str());*/
+
+	for(auto file : Filenames){
+		fAnalysisProcess(file.c_str());
+	}
 }
 
-
+void UserGuiMainFrame::fAnalysisProcess(std::string fname){
+	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
+	TChain *fChain = new TChain("GEMHit", "");
+	Filenamecheck->CheckAppendix((fname).c_str(), "root");
+	TFile *ff = new TFile((fname).c_str());
+	if (ff->IsOpen()) {
+		TTree *theTree = (TTree *) ff->Get("GEMHit");
+		if (!(theTree->IsZombie())) {
+			fChain->AddFile((fname).c_str());
+		} else
+			printf("Tree is not found in the file\n");
+	}
+	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
+	std::string file=fname;
+	GEMConfigure *cfg=GEMConfigure::GetInstance();
+	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
+	std::string savefilename=Form("Hit_run%d_%d.root",
+				generalprocess->GetNumberFromFilename(
+						generalprocess->GetAppendixLess_FileName(
+								file.c_str())),generalprocess->GetDividedNumber(file.c_str()));
+	std::cout<<"Working on file : "<< file.c_str()<<std::endl
+			<<"Save file name   : "<<savefilename.c_str()<<std::endl;
+	std::string savename=savefilename;
+	//std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
+	printf("File will be save as : %s",savename.c_str());
+	GEMTracking *pGEMTrack = new GEMTracking(fChain);
+	pGEMTrack->Run(-1,savename.c_str());
+}
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
 

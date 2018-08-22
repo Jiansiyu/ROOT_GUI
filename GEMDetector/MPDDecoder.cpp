@@ -128,8 +128,8 @@ void MPDDecoder::PedestalMode(std::string savefname){
 			pedestal_rms[uid]->SetMinimum(0);
 
 			// evaluation histos
-			pedestal_meanhisto[uid]=new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
-					Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
+			pedestal_meanhisto[uid]=new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d_histo",mpdid, adcid),
+					Form("PedestalMean(offset)_mpd_%d_ch_%d_histo",mpdid, adcid),
 					50, 0, 50);
 
 			pedestal_rmshisto[uid]=new TH1F(Form("PedestalRMS_mpd_%d_ch_%d_distribution",mpdid, adcid),
@@ -233,7 +233,8 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 	std::cout<<"[Test]"<<__func__<<" "<<__LINE__<<"This is a test"<<std::endl;
 	pfile->Close();
 	// end of loading the pedestal
-
+//TH1F * test = new TH1F("","",100,0,100);
+//test->
 	int sigma_cut=cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
 	std::map<int, std::vector<int>>mMapping=cfg->GetMapping().GetAPVmap();
 	MPDRawParser *rawparser=new MPDRawParser();
