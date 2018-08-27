@@ -20,6 +20,7 @@
 #include <TVector2.h>
 #include <TVector3.h>
 #include "../GEMDetector/GEMIDGenerator.h"
+
 struct GUICanvasDataStream{
 public:
 	GUICanvasDataStream(){
@@ -108,6 +109,7 @@ private:
 		size.Set(2., 4.);
 	}
 private:
+
 	TVector2 size;
 	std::map<int/**/,std::vector<int>> data;
 	std::map<int/*tab*/,std::vector<TH1F*>> histo_1h;
@@ -156,7 +158,8 @@ private:
 	void GUICanvasTabDraw(GUICanvasDataStream *);     //*SIGNAL*
 	void GUIMainTabDraw(GUIMainTabDataStream *);	  //*SIGNAL*
 	void GUIStatusBarDraw(GUIStatusBarDataStream *);  //*SIGNAL*
-//	ClassDef(GUIInforCenter,0);
+public:
+	ClassDef(GUIInforCenter,0);
 };
 
 

@@ -1,4 +1,6 @@
 # develop plan for the week
+* change the canvas style,remapping before draw
+* add the summary tab
 * optmize the data structure 
 * change root 6 to root 5 
 * add another tab which display all the apv in one canvas used for diagnose perpose

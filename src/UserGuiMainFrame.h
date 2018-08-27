@@ -120,7 +120,7 @@ public:
 
 ///oooooooooooooo00000000000000000000000000000000000ooooooooooooooooooooooooooooo
 //UVa input handler mode
-//ClassDef(UserGuiMainFrame,0);
+   ClassDef(UserGuiMainFrame,0);
 
 
 // dialog process

@@ -75,6 +75,8 @@ void MPDDecoder::RawDisplay(uint id) {
 		std::cout<<"miao miao miao"<<std::endl;
 	}
 }
+
+
 void MPDDecoder::PedestalMode(std::string savefname){
 	std::unordered_map<int,TH1F *> Pedestal_temp;
 	MPDRawParser *rawparser=new MPDRawParser();

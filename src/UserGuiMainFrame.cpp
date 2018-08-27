@@ -25,7 +25,6 @@
 ///
 
 // main decoder lib
-//#include "../GEMDecoder/input_handler.h"
 #include "UserGuiGeneralDialogProcess.h"
 #include "../GUIDialog/UserGUIMapWizard.h"
 
@@ -172,21 +171,14 @@ void UserGuiMainFrame::SetWorkZoneTab(){
 	for (int i = 0; i < tabnumber; i++) {
 		fWorkZoneTab->RemoveTab(0);
 	};
-
 	fWorkZoneTabDefultFrame = fWorkZoneTab->AddTab("WorkStatus");
-	// this is just used for draw the GUI, so efficency is not the first concen
+	// this is just used for draw the GUI, so efficiency is not the first concern
 	std::map<int,std::string> tablist;
 	GEMConfigure *cfg = GEMConfigure::GetInstance();
-
 	if (vWorkMode == 'R') {
-
 		for(auto apv : cfg->GetMapping().GetMPDList()){
-			//std::string name=Form("crate%d_mpd%d",GEM::getCrateID(apv),GEM::getMPDID(apv));
-			//std::cout<<"This is a test"<<name.c_str()<<std::endl;
-			tablist[apv]=Form("crate%d_mpd%d",GEM::getCrateID(apv),GEM::getMPDID(apv));
+			tablist[apv]=Form("crate%d_mpd%d",(GEM::getCrateID(apv)),(GEM::getMPDID(apv)));
 		}
-
-		//SetWorkZoneTab(cfg->GetMapping().GetMPDList());
 	}else if(vWorkMode == 'Z'){
 		for(auto module :cfg->GetMapping().GetGEMModuleList()){
 			tablist[module]=Form("Module%d",module);
@@ -196,9 +188,6 @@ void UserGuiMainFrame::SetWorkZoneTab(){
 	SetWorkZoneTab(tablist);
 	MapSubwindows();
 	Resize();   //resize to default size
-//	MapWindow();
-	//gSystem->ProcessEvents();
-	//Resize();
 }
 
 /*
@@ -215,12 +204,6 @@ void UserGuiMainFrame::SetWorkZoneTab(std::vector<int>tablist){
 		fWorkZoneTabEnbeddedCanvas[tab]->GetCanvas()->SetGrid();
 		fWorkZoneTabSubFrame[tab]->AddFrame(fWorkZoneTabEnbeddedCanvas[tab],new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 		cfWorkZoneTabCanvas[tab]=fWorkZoneTabEnbeddedCanvas[tab]->GetCanvas();
-//		fWorkZoneTabEnbeddedCanvas.push_back(new TRootEmbeddedCanvas("MainCanvas", fWorkZoneTabSubFrame.back(), 600,600));
-//		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetBorderMode(0);
-//		fWorkZoneTabEnbeddedCanvas.back()->GetCanvas()->SetGrid();
-//		fWorkZoneTabSubFrame.back()->AddFrame(fWorkZoneTabEnbeddedCanvas.back(),new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-//		cfWorkZoneTabCanvas.push_back(fWorkZoneTabEnbeddedCanvas.back()->GetCanvas());
-//		gSystem->ProcessEvents();
 	}
 }
 
@@ -631,13 +614,6 @@ void UserGuiMainFrame::dButtonRawOpenFileDialog(){
 					(dialog->GetBaseFileName(vRootDataList[file_counter])).c_str(),
 					vRawDataList.size()+file_counter);//dialog->GetNumberFromFilename(vRootDataList[file_counter]));
 		}
-
-		for (auto name :vRawDataList ){
-			//rawPaserList[name.c_str()]=new GEMDataParserM4V();
-			SetStatusBarDisplay(Form("Reading File"));
-//			rawPaserList[name.c_str()]->OpenFileIn(name.c_str());
-			SetStatusBarDisplay(Form("Reading File Done!"));
-		}
 		tRawFileEntry->Select(0);
 		tRawFileEntry->MapSubwindows();
 		tRawFileEntry->Layout();
@@ -691,39 +667,16 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 
 
 void UserGuiMainFrame::fZeroSupressionProcess(int entries,string Pedestal_name, string rawfilename){
-//#ifdef __DECODER_DEBUG_MODE
+#ifdef __DECODER_DEBUG_MODE
 	Pedestal_name="/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/results/Pedestal_run3300.root";
 	rawfilename=("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/mpd_ssp_3300.dat.0");
-//#endif
+#endif
 	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
 	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
 	decoder->HitDisplay(Pedestal_name.c_str(),entries);
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
-
-/*	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
-	TChain *fChain = new TChain("GEMHit", "");
-	std::vector<std::string>::iterator iter_filename=Filenames.begin();
-	while (iter_filename != Filenames.end()) {
-		Filenamecheck->CheckAppendix((*iter_filename).c_str(), "root");
-		TFile *ff = new TFile((*iter_filename).c_str());
-		if (ff->IsOpen()) {
-			TTree *theTree = (TTree *) ff->Get("GEMHit");
-			if (!(theTree->IsZombie())) {
-				fChain->AddFile((*iter_filename).c_str());
-			} else
-				printf("Tree is not found in the file\n");
-		}
-		iter_filename++;
-	}
-	UserGuiGeneralDialogProcess *a= new UserGuiGeneralDialogProcess();
-
-	std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
-	printf("File will be save as : %s",savename.c_str());
-	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Run(-1,savename.c_str());*/
-
 	for(auto file : Filenames){
 		fAnalysisProcess(file.c_str());
 	}
@@ -752,7 +705,6 @@ void UserGuiMainFrame::fAnalysisProcess(std::string fname){
 	std::cout<<"Working on file : "<< file.c_str()<<std::endl
 			<<"Save file name   : "<<savefilename.c_str()<<std::endl;
 	std::string savename=savefilename;
-	//std::string savename(Form(tOutPutfilePattern->GetTitle(),"_Tracking",a->GetNumberFromFilename(Filenames[0])));
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 	pGEMTrack->Run(-1,savename.c_str());
@@ -794,71 +746,21 @@ void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 
 			cfWorkZoneTabCanvas[tabid]->Clear();
 			cfWorkZoneTabCanvas[tabid]->ResetAttPad();
-			cfWorkZoneTabCanvas[tabid]->Divide(x_divide,y_divide);//int(data->GetCanvasDivied().X()), int(data->GetCanvasDivied().Y()));
-
+			cfWorkZoneTabCanvas[tabid]->Divide(4,4);//int(data->GetCanvasDivied().X()), int(data->GetCanvasDivied().Y()));
 
 			for(auto x_canvas = (tab->second).begin(); x_canvas!=(tab->second).end();x_canvas++){
 				for(auto y_canvas = (x_canvas->second).begin();y_canvas!=(x_canvas->second).end();y_canvas++){
 					int canvasid=(y_canvas->first)*int(x_divide)+x_canvas->first;
-					//std::cout<<tabid<<"   "<<(y_canvas->first)<<" "<< (x_canvas->first)  <<"test :"<< canvasid<<std::endl;
 					cfWorkZoneTabCanvas[tabid]->cd(canvasid+1);
 					y_canvas->second->Draw("HIST");
 				}
 			}
-
 			cfWorkZoneTabCanvas[tabid]->Modified();
 			cfWorkZoneTabCanvas[tabid]->Update();
-
 		}else{
 			std::cout<<__FUNCTION__<<__LINE__<< " [WORNING] "<<"Can NOT find "<< tab ->first<<" in the canvas"<<std::endl;
 		}
 	}
-/*
-	std::map<int,std::vector<int>> rawdata = data->GetRaw();
-	std::map<int,std::vector<std::vector<int>>> tabrawdata;
-	for(auto apv = rawdata.begin();apv!=rawdata.end();apv++){
-		int crateid=GEM::getCrateID(apv->first);
-		int mpdid=GEM::getMPDID(apv->first);
-		int id=GEM::GetUID(crateid,mpdid,0,0);
-		tabrawdata[id].push_back(apv->second);
-	}
-
-
-	std::map<int, std::vector<TH1F *>> tabHistoArray;
-	for(auto mpd_iter = tabrawdata.begin();mpd_iter!=tabrawdata.end();mpd_iter++){
-			int tabcanvasid=mpd_iter->first;
-			if(cfWorkZoneTabCanvas.find(tabcanvasid)!=cfWorkZoneTabCanvas.end()){
-				for(auto apv : mpd_iter->second){
-								TH1F *h = new TH1F(
-										Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
-												GEM::getMPDID(tabcanvasid)),
-										Form("crate%d_mpd%", GEM::getCrateID(tabcanvasid),
-												GEM::getMPDID(tabcanvasid)), 800, 0, 800);
-								for(int i = 0; i <apv.size();i++){
-										h->Fill(i+1,apv.at(i));
-										h->GetYaxis()->SetRangeUser(0,3000);
-										h->SetYTitle("ADC");
-										h->SetXTitle("channel");
-												}
-								tabHistoArray[tabcanvasid].push_back(h);
-				}
-			}
-	}
-
-	for(auto tabhisto = tabHistoArray.begin();tabhisto!=tabHistoArray.end();tabhisto++){
-		auto tabcanvasid=tabhisto->first;
-		cfWorkZoneTabCanvas[tabcanvasid]->Clear();
-		cfWorkZoneTabCanvas[tabcanvasid]->ResetAttPad();
-		cfWorkZoneTabCanvas[tabcanvasid]->Divide(4, 4);
-		int canvas_counter=1;
-		for(auto apv : tabhisto->second){
-			cfWorkZoneTabCanvas[tabcanvasid]->cd(canvas_counter++);
-			apv->Draw("HIST");
-		}
-		cfWorkZoneTabCanvas[tabcanvasid]->Modified();
-		cfWorkZoneTabCanvas[tabcanvasid]->Update();
-	}
-*/
 	gSystem->ProcessEvents();
 }
 
