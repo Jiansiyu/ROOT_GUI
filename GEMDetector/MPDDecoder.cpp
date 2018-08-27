@@ -82,7 +82,6 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	Benchmark *timer=new Benchmark();
 	while(ReadBlock()){
 		if((i++)%100==0)timer->Print(i);
-		//rawparser->LoadRawData(block_vec_mpd.begin(),block_vec_mpd.end());
 		rawparser->LoadRawData(block_vec_mpd);
 		auto data =rawparser->GetCommonModeSubtraction(); // get  the common mode subtracted data
 		// calculate the mean of the six time sample
@@ -106,7 +105,6 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	pedestal_rms_allhisto=new TH1F(Form("PedestalRMS_distribution"),
 					Form("PedestalRMS_distribution"),
 					50, 0, 50);
-	//--
 
 	// save the data into file
 	std::map<int,TH1F *> pedestal_mean;
