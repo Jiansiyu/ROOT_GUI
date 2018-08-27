@@ -672,14 +672,6 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
 	decoder->RawDisplay(entries);
 
-//	if(rawPaserList.find(rawfilename.c_str())==rawPaserList.end())
-//		{
-//			rawPaserList[rawfilename.c_str()]=new GEMDataParserM4V();
-//			//rawPaserList[rawfilename.c_str()]->OpenFileIn(rawfilename.c_str());
-//		}
-//	rawPaserList[rawfilename.c_str()]->Connect("GEMDrawRaw(GEM::EventRawStruct)","UserGuiMainFrame",this,"fCanvasDrawRaw(GEM::EventRawStruct)" );
-//	rawPaserList[rawfilename.c_str()]->DrawRawDisplay(entries);
-
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
@@ -792,7 +784,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 }
 
 void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
-	std::cout<<"[Test]"<<__func__<<" "<<__LINE__<<"This is a test"<<std::endl;
 	// new canvas functions
 	data->generateHisto();
 	std::map<int/*tab*/,std::map<int /*x*/,std::map<int/*y*/,TH1F *>>> histArr=data->GetHisto1dArray();
