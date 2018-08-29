@@ -79,7 +79,7 @@ const Double_t kMaxStripADC = 2000; //maximum value of the shape on a strip
 const Double_t kMaxSignalADC = 15000; //Max for the Integral of the signal shape on a strip
 const Double_t kMinSignalADC = 0;
 const Int_t kMaxStripsPerEvent = 1000;
-const Int_t kMinStripsinCluster = 1;//2;
+const Int_t kMinStripsinCluster = 2;//2;
 const Int_t kMaxStripsinCluster = 100;
 
 //Xinzhan: I changed to anther fitting method, so the following section is not being used any more

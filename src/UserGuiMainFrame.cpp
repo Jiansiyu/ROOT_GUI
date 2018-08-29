@@ -746,8 +746,7 @@ void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 
 			cfWorkZoneTabCanvas[tabid]->Clear();
 			cfWorkZoneTabCanvas[tabid]->ResetAttPad();
-			cfWorkZoneTabCanvas[tabid]->Divide(4,4);//int(data->GetCanvasDivied().X()), int(data->GetCanvasDivied().Y()));
-
+			cfWorkZoneTabCanvas[tabid]->Divide(4,4);
 			for(auto x_canvas = (tab->second).begin(); x_canvas!=(tab->second).end();x_canvas++){
 				for(auto y_canvas = (x_canvas->second).begin();y_canvas!=(x_canvas->second).end();y_canvas++){
 					int canvasid=(y_canvas->first)*int(x_divide)+x_canvas->first;
