@@ -67,7 +67,7 @@ const Double_t kMaxChargeRatio = 1.5;
 const Double_t kMinChargeRatio = 0.5;
 //Put a cut to the charge sharing ratio distribution
 
-const Int_t kMAXNCH = 5*10*50;//1209;  // 5 chambers 10 strips per events 50 events total
+const Int_t kMAXNCH = 5*10*100;//1209;  // 5 chambers 10 strips per events 50 events total
 //How many strips can be fired in one event
 const Int_t kNAPV = 640; 
 //Maximum number of APVs this program can hold

@@ -371,8 +371,8 @@ int UserGuiGeneralDialogProcess::GetDividedNumber(std::string filename){
 int UserGuiGeneralDialogProcess::GetNumberFromFilename(std::string filename){
 	std::string filebasename=GetAppendixLess_FileName(filename);
 	return atoi(filebasename.substr(filebasename.find_last_not_of("0123456789")+1).c_str());
-
 }
+
 
 Bool_t UserGuiGeneralDialogProcess::CheckAppendix(std::string filename, std::string appendix) {
 	if(filename.substr(filename.find_last_of(".")+1)==appendix){

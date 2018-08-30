@@ -152,9 +152,6 @@ private:
 private:
 	TGTab *fWorkZoneTab;
 	TGCompositeFrame *fWorkZoneTabDefultFrame;
-	//std::vector<TGCompositeFrame *> fWorkZoneTabSubFrame;
-//	std::vector<TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
-//	std::vector<TCanvas *> cfWorkZoneTabCanvas;
 	std::map<int /*tab id*/,TGCompositeFrame *>fWorkZoneTabSubFrame;
 	std::map<int /*tab id*/,TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
 	std::map<int ,TCanvas *> cfWorkZoneTabCanvas;

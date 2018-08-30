@@ -32,6 +32,8 @@
 #include "../GEMDetector/MPDDecoder.h"
 #include "../GEMDetector/GEMConfigure.h"
 
+#include <libgen.h>
+
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 
 UserGuiMainFrame::UserGuiMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
@@ -698,10 +700,18 @@ void UserGuiMainFrame::fAnalysisProcess(std::string fname){
 	std::string file=fname;
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
 	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
-	std::string savefilename=Form("Hit_run%d_%d.root",
+
+	//extract the number in the string
+	std::string filebasename=basename(strdup(fname.c_str()));
+	filebasename.substr(0,filebasename.find_first_of("."));
+	std::string filename_temp=filebasename;
+	int rundividednumber=atoi(filename_temp.substr(filename_temp.find_last_of("_")+1).c_str());
+
+	std::string test = filebasename.substr(0,filebasename.find_last_of("_"));
+	std::cout<<"Test :"<< test.c_str()<<std::endl;
+	std::string savefilename=Form("Tracking_run%d_%d.root",
 				generalprocess->GetNumberFromFilename(
-						generalprocess->GetAppendixLess_FileName(
-								file.c_str())),generalprocess->GetDividedNumber(file.c_str()));
+						test.c_str()),rundividednumber);
 	std::cout<<"Working on file : "<< file.c_str()<<std::endl
 			<<"Save file name   : "<<savefilename.c_str()<<std::endl;
 	std::string savename=savefilename;
