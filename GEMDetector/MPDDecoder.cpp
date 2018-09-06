@@ -351,7 +351,7 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 				int RstripNb=ChNb[channel];
 				RstripNb=RstripNb+(127-2*RstripNb)*(mMapping[apv->first].at(3));
 				RstripPos=RstripNb+128*(mMapping[apv->first].at(2));
-				int dimension = mMapping[apv->first].at(1);    // x/y dimension
+				int dimension = mMapping[apv->first].at(1);      //x/y dimension
 				int planeID=mMapping[apv->first].at(0);			// GEM Module ID
 
 				GEMModuleHisto[planeID][dimension].at(2)->Fill(RstripPos,adcsum_temp);
@@ -370,14 +370,11 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 
 }
 
-//
+
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	// uid , value
 	std::unordered_map<int,int> mPedestal_mean;
 	std::unordered_map<int,int> mPedestal_rms;
-
-	// the hit mode  process
-	// get all the apv list
 	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
 	if(!pfile->IsOpen()){
 		std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> [ERROR]: Pedestal file cannot open: "<<pedestalfname.c_str()<<std::endl;
@@ -423,7 +420,6 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	adc3     = new Int_t[20000];
 	adc4     = new Int_t[20000];
 	adc5     = new Int_t[20000];
-
 	Hit->Branch("evtID",&EvtID,"evtID/I");
 	Hit->Branch("nch",&nch,"nch/I");
 	Hit->Branch("strip",Vstrip,"strip[nch]/I");
@@ -436,10 +432,10 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	Hit->Branch("adc4",adc4,"adc4[nch]/I");
 	Hit->Branch("adc5",adc5,"adc5[nch]/I");
 
-	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
+	//GEMConfigure *gemcfg=GEMConfigure::GetInstance();
 	//Create tree and buffer
-	int sigma_cut=gemcfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
-	std::map<int, std::vector<int>>mMapping=gemcfg->GetMapping().GetAPVmap();
+	int sigma_cut=cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
+	std::map<int, std::vector<int>>mMapping=cfg->GetMapping().GetAPVmap();
 	MPDRawParser *rawparser=new MPDRawParser();
 	while(ReadBlock()){
 		Int_t nstrips=0;
@@ -490,8 +486,8 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 				if( adcsum_temp > (5*mPedestal_rms[apv->first+channel]) ){
 					int RstripPos=channel;
 					int RstripNb=ChNb[channel];
-					RstripNb=RstripNb+(127-2*RstripNb)*(mMapping[apv->first].at(3));
-					RstripPos=RstripNb+128*(mMapping[apv->first].at(2));
+					RstripNb=RstripNb+(127-2*RstripNb)*(mMapping[apv->first].at(3)); // invert
+					RstripPos=RstripNb+128*(mMapping[apv->first].at(2));			 // calculate position
 					// write the six time samples
 					// temprarily usage need to put into a 2-d array
 					Vstrip[nstrips]=RstripPos;
@@ -503,9 +499,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 					adc3[nstrips]=adc_temp[channel+129*3]-commonMode[3];
 					adc4[nstrips]=adc_temp[channel+129*4]-commonMode[4];
 					adc5[nstrips]=adc_temp[channel+129*5]-commonMode[5];
-
 					nstrips++;
-
 				}
 			}
 		}

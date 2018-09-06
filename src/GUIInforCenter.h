@@ -53,8 +53,14 @@ public:
 	}
 
 	void generateHisto(){
-		if(data.size()!=0) RawGenerateHisto();
-		if(canvasedDisplay.size())ZeroSubGenerateHisto();
+		if(data.size()!=0) {
+			RawGenerateHisto();
+			//size.Set(4.0,4.0);
+		}
+		if(canvasedDisplay.size()){
+			ZeroSubGenerateHisto();
+			//size.Set(2.0,4.0);
+		}
 	}
 private:
 	void RawGenerateHisto(){

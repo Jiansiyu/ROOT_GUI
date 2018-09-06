@@ -49,10 +49,12 @@ public:
 			int Invert = atoi(result.at(9).c_str());
 			std::string other = result.at(10);
 			int apvUniqueID = GEM::GetUID(CrateID, MPDID, ADCID,0);
-			apvMap[apvUniqueID].push_back(GEMID);
-			apvMap[apvUniqueID].push_back(dimension);
-			apvMap[apvUniqueID].push_back(Pos);
-			apvMap[apvUniqueID].push_back(Invert);
+
+			apvMap[apvUniqueID].push_back(GEMID);      // 0
+			apvMap[apvUniqueID].push_back(dimension);  // 1
+			apvMap[apvUniqueID].push_back(Pos);        // 2
+			apvMap[apvUniqueID].push_back(Invert);     // 3
+
 			CalculateMap();
 		} else {
 			std::cerr <<__FUNCTION__<<"<"<<__LINE__<<">"<<"Unknown Mapping format "<<result.size() << std::endl;

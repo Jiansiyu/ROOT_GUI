@@ -185,7 +185,6 @@ void UserGuiMainFrame::SetWorkZoneTab(){
 		for(auto module :cfg->GetMapping().GetGEMModuleList()){
 			tablist[module]=Form("Module%d",module);
 		}
-
 	}
 	SetWorkZoneTab(tablist);
 	MapSubwindows();
@@ -756,7 +755,8 @@ void UserGuiMainFrame::fCanvasDraw(GUICanvasDataStream *data){
 
 			cfWorkZoneTabCanvas[tabid]->Clear();
 			cfWorkZoneTabCanvas[tabid]->ResetAttPad();
-			cfWorkZoneTabCanvas[tabid]->Divide(4,4);
+			// TODO
+			cfWorkZoneTabCanvas[tabid]->Divide(x_divide,y_divide);
 			for(auto x_canvas = (tab->second).begin(); x_canvas!=(tab->second).end();x_canvas++){
 				for(auto y_canvas = (x_canvas->second).begin();y_canvas!=(x_canvas->second).end();y_canvas++){
 					int canvasid=(y_canvas->first)*int(x_divide)+x_canvas->first;

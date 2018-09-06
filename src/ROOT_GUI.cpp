@@ -39,6 +39,16 @@ int main(int argc, char **argv)
 	   fprintf(stderr, "%s: cannot run in batch mode\n", argv[0]);
 	         return 1;
    }
+//   std::string filename="963test123asjas456.root";
+//   std::string test = "miaomiao";
+//   while(filename.find_first_of("0123456789")!=std::string::npos){
+//	   filename=filename.substr(filename.find_first_of("0123456789"));
+//	   int number = atoi(filename.substr(filename.find_first_of("0123456789"),filename.find_first_not_of("0123456789")).c_str());
+//	   filename=filename.substr(filename.find_first_not_of("0123456789"));
+//	   std::cout<<filename.c_str()<<"   "<<number <<std::endl;
+//   }
+ //  std::string test=filename.substr(filename.find_first_of("0123456789"))
+ //  std::cout<<filename.substr(filename.find_first_of("0123456789"),filename.find_first_not_of("0123456789")).c_str()<<std::endl;
 
    //ConfigInfor *test=ConfigInfor::GetInstance();
    //test->ReadConfig();
