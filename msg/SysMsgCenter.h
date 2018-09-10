@@ -15,13 +15,14 @@ enum terminal_color{
 
 };
 
-enum PrintLevel{
+enum PrintType{
 	STATUS,
-	WORNING,
+	WORNINGL1,
+	WORNINGL2,
 	ERROR
 };
-
 class SysMsgCenter {
+
 public:
 	SysMsgCenter();
 	virtual ~SysMsgCenter();
@@ -29,16 +30,19 @@ public:
 
 	void LogInfor(std::string);
 	void LogInfor(std::string *);
-//++++++++++++++++++++++++++++++++
+
+	//++++++++++++++++++++++++++++++++
 // The log book interface
 	void PrintfLog(std::string);
 	void PrintfLog(int);
 	void PrintfLog(float);
-//++++++++++++++++++++++++++++++++
+
+	//++++++++++++++++++++++++++++++++
 // The GUI signal/slot interface
 	void PrintfGUI(std::string);
 	void PrintfGUI(int);
 	void PrintfGUI();      // canvas & dashboard interface
+
 //++++++++++++++++++++++++++++++++
 // terminal display interface
 	void Printf(std::string);

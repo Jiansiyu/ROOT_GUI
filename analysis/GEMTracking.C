@@ -302,46 +302,46 @@ void GEMTracking::Run(Int_t event, const char *filename)
 			}
 		}
 
-		GEMCalibration *calibration = new GEMCalibration(vCluster);
-		calibration->CosmicCalibrate();
-
-		// new algrithm for calclation the efficency
-		for(unsigned int i =0; i < kNMODULE; i ++) {
-			if(calibration->vGoodTrackingFlag[i]){  // at least 3 chambers are fired and all the predicted points are located in the effective area
-				if(calibration->nFiredChamber==4){
-					nEvents[i]++;
-					nEffEvents[i]++;
-				}else{
-					if((calibration->nFiredChamber==3)&&(calibration->vNCluster[i]==0)){
-						nEvents[i]++;
-					}
-				}
-
-			}
-		}
-
-
-		for(unsigned int i =0; i <kNMODULE; i ++){
-	/*		if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
-				nEvents[i]++;
-				if(calibration->vNCluster[i]){
-					nEffEvents[i]++;
-					vResiduex[i]=calibration->vPredictedPosX[i]-calibration->vCorrectedPosX[i];
-					vResiduey[i]=calibration->vPredictedPosY[i]-calibration->vCorrectedPosY[i];
-				}
-			}*/
-
-			if (nEvents[i] && nEffEvents[i]) {
-				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];
-			}
-		}
-
-		unsigned int lNumberofChamberFired=0;
-		for(unsigned int i= 0; i<kNMODULE; i ++) {
-			if(calibration->vNCluster[i])lNumberofChamberFired++;
-			//hNChamberFired
-		}
-		hNChamberFired->Fill(lNumberofChamberFired);
+//		GEMCalibration *calibration = new GEMCalibration(vCluster);
+//		calibration->CosmicCalibrate();
+//
+//		// new algrithm for calclation the efficency
+//		for(unsigned int i =0; i < kNMODULE; i ++) {
+//			if(calibration->vGoodTrackingFlag[i]){  // at least 3 chambers are fired and all the predicted points are located in the effective area
+//				if(calibration->nFiredChamber==4){
+//					nEvents[i]++;
+//					nEffEvents[i]++;
+//				}else{
+//					if((calibration->nFiredChamber==3)&&(calibration->vNCluster[i]==0)){
+//						nEvents[i]++;
+//					}
+//				}
+//
+//			}
+//		}
+//
+//
+//		for(unsigned int i =0; i <kNMODULE; i ++){
+//	/*		if(calibration->vGoodTrackingFlag[i]){ // if this is a good fit and the point is locate in the effective region
+//				nEvents[i]++;
+//				if(calibration->vNCluster[i]){
+//					nEffEvents[i]++;
+//					vResiduex[i]=calibration->vPredictedPosX[i]-calibration->vCorrectedPosX[i];
+//					vResiduey[i]=calibration->vPredictedPosY[i]-calibration->vCorrectedPosY[i];
+//				}
+//			}*/
+//
+//			if (nEvents[i] && nEffEvents[i]) {
+//				nEfficiency[i] = (float_t) nEffEvents[i]/ (float_t) nEvents[i];
+//			}
+//		}
+//
+//		unsigned int lNumberofChamberFired=0;
+//		for(unsigned int i= 0; i<kNMODULE; i ++) {
+//			if(calibration->vNCluster[i])lNumberofChamberFired++;
+//			//hNChamberFired
+//		}
+//		hNChamberFired->Fill(lNumberofChamberFired);
 /*		//calculate the efficiency for each detector
 		GEMTrackConstrcution *tracking = new GEMTrackConstrcution(vCluster);
 		tracking->CosmicEff();
@@ -368,16 +368,16 @@ void GEMTracking::Run(Int_t event, const char *filename)
 			}
 		}*/
 
-		delete calibration;
-		if(i%100==0)
-		{
-			cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
-					<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
-					<< setw(4) << " Detector:2" << setw(4) << (int) (nEfficiency[2] * 100)<< "% (" <<nEffEvents[2]<<"/"<<nEvents[2]<<")"
-					<< setw(4) << " Detector:3" << setw(4)<< (int) (nEfficiency[3] * 100) <<"% (" <<nEffEvents[3]<<"/"<<nEvents[3]<<")"
-					<<"   Entries: "<< i<<"  "
-					<< setw(4) << (int) (ratio * 100) << "\r" << flush;
-		}
+//		delete calibration;
+//		if(i%100==0)
+//		{
+//			cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
+//					<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
+//					<< setw(4) << " Detector:2" << setw(4) << (int) (nEfficiency[2] * 100)<< "% (" <<nEffEvents[2]<<"/"<<nEvents[2]<<")"
+//					<< setw(4) << " Detector:3" << setw(4)<< (int) (nEfficiency[3] * 100) <<"% (" <<nEffEvents[3]<<"/"<<nEvents[3]<<")"
+//					<<"   Entries: "<< i<<"  "
+//					<< setw(4) << (int) (ratio * 100) << "\r" << flush;
+//		}
 		//delete test;
 		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 	}
@@ -391,11 +391,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	save_cluster_tree();
 
 	cout<<"Result"<<endl;
-	cout << " Detector:0" << setw(4) << (int) (nEfficiency[0] * 100)<< "% (" <<nEffEvents[0]<<"/"<<nEvents[0]<<")"
-			<< setw(4) << " Detector:1" << setw(4)<< (int) (nEfficiency[1] * 100) << "% (" <<nEffEvents[1]<<"/"<<nEvents[1]<<")"
-			<< setw(4) << " Detector:2" << setw(4) << (int) (nEfficiency[2] * 100)<< "% (" <<nEffEvents[2]<<"/"<<nEvents[2]<<")"
-			<< setw(4) << " Detector:3" << setw(4)<< (int) (nEfficiency[3] * 100) <<"% (" <<nEffEvents[3]<<"/"<<nEvents[3]<<")"
-			<< setw(4) << (int) (1 * 100) << "\r" << flush;
 }
 
 

@@ -722,8 +722,13 @@ void UserGuiMainFrame::fAnalysisProcess(std::string fname){
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){
 
 #ifdef __DECODER_DEBUG_MODE
-	Pedestal_name="/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/results/Pedestal_run3320.root";
-	rawfilename.push_back("/home/newdriver/Storage/Server/JLabFarm/mpd_ssp_3300.dat.0");
+	Pedestal_name="/home/newdriver/Research/Eclipse_Workspace/oxygen/MPD4_vme_Decoder_infn/Pedestal/pedestal_3510.root";
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.0");
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.1");
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.2");
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.3");
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.4");
+	rawfilename.push_back("/media/newdriver/data/daq/data/mpd_ssp_3512.dat.5");
 #endif
 
 	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
@@ -740,7 +745,8 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 		std::cout<<"Working on file : "<< file.c_str()<<std::endl
 				<<"Pedestal file    : "<<pedestalfname.c_str()<<std::endl
 				<<"Save file name   : "<<savefilename.c_str()<<std::endl;
-		decoder->HitMode(pedestalfname.c_str(),savefilename.c_str());
+//		decoder->HitMode(pedestalfname.c_str(),savefilename.c_str());
+		decoder->HiModeTest(pedestalfname.c_str(),savefilename.c_str());
 	}
 }
 

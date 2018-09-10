@@ -40,8 +40,10 @@ MPDDecoder::MPDDecoder(std::string fname){
 
 void MPDDecoder::Initialize(){
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
+	//int test[128]={0, 32, 64, 96, 8, 40, 72, 104, 16, 48, 80, 112, 24, 56, 88, 120, 1, 33, 65, 97, 9, 41, 73, 105, 17, 49, 81, 113, 25, 57, 89, 121, 2, 34, 66, 98, 10, 42, 74, 106, 18, 50, 82, 114, 26, 58, 90, 122, 3, 35, 67, 99, 11, 43, 75, 107, 19, 51, 83, 115, 27, 59, 91, 123, 4, 36, 68, 100, 12, 44, 76, 108, 20, 52, 84, 116, 28, 60, 92, 124, 5, 37, 69, 101, 13, 45, 77, 109, 21, 53, 85, 117, 29, 61, 93, 125, 6, 38, 70, 102, 14, 46, 78, 110, 22, 54, 86, 118, 30, 62, 94, 126, 7, 39, 71, 103, 15, 47, 79, 111, 23, 55, 87, 119, 31, 63, 95, 127};
 	for(int i = 0 ; i <128; i ++){
 	ChNb[i]=(cfg->GetSysCondfig().Analysis_cfg.nch)[i];
+	//ChNb[i]=test[i];
 	}
 	//HitCut_sigma=cfg->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
 }
@@ -370,7 +372,170 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 
 }
 
+void MPDDecoder::HiModeTest(std::string pedestalfname,std::string savefname){
+	// load the pedestals
+	std::map<int,int> mPedestal_mean;// uid , value
+	std::map<int,int> mPedestal_rms;
+	TFile *pfile=new TFile(pedestalfname.c_str(),"READ");
+	if(!pfile->IsOpen()){
+		std::cout<<__FUNCTION__<<"<"<<__LINE__<<"> [ERROR]: Pedestal file cannot open: "<<pedestalfname.c_str()<<std::endl;
+		return;
+	}
+	for(auto apvlist : (gemConfig->GetMapping().GetAPVList())){
+		int crateid=GEM::getCrateID(apvlist);
+		int mpdid=GEM::getMPDID(apvlist);
+		int apvid=GEM::getADCID(apvlist);
 
+		std::string hmean_str=Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, apvid);
+		std::string hRMS_str=Form("PedestalRMS_mpd_%d_ch_%d",mpdid, apvid);
+
+		if(pfile->GetListOfKeys()->Contains(hmean_str.c_str())&&(pfile->GetListOfKeys()->Contains(hRMS_str.c_str()))){
+			TH1F *hmean=(TH1F *) pfile->Get(hmean_str.c_str());
+			TH1F *hRMS=(TH1F *) pfile->Get(hRMS_str.c_str());
+			for(int i=0;i<128;i++){
+				int uid=GEM::GetUID(crateid,mpdid,apvid,i);
+				mPedestal_mean[uid]=(hmean->GetBinContent(i+1));
+				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
+			}
+		}else{
+			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+					<< "MPD_" << mpdid << " APV_" << apvid
+					<< " is declared in the map, but cannot file in the pedestal file"
+					<< std::endl;
+		}
+	}
+	std::cout<<"Reading Pedestal Done!"<<std::endl;
+	unsigned int NTSample=gemConfig->GetSysCondfig().DAQ_cfg.NSample;   // read how many time samples
+	// finish reading the pedestals
+	// TODO change the code to more flexiable time sample compatible
+	Benchmark *timer=new Benchmark();
+	TFile *HitFileio=new TFile(savefname.c_str(),"RECREATE");
+	TTree *Hit = new TTree("GEMHit","Hit list");   	//create the tree
+
+	Int_t EvtID=0;
+	Int_t nch=0;
+	Int_t *Vstrip;
+	Int_t *VdetID;
+	Int_t *VplaneID;
+	Int_t *adc0;
+	Int_t *adc1;
+	Int_t *adc2;
+	Int_t *adc3;
+	Int_t *adc4;
+	Int_t *adc5;
+	Int_t *adc[NTSample];
+
+	Vstrip   = new Int_t[20000];  // strip ID
+	VdetID   = new Int_t[20000];
+	VplaneID = new Int_t[20000];
+	adc0     = new Int_t[20000];
+	adc1     = new Int_t[20000];
+	adc2     = new Int_t[20000];
+	adc3     = new Int_t[20000];
+	adc4     = new Int_t[20000];
+	adc5     = new Int_t[20000];
+
+	Hit->Branch("evtID",&EvtID,"evtID/I");
+	Hit->Branch("nch",&nch,"nch/I");
+	Hit->Branch("strip",Vstrip,"strip[nch]/I");
+	Hit->Branch("detID",VdetID,"detID[nch]/I");
+	Hit->Branch("planeID",VplaneID,"planeID[nch]/I");
+	for(int tsid=0; tsid < NTSample ; tsid++){
+		adc[tsid]= new Int_t[20000];
+		Hit->Branch(Form("adc%d",tsid),adc[tsid],Form("adc%d[nch]/I",tsid));
+	}
+	//Create tree and buffer
+	int sigma_cut=gemConfig->GetSysCondfig().Analysis_cfg.ZeroSubtrCutSigma;
+	std::map<int, std::vector<int>>mMapping=gemConfig->GetMapping().GetAPVmap();
+	MPDRawParser *rawparser=new MPDRawParser();
+	while(ReadBlock()){
+		// detID, plantid, stripid, sixtimesamples
+		std::map<int,std::map<int,std::map<int,std::vector<int>>>> hit_data;
+		if(EvtID%300)timer->Print(EvtID);
+		rawparser->LoadRawData(block_vec_mpd);
+		std::map<int,std::vector<int>> raw_data=rawparser->GetDecoded();
+		for(auto  apv = raw_data.begin();apv!=raw_data.end();apv++){    // loop on all the apvs
+			int uid=apv->first;
+			if(mPedestal_mean.find(uid)==mPedestal_mean.end()) {
+				continue;
+			}
+			std::vector<int> adc_temp=apv->second;
+			int totalsize=adc_temp.size();
+			int TSsize=totalsize/129;
+			if((totalsize%129!=0)||(TSsize!=NTSample)){
+				std::cout<<"[ERROR] "<<__FUNCTION__<<" <"<<__LINE__<<">"<<" This size is not expected"<<std::endl;
+			}
+
+#ifdef __DECODER_DEBUG_MODE
+			std::cout<<"EvtID: "<<EvtID<<"  Size of raw data:" << adc_temp.size()<<" expected is : "<< 129*6<<std::endl;
+#endif
+
+			// subtract the common mode
+			for(int counter=0; counter<totalsize; counter++){
+				if((counter%129)!=128) adc_temp[counter]=adc_temp[counter]-mPedestal_mean[apv->first+(counter%129)];
+			}
+
+			int commonMode[TSsize];
+			for(uint16_t ts_counter=0;ts_counter<TSsize;ts_counter++){
+				commonMode[ts_counter]=0;
+				std::vector<int> singleTSadc_temp_sorting;
+				singleTSadc_temp_sorting.insert(singleTSadc_temp_sorting.end(),&adc_temp[129*ts_counter],&adc_temp[129*(ts_counter+1)]);
+				std::sort(singleTSadc_temp_sorting.begin(),singleTSadc_temp_sorting.end()-1);
+				for(int k =28; k < 100; k ++){
+					commonMode[ts_counter]+=singleTSadc_temp_sorting[k];
+				}
+				commonMode[ts_counter]=commonMode[ts_counter]/72;
+			}
+			// loop on one apv card
+			for(int channel=0;channel<128;channel++){
+				int adcsum_temp=0;
+				for(int ts_counter=0;ts_counter<TSsize; ts_counter++){
+					adcsum_temp=adcsum_temp+adc_temp[channel+129*ts_counter]-commonMode[ts_counter];
+				}
+				adcsum_temp=adcsum_temp/TSsize;
+				if( adcsum_temp >= (5*mPedestal_rms[apv->first+channel]) ){
+					int RstripPos;
+					int RstripNb=ChNb[channel];
+					RstripNb=RstripNb+(127-2*RstripNb)*(mMapping[apv->first].at(3)); // invert
+					RstripPos=RstripNb+128*(mMapping[apv->first].at(2));			 // calculate position
+					for(int ts_id=0;ts_id<TSsize;ts_id++){
+						hit_data[mMapping[apv->first].at(0)][mMapping[apv->first].at(1)][RstripPos].push_back(adc_temp[channel+ts_id*129]-commonMode[ts_id]);
+					}
+				}
+			}
+		}
+		Int_t nstrips=0;
+		for(auto VdetID_iter = hit_data.begin();VdetID_iter!=hit_data.end();VdetID_iter++){
+			for(auto VplaneID_iter=VdetID_iter->second.begin();VplaneID_iter!=VdetID_iter->second.end();VplaneID_iter++){
+				for(auto Vstrip_iter=VplaneID_iter->second.begin();Vstrip_iter!=VplaneID_iter->second.end();Vstrip_iter++){
+					Vstrip[nstrips]=Vstrip_iter->first;
+					VdetID[nstrips]=VdetID_iter->first;
+					VplaneID[nstrips]=VplaneID_iter->first;
+					for(int i = 0; i < (Vstrip_iter->second.size());i++){
+						adc[i][nstrips]=(Vstrip_iter->second).at(i);
+					}
+					nstrips++;
+				}
+			}
+		}
+
+		nch=nstrips;
+		EvtID++;
+		if(nch!=0) Hit->Fill();
+#ifdef __DECODER_DEBUG_MODE
+			std::cout<<"EvtID: "<<EvtID<<" End of process this event, ready to process next one "<<std::endl;
+#endif
+	}
+
+	Hit->SetDirectory(HitFileio);
+	Hit->Write();
+	HitFileio->Write();
+	HitFileio->Close();
+}
+
+
+//!
+//!
 void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	// uid , value
 	std::unordered_map<int,int> mPedestal_mean;
@@ -455,6 +620,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 			std::vector<int> adc_temp=apv->second;
 			int totalsize=adc_temp.size();
 			int TSsize=totalsize/129;
+
 #ifdef __DECODER_DEBUG_MODE
 			std::cout<<"EvtID: "<<EvtID<<"  Size of raw data:" << adc_temp.size()<<" expected is : "<< 129*6<<std::endl;
 #endif
@@ -500,6 +666,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 					adc4[nstrips]=adc_temp[channel+129*4]-commonMode[4];
 					adc5[nstrips]=adc_temp[channel+129*5]-commonMode[5];
 					nstrips++;
+
 				}
 			}
 		}
