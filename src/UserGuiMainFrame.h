@@ -65,49 +65,6 @@
 #include "UserGUIDataStructue.h"
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 #include "GUIInforCenter.h"
-enum ETestCommandIdentifiers {
-	M_FILE_OPEN,
-	M_FILE_NEWCANVAS,
-	M_FILE_TBROWER,
-	M_FILE_SAVE,
-	M_FILE_SAVEAS,
-	M_FILE_PRINT,
-	M_FILE_PRINTSETUP,
-	M_FILE_EXIT,
-
-	M_SET_WORKMODE,
-	M_SET_LOADMAPPING,
-	M_SET_LOADPEDESTAL,
-	M_SET_BATCH,
-
-	M_TOOL_APVMAPPINGWIZARD,
-
-	M_VIEW_ENBL_DOCK,
-	M_VIEW_ENBL_HIDE,
-	M_VIEW_DOCK,
-	M_VIEW_UNDOCK,
-
-	M_HELP_CONTENTS,
-	M_HELP_SEARCH,
-	M_HELP_ABOUT,
-
-	// workzone button key value
-
-	C_WORKMODE_RAW,
-	C_WORKMODE_ZEROSUBTRACTION,
-	C_WORKMODE_PEDESTAL,
-	C_WORKMODE_HIT,
-	C_WORKMODE_ANALYSIS,
-	C_WORKMODE_CALIBRATION,
-
-	C_RAWFILE_PEDESTAL,
-	C_RAWFILE_DAT,
-
-	V_NUMBERINPUT,
-	C_CONFIRM,
-
-	COLORSEL
-};
 
 class UserGuiMainFrame: public TGMainFrame {
 
@@ -283,6 +240,49 @@ private :
 	void fAnalysisProcess(std::string Filenames); // analysis mode process
 	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
 
+	enum ETestCommandIdentifiers {
+		M_FILE_OPEN,
+		M_FILE_NEWCANVAS,
+		M_FILE_TBROWER,
+		M_FILE_SAVE,
+		M_FILE_SAVEAS,
+		M_FILE_PRINT,
+		M_FILE_PRINTSETUP,
+		M_FILE_EXIT,
+
+		M_SET_WORKMODE,
+		M_SET_LOADMAPPING,
+		M_SET_LOADPEDESTAL,
+		M_SET_BATCH,
+
+		M_TOOL_APVMAPPINGWIZARD,
+
+		M_VIEW_ENBL_DOCK,
+		M_VIEW_ENBL_HIDE,
+		M_VIEW_DOCK,
+		M_VIEW_UNDOCK,
+
+		M_HELP_CONTENTS,
+		M_HELP_SEARCH,
+		M_HELP_ABOUT,
+
+		// workzone button key value
+
+		C_WORKMODE_RAW,
+		C_WORKMODE_ZEROSUBTRACTION,
+		C_WORKMODE_PEDESTAL,
+		C_WORKMODE_HIT,
+		C_WORKMODE_ANALYSIS,
+		C_WORKMODE_CALIBRATION,
+
+		C_RAWFILE_PEDESTAL,
+		C_RAWFILE_DAT,
+
+		V_NUMBERINPUT,
+		C_CONFIRM,
+
+		COLORSEL
+	};
 
 };
 
