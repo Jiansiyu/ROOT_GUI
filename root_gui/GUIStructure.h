@@ -8,6 +8,9 @@
 #ifndef GUISTRUCTURE_H_
 #define GUISTRUCTURE_H_
 
+#include "vector"
+#include "map"
+#include "string"
 
 enum CommandIdentifiers {
 	// Command for the file window
@@ -57,5 +60,17 @@ enum CommandIdentifiers {
 	C_COLORSEL
 };
 
+enum GUIWorkMode{
+	WORKMODE_RAW,
+	WORKMODE_PEDESTAL,
+	WORKMODE_ZERSUBTRACTION,
+	WORKMODE_HIT,
+	WORKMODE_ANALYSIS,
+	WORKMODE_CALIBRATION
+};
+
+struct GUIDisplaySetting{
+
+};
 
 #endif /* GUISTRUCTURE_H_ */

@@ -35,56 +35,62 @@ GUIMainFrame::~GUIMainFrame() {
 
 Bool_t GUIMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 	switch (GET_MSG(msg)) {
-		case kC_COMMAND:
-			gKC_ColorselProcess(msg,parm1);
+		case kC_COMMAND:             // button command
+			{
+				switch (GET_SUBMSG(msg)) {
+					case kCM_MENU:
+						gMessageProcessMenu(msg,parm1);
+						break;
+					case kCM_BUTTON:
+						gMessageProcessButton(msg,parm1);
+						break;
+					case kCM_RADIOBUTTON:
+						gMessageProcessRadioButton(msg,parm1);
+					default:
+						break;
+				}
+			};
 			break;
-		case kCM_CHECKBUTTON:
-			gKCM_CommandProcess(msg,parm1);
+		case kCM_CHECKBUTTON:         // number entry
+			gMessageProcessCheckButton(msg,parm1);
 			break;
-		case kC_COLORSEL:
-			gKC_ColorselProcess(msg,parm1);
+		case kC_COLORSEL:			  // color ring
+			gMessageProcessColorSel(msg,parm1);
 			break;
 		default:
 			break;
 	}
+}
+
+
+
+// button process
+void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
+
+}
+// menu process
+void GUIMainFrame::gMessageProcessMenu(Long_t msg, Long_t parm){
+
+}
+
+// radio button used for select the work mode
+void GUIMainFrame::gMessageProcessRadioButton(Long_t msg, Long_t parm){
+
+}
+
+// check button used for control the number
+void GUIMainFrame::gMessageProcessCheckButton(Long_t msg, Long_t parm){
+
+}
+
+//
+void GUIMainFrame::gMessageProcessColorSel(Long_t msg, Long_t parm){
+
 }
 
 void GUIMainFrame::CloseWindow() {
 	printf("Program Terminated\n");
 	gApplication->Terminate(); // the end of the program
-}
-
-void GUIMainFrame::gKC_CommandProcess(Long_t msg, Long_t parm1){
-	switch (GET_SUBMSG(msg)) {
-		case kCM_MENU:
-
-			break;
-		case kCM_BUTTON:
-
-			break;
-		case kCM_RADIOBUTTON:
-
-			break;
-		default:
-			break;
-	}
-}
-
-void GUIMainFrame::gKCM_CommandProcess(Long_t msg, Long_t parm1){
-
-}
-
-void GUIMainFrame::gKC_ColorselProcess(Long_t msg, Long_t parm1){
-
-}
-
-
-void GUIMainFrame::gWorkMenuDialogProcessMSG(Long_t param){
-
-}
-
-void GUIMainFrame::gWorkModeDialogProcessMSG(Long_t param){
-
 }
 
 void GUIMainFrame::gMenuUnitDraw(TGLayoutHints *l ){

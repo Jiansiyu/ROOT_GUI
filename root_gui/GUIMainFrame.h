@@ -77,11 +77,13 @@ private:
 	virtual TGCompositeFrame *gWorktabControlOutputButtonDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	void gSetDefaultInformation();
 
-	virtual void gKC_CommandProcess(Long_t msg, Long_t parm1);
-	virtual void gKCM_CommandProcess(Long_t msg, Long_t parm1);
-	virtual void gKC_ColorselProcess(Long_t msg, Long_t parm1);
-	virtual void gWorkMenuDialogProcessMSG(Long_t param);
-	virtual void gWorkModeDialogProcessMSG(Long_t param);
+
+	// command process
+	virtual void gMessageProcessMenu(Long_t msg, Long_t parm);
+	virtual void gMessageProcessButton(Long_t msg, Long_t parm);
+	virtual void gMessageProcessRadioButton(Long_t msg, Long_t parm);
+	virtual void gMessageProcessCheckButton(Long_t msg, Long_t parm);
+	virtual void gMessageProcessColorSel(Long_t msg, Long_t parm);
 
 
 	//global variables
