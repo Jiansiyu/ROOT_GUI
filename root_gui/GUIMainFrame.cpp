@@ -6,7 +6,6 @@
  */
 
 #include "../root_gui/GUIMainFrame.h"
-
 #include "TApplication.h"
 #include "TGLayout.h"
 #include "TG3DLine.h"
@@ -17,7 +16,9 @@
 #include "libgen.h"
 #include "string"
 #include "iostream"
-#include "../root_gui/GUIStructure.h"
+#include "GUIStructure.h"
+#include "GUISysGeneral.h"
+
 GUIMainFrame::GUIMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	SetCleanup(kDeepCleanup);
 	gMenuUnitDraw(new TGLayoutHints(kLHintsExpandX,0,0,1,0));
@@ -60,32 +61,125 @@ Bool_t GUIMainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t) {
 		default:
 			break;
 	}
-}
-
-
+	return kTRUE;
+};
 
 // button process
 void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
-
+	GUISysGeneral *openDialog=new GUISysGeneral();
+	switch (parm) {
+		case B_PEDESTALFILE_OPEN:
+			{
+				std::vector<std::string> files=openDialog->FilesBrowser();
+				if(files.size()==0) break;
+				if(files.size()>1) std::cout<<"Pedestal file only support one file, only "<<files.front().c_str()<<"  will be saved"<<std::endl;
+				guiinfor->SetPedestalInputFile(files.front().c_str());
+			}
+			break;
+		case B_RAWFILE_OPEN:
+			{
+				std::vector<std::string> files=openDialog->FilesBrowser();
+				if(files.size()==0) break;
+				guiinfor->SetRawFileInputList_add(files);
+			}
+			break;
+		case B_RAWFILE_DELETE:
+			std::cout<<"Raw delete Button"<<std::endl;
+			break;
+		case B_CONFIRM:
+			std::cout<<"Confirm Button"<<std::endl;
+			break;
+		default:
+			break;
+	}
 }
+
 // menu process
 void GUIMainFrame::gMessageProcessMenu(Long_t msg, Long_t parm){
-
+	switch (parm) {
+		case M_FILE_OPEN:
+			{
+				std::cout<<"Open file dialog" <<std::endl;
+			}
+			break;
+		case M_FILE_NEWCANVAS:
+			{
+				new TCanvas("UVa GEM Analysis Framework--NewCanvas",
+				"UVa GEM Analysis Framework--NewCanvas", 400, 400);
+			}
+			break;
+		case M_FILE_TBROWER:
+			{
+				new TBrowser("UVa GEM Analysis Framework--TBrowser",
+				"UVa GEM Analysis Framework--Root Tree Browser");
+			}
+			break;
+		case M_FILE_SAVE:
+			std::cout<<"Save dialog"<<std::endl;
+			break;
+		case M_FILE_SAVEAS:
+			std::cout<<"Save as dialog"<<std::endl;
+			break;
+		case M_FILE_PRINT:
+			std::cout<<"Print dialog"<<std::endl;
+			break;
+		case M_FILE_EXIT:
+			CloseWindow();
+			break;
+		case M_SET_LOADMAPPING:
+			std::cout<<"load mapping as diaglog"<<std::endl;
+			break;
+		case M_SET_LOADPEDESTAL:
+			std::cout<<"Load Pedestal diaglog"<<std::endl;
+			break;
+		case M_TOOL_APVMAPPINGWIZARD:
+			std::cout<<"APV mapping wizard diaglog"<<std::endl;
+			break;
+		default:
+			std::cout<<"Command Currently not support"<<std::endl;
+			break;
+	}
 }
 
 // radio button used for select the work mode
 void GUIMainFrame::gMessageProcessRadioButton(Long_t msg, Long_t parm){
-
+	switch (parm) {
+		case C_WORKMODE_RAW:
+			guiinfor->SetRunMode(WORKMODE_ANALYSIS);
+			std::cout<<"Raw mode selected"<<std::endl;
+			break;
+		case C_WORKMODE_ZEROSUBTRACTION:
+			std::cout<<"Zero Subtraction mode selected"<<std::endl;
+			break;
+		case C_WORKMODE_PEDESTAL:
+			std::cout<<"Pedestal Mode selected"<<std::endl;
+			break;
+		case C_WORKMODE_HIT:
+			std::cout<<"Pedestal Mode selected"<<std::endl;
+			break;
+		case C_WORKMODE_ANALYSIS:
+			std::cout<<"Analysis mode selected" <<std::endl;
+			break;
+		default:
+			std::cout<<"Command currently not support"<<std::endl;
+			break;
+	}
 }
 
 // check button used for control the number
 void GUIMainFrame::gMessageProcessCheckButton(Long_t msg, Long_t parm){
-
+	switch (parm) {
+		case -1:
+			std::cout<<"Event Number is changed"<<std::endl;
+			break;
+		default:
+			std::cout<<parm<<std::endl;
+			break;
+	}
 }
-
 //
 void GUIMainFrame::gMessageProcessColorSel(Long_t msg, Long_t parm){
-
+	std::cout<<"Color Sel changed"<<std::endl;
 }
 
 void GUIMainFrame::CloseWindow() {
@@ -162,12 +256,15 @@ TGCompositeFrame *GUIMainFrame::gWorktabControlButtonSetDraw(TGCompositeFrame *p
 	TGRadioButton *bWorkModeHit = new TGRadioButton(fWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
 	TGRadioButton *bWorkModeAnalysis = new TGRadioButton(fWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
 	TGRadioButton *bWorkModeCalibration = new TGRadioButton(fWorkModeButtonGroup,"&Calibration",C_WORKMODE_CALIBRATION);
+//	TGRadioButton *bWorkModeOnlineMonitor = new TGRadioButton(fWorkModeButtonGroup,"&OnlineMonitor",C_WORKMODE_ONLINEMONITOR);
+
 	bWorkModeRAW->Associate(this);
 	bWorkModeRAW->Associate(this);
 	bWorkModeZeroSubtraction->Associate(this);
 	bWorkModePedestal->Associate(this);
 	bWorkModeHit->Associate(this);
 	bWorkModeAnalysis->Associate(this);
+	//bWorkModeOnlineMonitor->Associate(this);
 	fWorkButtonSelectionFrame->AddFrame(fWorkModeButtonGroup,new TGLayoutHints(kLHintsTop|kLHintsExpandX,10,10,0,10));
 	fWorkControlButtonFrame->AddFrame(tWorkModeTab,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 	return fWorkControlButtonFrame;
@@ -298,14 +395,15 @@ void GUIMainFrame::gSetMenuFile(TGPopupMenu *fMenuFile){
 	fMenuFile->AddEntry("Root &TBrowser", M_FILE_TBROWER);
 	fMenuFile->AddEntry("&Save", M_FILE_SAVE);
 	fMenuFile->AddEntry("S&ave as...", M_FILE_SAVEAS);
-	fMenuFile->AddEntry("&Close", -1);
+	//fMenuFile->AddEntry("&Close", -1);
 	fMenuFile->AddSeparator();
 	fMenuFile->AddEntry("&Print", M_FILE_PRINT);
 	fMenuFile->AddEntry("P&rint setup...", M_FILE_PRINTSETUP);
 	fMenuFile->AddSeparator();
 	fMenuFile->AddEntry("E&xit", M_FILE_EXIT);
 	fMenuFile->DisableEntry(M_FILE_SAVEAS);
-	fMenuFile->HideEntry(M_FILE_PRINT);
+	fMenuFile->DisableEntry(M_FILE_PRINTSETUP);
+	//fMenuFile->HideEntry(M_FILE_PRINT);
 	fMenuFile->Associate(this);
 }
 

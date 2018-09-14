@@ -44,7 +44,7 @@
 #include "TSystemDirectory.h"
 #include "TH1F.h"
 #include "map"
-
+#include "GUIInformation.h"
 class GUIMainFrame: public TGMainFrame {
 public:
 	GUIMainFrame(const TGWindow *p, UInt_t w, UInt_t h);
@@ -87,6 +87,7 @@ private:
 
 
 	//global variables
+	GUIInformation *guiinfor=GUIInformation::GetInstance();
 private:
 
 private:
