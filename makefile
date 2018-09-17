@@ -13,7 +13,7 @@
 # You make need to modify the following paths according to you system setting
 #+++++++++++++++++++++++++++++++++++++++++++
 # general make file configuration
-CC       = g++ -std=c++0x -pthread -O3 -g3 #-Wall
+CC       = gcc -std=c++11 -pthread -lpthread -Ofast -g3 #-Wall
 CFLAGS= ${CFLAG}
 THIS_DIR =`cd "\`dirname \"$0\"\`";pwd`
 #THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -34,7 +34,7 @@ CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS} -I${EVIO_INC} -I./
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
-LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat -levioxx -levio  
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat -levioxx -levio  -lstdc++ -lm
 else
 LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}/libevioxx.dylib ${EVIO_LIB}/libevio.dylib 
 endif

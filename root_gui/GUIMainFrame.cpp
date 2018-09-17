@@ -5,7 +5,7 @@
  *  Author: newdriver
  */
 
-#include "../root_gui/GUIMainFrame.h"
+#include "GUIMainFrame.h"
 #include "TApplication.h"
 #include "TGLayout.h"
 #include "TG3DLine.h"

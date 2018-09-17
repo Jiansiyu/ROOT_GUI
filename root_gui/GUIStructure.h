@@ -73,8 +73,4 @@ enum GUIWorkMode{
 	WORKMODE_CALIBRATION
 };
 
-struct GUIDisplaySetting{
-
-};
-
 #endif /* GUISTRUCTURE_H_ */

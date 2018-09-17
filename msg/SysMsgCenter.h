@@ -9,11 +9,6 @@
 #define USERSYSMSGCENTER_H_
 #include <string>
 #include <ctime>
-//! Terminal color out put color defination
-
-enum terminal_color{
-
-};
 
 enum PrintType{
 	STATUS,

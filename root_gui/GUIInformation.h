@@ -12,10 +12,16 @@
 
 #ifndef GUIINFORMATION_H_
 #define GUIINFORMATION_H_
+
+#include "TSystem.h"
 #include "string"
 #include "vector"
 #include "GUIStructure.h"
 #include  "GUISignalSlot.h"
+
+struct GUIDisplaySetting{
+
+};
 
 class GUIInformation {
 
@@ -29,10 +35,12 @@ public:
 	std::string *GetPedestalInputFile();
 	std::vector<std::string> *GetRawFileInputList();
 
+	CpuInfo_t GetCPUInfor();
+	MemInfo_t GetMemeryInfor();
 private:
 	// control panel informations
 	GUIWorkMode iWorkmode;
-	GUIDisplaySetting iSetting;
+	GUIDisplaySetting iDisplaySetting;
 	std::string iPedestal;
 	std::vector<std::string> iRawFileList;
 	std::string iOutputFilePattern;
@@ -52,8 +60,10 @@ private:
 	unsigned int iWorkProgress;
 
 	// code ralated
-	std::string iCurrentPath;
-	std::string iCodePath;
+	CpuInfo_t iCPUinfor;
+	MemInfo_t iMemeryInfor;
+
+
 //+++++++++++++++++++++++++++++++++++
 public:
 	static GUIInformation *GetInstance();

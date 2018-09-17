@@ -11,26 +11,18 @@
 #include <algorithm>
 #include <map>
 #include <unordered_map>
+#include "GEMEventData.h"
+
 class MPDRawParser {
 public:
 	MPDRawParser();
 	virtual ~MPDRawParser();
-
-	void LoadRawData(std::vector<uint32_t>::iterator begin,std::vector<uint32_t>::iterator end);
-	void LoadRawData(const std::vector<uint32_t> &);
-
-	std::map<int,std::vector<int>> GetDecoded();
-
-	std::map<int,std::vector<int>> GetCommonModeSubtraction();
 private:
-	// UID   data
-	std::map<int,std::vector<int>> mAPVRawSingleEvent;	 // raw data from dat file
-	std::map<int,std::vector<int>> mCommonModeSubtractedEvent;
-	std::map<int,std::vector<int>> mPedestalTimeSample;  // data after common mode subtraction
+//	virtual void GetDecoded(GEMEvent **,const std::vector<uint32_t> &);
+//	virtual void GetDecoded(GEMEvent **,std::vector<uint32_t>::iterator begin,std::vector<uint32_t>::iterator end);
+//	virtual void GetZeroSubtrData(GEMEvent *);
+//	virtual void GetCommonModeSubtrData(GEMEvent *);
 
-
-	void  CommonModeSubtraction();
-	void clear();
 };
 
 #endif /* MPDRAWPARSER_H_ */

@@ -6,7 +6,7 @@
  */
 
 #include "GUIInformation.h"
-
+#include "TSystem.h"
 #include "vector"
 #include "string"
 #include "iostream"
@@ -17,15 +17,48 @@ GUIInformation *GUIInformation::GetInstance(){
 	return m_instance;
 }
 
+
 void GUIInformation::SetRawFileInputList_add(std::vector<std::string> filelist){
 	iRawFileList.insert(iRawFileList.end(),filelist.begin(),filelist.end());
 	for(auto file : iRawFileList){
 		std::cout<<"File input : "<< file.c_str()<<std::endl;
 	}
 }
+
+
 void GUIInformation::SetPedestalInputFile(std::string file){
 	iPedestal=file;
 }
+
+
 void GUIInformation::SetRunMode(GUIWorkMode command){
 	iWorkmode=command;
+}
+
+
+//! Return the work mode
+//
+//
+GUIWorkMode GUIInformation::GetRunMode(){
+	return iWorkmode;
+}
+
+
+std::string *GUIInformation::GetPedestalInputFile(){
+	return &iPedestal;
+}
+
+
+std::vector<std::string> *GUIInformation::GetRawFileInputList(){
+	return &iRawFileList;
+}
+
+CpuInfo_t GUIInformation::GetCPUInfor(){
+	gSystem->GetCpuInfo(&iCPUinfor,100);
+	return iCPUinfor;
+}
+
+MemInfo_t GUIInformation::GetMemeryInfor(){
+	gSystem->GetMemInfo(&iMemeryInfor);
+	return iMemeryInfor;
 }

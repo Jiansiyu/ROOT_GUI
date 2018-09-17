@@ -39,13 +39,14 @@ or all the apvs on the MPDs
 // @param adcID
 // @param channelID
 // if set the param to -1 means select all the modules
+
 template<class T>
 T GetUID(T CrateID, T mpdID, T adcID, T channelID) {
 	if (CrateID == -1) {
 		CrateID = (GEM_CRATEID_POS >> GEM_CRATEID_SHIFT);
 	}
 	if (mpdID == -1) {
-		mpdID = (GEM_MPDID_POS >> GEM_MPDID_SHIFT);
+		mpdID = GEM_MPDID_POS >> GEM_MPDID_SHIFT;
 	}
 	if (adcID == -1) {
 		adcID = (GEM_ADCID_POS >> GEM_ADCID_SHIFT);

@@ -15,29 +15,18 @@
 #include "evioUtil.hxx"
 #include "evioFileChannel.hxx"
 
-#include "MPDStructure.h"
-#include "MPDRawParser.h"
-#include "GEMIDGenerator.h"
-#include "GEMConfigure.h"
-#include "../src/Benchmark.h"
 #include "unordered_map"
 #include <math.h>
 #include <algorithm>
-#ifdef __MULT_THREAD
-#include "thread"
-#endif
-
-MPDDecoder::MPDDecoder() : GUIInforCenter(){
+MPDDecoder::MPDDecoder(){
 	// TODO Auto-generated constructor stub
-	Initialize();
 }
 
 MPDDecoder::MPDDecoder(std::string fname){
-	LoadFile(fname.c_str());
-	Initialize();
+
 }
 
-
+/*
 void MPDDecoder::Initialize(){
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
 	//int test[128]={0, 32, 64, 96, 8, 40, 72, 104, 16, 48, 80, 112, 24, 56, 88, 120, 1, 33, 65, 97, 9, 41, 73, 105, 17, 49, 81, 113, 25, 57, 89, 121, 2, 34, 66, 98, 10, 42, 74, 106, 18, 50, 82, 114, 26, 58, 90, 122, 3, 35, 67, 99, 11, 43, 75, 107, 19, 51, 83, 115, 27, 59, 91, 123, 4, 36, 68, 100, 12, 44, 76, 108, 20, 52, 84, 116, 28, 60, 92, 124, 5, 37, 69, 101, 13, 45, 77, 109, 21, 53, 85, 117, 29, 61, 93, 125, 6, 38, 70, 102, 14, 46, 78, 110, 22, 54, 86, 118, 30, 62, 94, 126, 7, 39, 71, 103, 15, 47, 79, 111, 23, 55, 87, 119, 31, 63, 95, 127};
@@ -716,7 +705,7 @@ bool MPDDecoder::ReadBlock(){
 
 void MPDDecoder::clear(){
 	block_vec_mpd.clear();
-}
+}*/
 
 MPDDecoder::~MPDDecoder() {
 	// TODO Auto-generated destructor stub
