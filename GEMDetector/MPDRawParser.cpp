@@ -13,7 +13,6 @@
 #include "MPDRawParser.h"
 #include "MPDStructure.h"
 #include "GEMIDGenerator.h"
-
 MPDRawParser::MPDRawParser() {
 	// TODO Auto-generated constructor stub
 
@@ -22,29 +21,6 @@ MPDRawParser::MPDRawParser() {
 MPDRawParser::~MPDRawParser() {
 	// TODO Auto-generated destructor stub
 }
-
-
-//void MPDRawParser::GetDecoded(GEMEvent **gem,
-//		const std::vector<uint32_t> &gemRaw) {
-//
-//}
-//
-//void MPDRawParser::GetDecoded(GEMEvent **gem,
-//		std::vector<uint32_t>::iterator begin,
-//		std::vector<uint32_t>::iterator end) {
-//}
-//
-//
-//void MPDRawParser::GetZeroSubtrData(GEMEvent *){
-//
-//}
-//
-//void MPDRawParser::GetCommonModeSubtrData(GEMEvent *){
-
-//}
-
-/*//template<class T>
-//void MPDRawParser::LoadRawData(std::vector<T> begin,std::vector<T> end)
 void MPDRawParser::LoadRawData(std::vector<uint32_t>::iterator begin,std::vector<uint32_t>::iterator end){
 
 	  int mpdid;
@@ -106,8 +82,6 @@ void MPDRawParser::LoadRawData(const std::vector<uint32_t>  & data_in){
 	  int UID;
 	  clear();
 	  for(auto data : data_in){
-
-//		uint32_t data=*iter;
 		uint32_t header;
 		uint32_t apv_header;
 		header = (data & 0x00e00000)>>21;
@@ -205,4 +179,4 @@ std::map<int,std::vector<int>> MPDRawParser::GetCommonModeSubtraction(){
 
 std::map<int,std::vector<int>> MPDRawParser::GetDecoded(){
 	return mAPVRawSingleEvent;
-}*/
+}

@@ -1,26 +1,29 @@
 /*
  * MPDDecoder.h
  *
- * Created on: Jul 5, 2018
+ *  Created on: Jul 5, 2018
  *      Author: newdriver
  */
 
 #ifndef MPDDECODER_H_
 #define MPDDECODER_H_
 #include <string>
-
+#include <vector>
 #include "evioUtil.hxx"
 #include "evioFileChannel.hxx"
+#include "MPDStructure.h"
+#include "../src/GUIInforCenter.h"
+#include "GEMConfigure.h"
 
-
-class MPDDecoder {
+class MPDDecoder : public GUIInforCenter {
 public:
 	MPDDecoder();
 	MPDDecoder(std::string fname);
 	virtual ~MPDDecoder();
-/*
-	void LoadFile(std::string fname);
+
+	Bool_t LoadFile(std::string fname);
 	void PedestalMode(std::string);
+	void PedestalMode(std::vector<std::string> const,std::string savefname="");
 	void HitMode(std::string,std::string);
 	void HiModeTest(std::string,std::string);
 	void RawDisplay(uint evtid);
@@ -28,8 +31,8 @@ public:
 
 private:
 
-	void LoadPedestalFile();  //load and convert to array to increase efficiency
-	void LoadMappingfile();   //load mapping file, and convert the file to array to increase efficiency
+	void LoadPedestalFile();  // load and convert to array to increase efficiency
+	void LoadMappingfile();   // load mapping file, and convert the file to array to increase efficiency
 	void ZeroSubtraction();
 	int ChNb[128];
 	void Initialize();
@@ -41,14 +44,15 @@ private:
 	GEMConfigure *gemConfig= GEMConfigure::GetInstance();;
 	bool ReadBlock();
 	void clear();
+	uint32_t gEventID;
 private:
-	std::map<intevtid,std::map<intmpdid,std::vector<TH1F *>>> rawHistoBuffer;
+	std::map<int/*evtid*/,std::map<int/*mpdid*/,std::vector<TH1F *>>> rawHistoBuffer;
 
 // GUI interface
 private:
 	void Progressbar(int current); // control the progress bar
 	void Informationbar(std::string infor);
-	void Canvas();*/
+	void Canvas();
 };
 
 #endif /* MPDDECODER_H_ */

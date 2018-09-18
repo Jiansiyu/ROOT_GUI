@@ -25,9 +25,9 @@ or all the apvs on the MPDs
 #define GEM_CRATEID_SIZE   8
 
 #define GEM_CHANNELID_SHIFT 0
-#define GEM_ADCID_SHIFT     GEM_CHANNELID_SIZE
-#define GEM_MPDID_SHIFT     GEM_CHANNELID_SIZE+GEM_ADCID_SIZE
-#define GEM_CRATEID_SHIFT   GEM_CHANNELID_SIZE+GEM_ADCID_SIZE+GEM_MPDID_SIZE
+#define GEM_ADCID_SHIFT     (GEM_CHANNELID_SIZE)
+#define GEM_MPDID_SHIFT     (GEM_CHANNELID_SIZE+GEM_ADCID_SIZE)
+#define GEM_CRATEID_SHIFT   (GEM_CHANNELID_SIZE+GEM_ADCID_SIZE+GEM_MPDID_SIZE)
 
 #define GEM_CHANNELID_POS  (0xff)
 #define GEM_ADCID_POS	   (0xff<<GEM_ADCID_SHIFT)
@@ -39,14 +39,13 @@ or all the apvs on the MPDs
 // @param adcID
 // @param channelID
 // if set the param to -1 means select all the modules
-
 template<class T>
 T GetUID(T CrateID, T mpdID, T adcID, T channelID) {
 	if (CrateID == -1) {
 		CrateID = (GEM_CRATEID_POS >> GEM_CRATEID_SHIFT);
 	}
 	if (mpdID == -1) {
-		mpdID = GEM_MPDID_POS >> GEM_MPDID_SHIFT;
+		mpdID = (GEM_MPDID_POS >> GEM_MPDID_SHIFT);
 	}
 	if (adcID == -1) {
 		adcID = (GEM_ADCID_POS >> GEM_ADCID_SHIFT);
@@ -59,22 +58,22 @@ T GetUID(T CrateID, T mpdID, T adcID, T channelID) {
 }
 template<class T>
 T getMPDID(T uid) {
-	return (uid & GEM_MPDID_POS) >> GEM_MPDID_SHIFT;
+	return (uid & GEM_MPDID_POS) >> (GEM_MPDID_SHIFT);
 }
 
 template<class T>
 T getADCID(T uid) {
-	return (uid & GEM_ADCID_POS) >> GEM_ADCID_SHIFT;
+	return (uid & GEM_ADCID_POS) >> (GEM_ADCID_SHIFT);
 }
 
 template<class T>
 T getChannelID(T uid) {
-	return (uid & GEM_CHANNELID_POS) >> GEM_CHANNELID_SHIFT;
+	return (uid & GEM_CHANNELID_POS) >> (GEM_CHANNELID_SHIFT);
 }
 
 template<class T>
 T getCrateID(T uid) {
-	return (uid & GEM_CRATEID_POS) >> GEM_CRATEID_SHIFT;
+	return (uid & GEM_CRATEID_POS) >> (GEM_CRATEID_SHIFT);
 }
 }
 

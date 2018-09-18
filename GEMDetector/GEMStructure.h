@@ -125,13 +125,25 @@ public:
 			std::cout<<name.c_str()<<std::endl;
 		}
 	}
-
+	std::map<int,std::map<uint8_t,uint32_t>> GetModuleStripCount(){
+		std::map<int, std::map<uint8_t,std::vector<int>>> posmax;
+		for(auto iter =apvMap.begin();iter != apvMap.end();iter++){
+			posmax[iter->second[0]][iter->second[1]].push_back(iter->second[2]);
+		}
+		for(auto iter = posmax.begin(); iter != posmax.end();iter++){
+			for(auto itter=iter->second.begin();itter!=iter->second.end();itter++){
+				module_strip_count[iter->first][itter->first]=*max_element(itter->second.begin(),itter->second.begin())*128;
+			}
+		}
+		return module_strip_count;
+	}
 private:
 	std::map<int, std::vector<int>> apvMap;   // unique ID, apv
 	std::vector<int> mpdUIDList;
 	std::vector<std::string> MPDNameList;
 	std::map<int,std::map<int,std::vector<int>>> apvArray; // crateid, mpdid, apv
 	std::vector<int> apvUIDList;
+	std::map<int,std::map<uint8_t,uint32_t>> module_strip_count;
 	void CalculateMap(){
 		mpdUIDList.clear();
 		MPDNameList.clear();
