@@ -105,6 +105,7 @@ void MPDDecoder::PedestalMode(std::vector<std::string> const fnameList,std::stri
 						Pedestal_temp[iter->first]->Fill((std::accumulate(iter->second.begin(),iter->second.end(),0.0)/(iter->second.size())));
 					}
 		}
+		chan->close();
 	}
 
 	std::map<int, std::vector<int>> mMapping =
