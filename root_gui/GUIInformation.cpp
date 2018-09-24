@@ -35,9 +35,30 @@ void GUIInformation::SetRunMode(GUIWorkMode command){
 	iWorkmode=command;
 }
 
+std::vector<std::string> GUIInformation::GetWorkZoneTabList(GUIWorkMode wmode){
+	switch (wmode) {
+		case WORKMODE_RAW:
+			return iWorkZoneTabList_Raw;
+			break;
+		case WORKMODE_PEDESTAL:
+			return iWorkZoneTabList_Pedestal;
+			break;
+		case WORKMODE_ZERSUBTRACTION:
+			return iWorkZoneTabList_ZeroSubtraction;
+			break;
+		case WORKMODE_HIT:
+			return iWorkZoneTabList_Hit;
+			break;
+		case WORKMODE_ANALYSIS:
+			return iWorkZoneTabList_Analysis;
+			break;
+		default:
+			return iWorkZoneTabList_default;
+			break;
+	}
+}
 
 //! Return the work mode
-//
 //
 GUIWorkMode GUIInformation::GetRunMode(){
 	return iWorkmode;
@@ -49,8 +70,8 @@ std::string *GUIInformation::GetPedestalInputFile(){
 }
 
 
-std::vector<std::string> *GUIInformation::GetRawFileInputList(){
-	return &iRawFileList;
+std::vector<std::string> GUIInformation::GetRawFileInputList(){
+	return iRawFileList;
 }
 
 CpuInfo_t GUIInformation::GetCPUInfor(){

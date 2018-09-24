@@ -14,6 +14,7 @@
 #include "TGFileDialog.h"
 #include "string"
 #include "vector"
+#include "GUIInformation.h"
 class GUISysGeneral:public TGFrame {
 public:
 	GUISysGeneral();
@@ -24,6 +25,11 @@ public:
 	inline const std::string *GetFilename(const std::string filename);
 	inline const std::string *GetPathname(const std::string filename);
 	inline const std::string *GetBasename(const std::string filename);
+	inline const std::string GetOutPutFileName(const std::string filename,const std::string pattern="Tracking_run%4d_%4d.root");
+//	template<class T>
+	inline const std::vector<unsigned int> GetNumberFromString(const std::string filename);
+private:
+	GUIInformation *guiinfor=GUIInformation::GetInstance();
 };
 
 #endif /* GUISYSGENERAL_H_ */

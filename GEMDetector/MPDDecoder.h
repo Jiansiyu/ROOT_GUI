@@ -44,7 +44,7 @@ private:
 	GEMConfigure *gemConfig= GEMConfigure::GetInstance();;
 	bool ReadBlock();
 	void clear();
-	uint32_t gEventID;
+	uint32_t gEventID=0;
 private:
 	std::map<int/*evtid*/,std::map<int/*mpdid*/,std::vector<TH1F *>>> rawHistoBuffer;
 

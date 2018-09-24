@@ -25,9 +25,10 @@
 #include <vector>
 #include <numeric>
 #include <algorithm>
-#ifdef __MULT_THREAD
+//#ifdef __MULT_THREAD
 #include "thread"
-#endif
+#include "mutex"
+//#endif
 
 MPDDecoder::MPDDecoder() : GUIInforCenter(){
 	// TODO Auto-generated constructor stub
@@ -85,29 +86,29 @@ void MPDDecoder::RawDisplay(uint id) {
 }
 
 void MPDDecoder::PedestalMode(std::vector<std::string> const fnameList,std::string savefname){
-	// Get The map and reconstruction
-	//	gemConfig
 	clear();
-	std::unordered_map<int,TH1F*> Pedestal_temp;
-	MPDRawParser *rawparser=new MPDRawParser();
-	Benchmark *timer=new Benchmark();
-	for (auto fname : fnameList){
-		if(!LoadFile(fname.c_str())) continue;
-		while(ReadBlock()){
-			if(gEventID%100==0) timer->Print(gEventID);
+	std::thread::id id=std::this_thread::get_id();
+	std::unordered_map<int, TH1F*> Pedestal_temp;
+	MPDRawParser *rawparser = new MPDRawParser();
+	Benchmark *timer = new Benchmark();
+	for (auto fname : fnameList) {
+		std::cout<<"Thread : "<<id<<" pedestal file: "<<fname.c_str()<<std::endl;
+		if (!LoadFile(fname.c_str()))continue;
+		while (ReadBlock()) {
+			if (gEventID % 100 == 1) timer->Print(gEventID);
 			rawparser->LoadRawData(block_vec_mpd);
-			auto data=rawparser->GetCommonModeSubtraction();
-			for(auto iter= data.begin();iter!=data.end();iter++){
-						if(Pedestal_temp.find(iter->first)==Pedestal_temp.end()){
-							Pedestal_temp[iter->first] = new TH1F(Form("%d",iter->first),Form("%d",iter->first),3500,-500,3000);
-						}
-						// the mean of all the time samples
-						Pedestal_temp[iter->first]->Fill((std::accumulate(iter->second.begin(),iter->second.end(),0.0)/(iter->second.size())));
-					}
+			auto data = rawparser->GetCommonModeSubtraction();
+			for (auto iter = data.begin(); iter != data.end(); iter++) {
+				if (Pedestal_temp.find(iter->first) == Pedestal_temp.end()) {
+					Pedestal_temp[iter->first] =
+							new TH1F(Form("%d", iter->first), Form("%d", iter->first),3500, -500, 3000);
+				}
+				// the mean of all the time samples
+				Pedestal_temp[iter->first]->Fill((std::accumulate(iter->second.begin(),iter->second.end(), 0.0) / (iter->second.size())));
+			}
 		}
 		chan->close();
 	}
-
 	std::map<int, std::vector<int>> mMapping =
 			gemConfig->GetMapping().GetAPVmap();
 	// finish loading the pedestal values
@@ -134,144 +135,164 @@ void MPDDecoder::PedestalMode(std::vector<std::string> const fnameList,std::stri
 				itter_dimension != iter_module->second.end();
 				itter_dimension++) {
 			if (itter_dimension->first == 0) {
-				pedestal_moduler_rms[iter_module->first][itter_dimension->first] =
-						new TH1F(
-								Form("Pedestal_Module_%d_X_rms",
-										iter_module->first),
-								Form("Pedestal_Module_%d_X_rms",
-										iter_module->first),
-								itter_dimension->second, 0,
-								itter_dimension->second);
-				pedestal_moduler_mean[iter_module->first][itter_dimension->first]
-						== new TH1F(
-								Form("Pedestal_Module_%d_X_mean",
-										iter_module->first),
-								Form("Pedestal_Module_%d_X_mean",
-										iter_module->first),
-								itter_dimension->second, 0,
-								itter_dimension->second);
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first] = new TH1F(
+								Form("Pedestal_Module_%d_X_rms",iter_module->first),
+								Form("Pedestal_Module_%d_X_rms",iter_module->first),
+								8*128,0,8*128);
+								//itter_dimension->second, 0,itter_dimension->second);
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->GetXaxis()->SetTitle("Channels");
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->GetYaxis()->SetTitle("RMS");
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->SetOption("HIST");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]= new TH1F(
+								Form("Pedestal_Module_%d_X_mean",iter_module->first),
+								Form("Pedestal_Module_%d_X_mean",iter_module->first),
+								8*128,0,8*128);
+								//itter_dimension->second, 0,itter_dimension->second);
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->GetXaxis()->SetTitle("Channels");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->GetYaxis()->SetTitle("Mean");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->SetOption("HIST");
+
 			} else {
-				pedestal_moduler_rms[iter_module->first][itter_dimension->first] =
-						new TH1F(
-								Form("Pedestal_Module_%d_Y_rms",
-										iter_module->first),
-								Form("Pedestal_Module_%d_Y_rms",
-										iter_module->first),
-								itter_dimension->second, 0,
-								itter_dimension->second);
-				pedestal_moduler_mean[iter_module->first][itter_dimension->first]
-						== new TH1F(
-								Form("Pedestal_Module_%d_Y_mean",
-										iter_module->first),
-								Form("Pedestal_Module_%d_Y_mean",
-										iter_module->first),
-								itter_dimension->second, 0,
-								itter_dimension->second);
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first] = new TH1F(
+								Form("Pedestal_Module_%d_Y_rms",iter_module->first),
+								Form("Pedestal_Module_%d_Y_rms",iter_module->first),
+								10*128,0,10*128);
+								//itter_dimension->second, 0,itter_dimension->second);
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]= new TH1F(
+								Form("Pedestal_Module_%d_Y_mean",iter_module->first),
+								Form("Pedestal_Module_%d_Y_mean",iter_module->first),
+								10*128,0,10*128);
+								//itter_dimension->second, 0,itter_dimension->second);
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->GetXaxis()->SetTitle("Channels");
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->GetYaxis()->SetTitle("RMS");
+				pedestal_moduler_rms[iter_module->first][itter_dimension->first]->SetOption("HIST");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->GetXaxis()->SetTitle("Channels");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->GetYaxis()->SetTitle("Mean");
+				pedestal_moduler_mean[iter_module->first][itter_dimension->first]->SetOption("HIST");
 			}
 		}
 	}
 
-		pedestal_rms_allhisto=new TH1F(Form("PedestalRMS_distribution"),
-						Form("PedestalRMS_distribution"),
-						50, 0, 50);
+	pedestal_rms_allhisto = new TH1F(
+			Form("PedestalRMS_distribution"),
+			Form("PedestalRMS_distribution"),
+			50, 0, 50);
+	pedestal_rms_allhisto->GetXaxis()->SetTitle("RMS");
+	pedestal_rms_allhisto->GetYaxis()->SetTitle("Count");
+	pedestal_rms_allhisto->SetOption("HIST");
+	for (auto iter = Pedestal_temp.begin(); iter != Pedestal_temp.end();
+			iter++) {
+		int crateid = GEM::getCrateID(iter->first);
+		int mpdid = GEM::getMPDID(iter->first);
+		int adcid = GEM::getADCID(iter->first);
+		int channelid = GEM::getChannelID(iter->first);
+		int uid = GEM::GetUID(crateid, mpdid, adcid, 0);
 
+		if (pedestal_mean.find(uid) == pedestal_mean.end()) {
 
-		for(auto iter = Pedestal_temp.begin();iter!=Pedestal_temp.end();iter++){
-			int crateid=GEM::getCrateID(iter->first);
-			int mpdid=GEM::getMPDID(iter->first);
-			int adcid=GEM::getADCID(iter->first);
-			int channelid=GEM::getChannelID(iter->first);
-			int uid=GEM::GetUID(crateid,mpdid,adcid,0);
+			pedestal_mean[uid] = new TH1F(
+					Form("PedestalMean(offset)_mpd_%d_ch_%d", mpdid, adcid),
+					Form("PedestalMean(offset)_mpd_%d_ch_%d", mpdid, adcid),
+					128, 0, 128);
+			pedestal_rms[uid] = new TH1F(
+					Form("PedestalRMS_mpd_%d_ch_%d", mpdid, adcid),
+					Form("PedestalRMS_mpd_%d_ch_%d", mpdid, adcid), 128, 0,
+					128);
 
-			if(pedestal_mean.find(uid)==pedestal_mean.end()){
-				pedestal_mean[uid]=new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
-						Form("PedestalMean(offset)_mpd_%d_ch_%d",mpdid, adcid),
-						128, 0, 128);
-				pedestal_rms[uid]=new TH1F(Form("PedestalRMS_mpd_%d_ch_%d",mpdid, adcid),
-						Form("PedestalRMS_mpd_%d_ch_%d",mpdid, adcid),
-						128, 0, 128);
-				pedestal_rms[uid]->SetMinimum(0);
+			pedestal_rms[uid]->SetMinimum(0);
 
-				// evaluation histos
-				pedestal_meanhisto[uid]=new TH1F(Form("PedestalMean(offset)_mpd_%d_ch_%d_histo",mpdid, adcid),
-						Form("PedestalMean(offset)_mpd_%d_ch_%d_histo",mpdid, adcid),
-						50, 0, 50);
+			// evaluation histos
+			pedestal_meanhisto[uid] = new TH1F(
+					Form("PedestalMean(offset)_mpd_%d_ch_%d_histo", mpdid,
+							adcid),
+					Form("PedestalMean(offset)_mpd_%d_ch_%d_histo", mpdid,
+							adcid), 50, 0, 50);
+			pedestal_rmshisto[uid] = new TH1F(
+					Form("PedestalRMS_mpd_%d_ch_%d_distribution", mpdid, adcid),
+					Form("PedestalRMS_mpd_%d_ch_%d_distribution", mpdid, adcid),
+					50, 0, 50);
+		}
+		pedestal_mean[uid]->Fill(channelid, iter->second->GetMean());
+		pedestal_rms[uid]->Fill(channelid, iter->second->GetRMS());
+		pedestal_meanhisto[uid]->Fill(iter->second->GetMean());
+		pedestal_rmshisto[uid]->Fill(iter->second->GetRMS());
+		pedestal_rms_allhisto->Fill(iter->second->GetRMS());
+		// calculate the map address
+		int RstripPos = channelid;
+		int RstripNb = ChNb[channelid];
+		if (mMapping.find(uid) != mMapping.end()) {
 
-				pedestal_rmshisto[uid]=new TH1F(Form("PedestalRMS_mpd_%d_ch_%d_distribution",mpdid, adcid),
-						Form("PedestalRMS_mpd_%d_ch_%d_distribution",mpdid, adcid),
-						50, 0, 50);
-			}
-
-
-			pedestal_mean[uid]->Fill(channelid,iter->second->GetMean());
-			pedestal_rms[uid]->Fill(channelid,iter->second->GetRMS());
-
-			pedestal_meanhisto[uid]->Fill(iter->second->GetMean());
-			pedestal_rmshisto[uid]->Fill(iter->second->GetRMS());
-			pedestal_rms_allhisto->Fill(iter->second->GetRMS());
-
-			// calculate the map address
-			int RstripPos = channelid;
-			int RstripNb = ChNb[channelid];
 			RstripNb = RstripNb + (127 - 2 * RstripNb) * (mMapping[uid].at(3));
 			RstripPos = RstripNb + 128 * (mMapping[uid].at(2));
 			int dimension = mMapping[uid].at(1);    // x/y dimension
 			int planeID = mMapping[uid].at(0);		// GEM Module ID
-			pedestal_moduler_rms[planeID][dimension]->Fill(RstripPos,iter->second->GetRMS());
-			pedestal_moduler_mean[planeID][dimension]->Fill(RstripPos,iter->second->GetMean());
-		}
-
-		// generate the 2-d histo for the pedestal
-		pedestal_rms_2d_distri=new TH2F("Pedestal_distribution","Pedestal_distribution",pedestal_meanhisto.size()+2,0,pedestal_meanhisto.size()+2,50,0,50);
-		pedestal_rms_2d_histo=new TH1F("Pedestal_distribution_histo","Pedestal_distribution_hiso",pedestal_meanhisto.size()+2,0,pedestal_meanhisto.size()+2);
-		int counter_temp=0;
-
-		for (auto iter = pedestal_rmshisto.begin();iter!=pedestal_rmshisto.end();iter++){
-			int uid = iter->first;
-			int crateid = GEM::getCrateID(uid);
-			int mpdid = GEM::getMPDID(uid);
-			int apvid = GEM::getADCID(uid);
-
-			pedestal_rms_2d_histo->Fill(counter_temp,iter->second->GetMean());
-			pedestal_rms_2d_histo->SetBinError(counter_temp+1,iter->second->GetRMS());
-			counter_temp++;
-		}
-		counter_temp=0;
-		for(auto iter = pedestal_rms.begin();iter!=pedestal_rms.end();iter++){
-			int uid = iter->first;
-			int crateid = GEM::getCrateID(uid);
-			int mpdid = GEM::getMPDID(uid);
-			int apvid = GEM::getADCID(uid);
-			for(int i=0;i<128;i++){
-				pedestal_rms_2d_distri->Fill(counter_temp,iter->second->GetBinContent(i+1));
+			if(pedestal_moduler_rms.find(planeID)!=pedestal_moduler_rms.end()){
+			pedestal_moduler_rms[planeID][dimension]->Fill(RstripPos,
+					iter->second->GetRMS());
+			pedestal_moduler_mean[planeID][dimension]->Fill(RstripPos,
+					iter->second->GetMean());
+			}else{
+				std::cout<<"Plane :"<< planeID<<" did not initialized"<<std::endl;
 			}
-			counter_temp++;
 		}
+	}
+	// generate the 2-d histo for the pedestal
+	pedestal_rms_2d_distri = new TH2F("Pedestal_distribution",
+			"Pedestal_distribution", pedestal_meanhisto.size() + 2, 0,
+			pedestal_meanhisto.size() + 2, 50, 0, 50);
+	pedestal_rms_2d_histo = new TH1F("Pedestal_distribution_histo",
+			"Pedestal_distribution_hiso", pedestal_meanhisto.size() + 2, 0,
+			pedestal_meanhisto.size() + 2);
+	int counter_temp = 0;
 
+	for (auto iter = pedestal_rmshisto.begin(); iter != pedestal_rmshisto.end();
+			iter++) {
+		int uid = iter->first;
+		int crateid = GEM::getCrateID(uid);
+		int mpdid = GEM::getMPDID(uid);
+		int apvid = GEM::getADCID(uid);
+
+		pedestal_rms_2d_histo->Fill(counter_temp, iter->second->GetMean());
+		pedestal_rms_2d_histo->SetBinError(counter_temp + 1,
+				iter->second->GetRMS());
+		counter_temp++;
+	}
+	counter_temp = 0;
+	for (auto iter = pedestal_rms.begin(); iter != pedestal_rms.end(); iter++) {
+		int uid = iter->first;
+		int crateid = GEM::getCrateID(uid);
+		int mpdid = GEM::getMPDID(uid);
+		int apvid = GEM::getADCID(uid);
+		for (int i = 0; i < 128; i++) {
+			pedestal_rms_2d_distri->Fill(counter_temp,
+					iter->second->GetBinContent(i + 1));
+		}
+		counter_temp++;
+	}
 	// save the histogram into root file
-		TFile *file=new TFile(savefname.c_str(),"RECREATE");
+	TFile *file = new TFile(savefname.c_str(), "RECREATE");
 
-		for(auto iter =pedestal_moduler_rms.begin();iter != pedestal_moduler_rms.end();iter++){
-			for(auto itter = iter->second.begin();itter !=iter->second.end();itter ++){
-				//itter->second->SetDirectory(file);
-				pedestal_moduler_rms[iter->first][itter->first]->SetDirectory(file);
-				pedestal_moduler_mean[iter->first][itter->first]->SetDirectory(file);
-			}
+	for (auto iter = pedestal_moduler_rms.begin();
+			iter != pedestal_moduler_rms.end(); iter++) {
+		for (auto itter = iter->second.begin(); itter != iter->second.end();
+				itter++) {
+			pedestal_moduler_rms[iter->first][itter->first]->SetDirectory(file);
+			pedestal_moduler_mean[iter->first][itter->first]->SetDirectory(
+					file);
 		}
+	}
 
-		pedestal_rms_allhisto->SetDirectory(file);
-		pedestal_rms_2d_distri->SetDirectory(file);
-		pedestal_rms_2d_histo->SetDirectory(file);
+	pedestal_rms_allhisto->SetDirectory(file);
+	pedestal_rms_2d_distri->SetDirectory(file);
+	pedestal_rms_2d_histo->SetDirectory(file);
 
-		for(auto iter = pedestal_mean.begin();iter!=pedestal_mean.end();iter++){
-			pedestal_mean[iter->first]->SetDirectory(file);
-			pedestal_rms[iter->first]->SetDirectory(file);
-		}
-		file->Write();
-		file->Close();
-
-
-
+	for (auto iter = pedestal_mean.begin(); iter != pedestal_mean.end();
+			iter++) {
+		pedestal_mean[iter->first]->SetDirectory(file);
+		pedestal_rms[iter->first]->SetDirectory(file);
+	}
+	file->Write();
+	file->Close();
 }
 
 void MPDDecoder::PedestalMode(std::string savefname){
@@ -331,8 +352,6 @@ void MPDDecoder::PedestalMode(std::string savefname){
 					Form("PedestalRMS_mpd_%d_ch_%d_distribution",mpdid, adcid),
 					50, 0, 50);
 		}
-
-
 		pedestal_mean[uid]->Fill(channelid,iter->second->GetMean());
 		pedestal_rms[uid]->Fill(channelid,iter->second->GetRMS());
 
@@ -583,6 +602,7 @@ void MPDDecoder::HiModeTest(std::string pedestalfname,std::string savefname){
 					<< std::endl;
 		}
 	}
+	pfile->Close();
 	std::cout<<"Reading Pedestal Done!"<<std::endl;
 	unsigned int NTSample=gemConfig->GetSysCondfig().DAQ_cfg.NSample;   // read how many time samples
 	// finish reading the pedestals
@@ -683,6 +703,7 @@ void MPDDecoder::HiModeTest(std::string pedestalfname,std::string savefname){
 				}
 			}
 		}
+		// this fill the data, this also used for order the strips position, otherwise, analysis connot not rebuild the cluster correctly
 		Int_t nstrips=0;
 		for(auto VdetID_iter = hit_data.begin();VdetID_iter!=hit_data.end();VdetID_iter++){
 			for(auto VplaneID_iter=VdetID_iter->second.begin();VplaneID_iter!=VdetID_iter->second.end();VplaneID_iter++){
@@ -747,7 +768,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 		}
 	}
 	// finish reading the pedestals
-
+	pfile->Close();
 	Benchmark *timer=new Benchmark();
 	TFile *HitFileio=new TFile(savefname.c_str(),"RECREATE");
 	//create the tree
@@ -863,40 +884,51 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	HitFileio->Close();
 }
 
-
-
+//
+//
+//
 bool MPDDecoder::ReadBlock(){
 	clear(); // start a new event
-	if(chan->read()){
-		evio::evioDOMTree event(chan);
-		evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
-		for(evio::evioDOMNodeList::iterator iter = mpdEventList->begin();
-				iter != mpdEventList->end(); iter++){
-			int banktag=(*iter)->tag;
-			vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
-			switch (banktag) {
-				case GEM::MPD_tag:
-					unsigned int iend;
-					for(iend =0; iend< block_vec->size();iend++){
-						uint32_t tag=((*block_vec).at(iend)>>24)&0xf8;
-						if(tag==0x90||tag==0x88)break;
-					}
-					block_vec_mpd.insert(block_vec_mpd.begin(),block_vec->begin(),block_vec->begin()+iend);
-					break;
-				default:
-					break;
+	try {
+		if(chan->read()){
+			gEventID++;
+			evio::evioDOMTree event(chan);
+			evio::evioDOMNodeListP mpdEventList = event.getNodeList( evio::isLeaf() );
+			for(evio::evioDOMNodeList::iterator iter = mpdEventList->begin();
+					iter != mpdEventList->end(); iter++){
+				int banktag=(*iter)->tag;
+				vector<uint32_t> *block_vec = (*iter)->getVector<uint32_t>();
+				switch (banktag) {
+					case GEM::MPD_tag:
+						unsigned int iend;
+						for(iend =0; iend< block_vec->size();iend++){
+							uint32_t tag=((*block_vec).at(iend)>>24)&0xf8;
+							if(tag==0x90||tag==0x88)break;
+						}
+						block_vec_mpd.insert(block_vec_mpd.begin(),block_vec->begin(),block_vec->begin()+iend);
+						break;
+					default:
+						break;
+				}
 			}
+			if(block_vec_mpd.size()!=0){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			return false;
 		}
-		return true;
-	}else{
-		return false;
+	} catch (evio::evioException e) {
+		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] error in open file :"
+						<<"  error code :"<< e.toString()<<std::endl;
+				return false;
 	}
-	gEventID++;
 }
 
 void MPDDecoder::clear(){
 	block_vec_mpd.clear();
-	gEventID=0;
+	//gEventID=0;
 }
 
 MPDDecoder::~MPDDecoder() {

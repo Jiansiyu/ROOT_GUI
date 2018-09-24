@@ -33,8 +33,8 @@ public:
 
 	GUIWorkMode GetRunMode();
 	std::string *GetPedestalInputFile();
-	std::vector<std::string> *GetRawFileInputList();
-
+	std::vector<std::string> GetRawFileInputList();
+	std::vector<std::string> GetWorkZoneTabList(GUIWorkMode=WORKMODE_RAW);
 	CpuInfo_t GetCPUInfor();
 	MemInfo_t GetMemeryInfor();
 private:
@@ -63,6 +63,14 @@ private:
 	CpuInfo_t iCPUinfor;
 	MemInfo_t iMemeryInfor;
 
+	///WorkZoneTab Name rules:
+	///
+	std::vector<std::string> iWorkZoneTabList_Raw;
+	std::vector<std::string> iWorkZoneTabList_Pedestal;
+	std::vector<std::string> iWorkZoneTabList_ZeroSubtraction;
+	std::vector<std::string> iWorkZoneTabList_Hit;
+	std::vector<std::string> iWorkZoneTabList_Analysis;
+	std::vector<std::string> iWorkZoneTabList_default;
 
 //+++++++++++++++++++++++++++++++++++
 public:

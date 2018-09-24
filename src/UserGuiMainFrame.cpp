@@ -17,13 +17,6 @@
 #include "libgen.h"
 #include "string"
 
-/// gem analysis method
-#include "../analysis/Config.h"
-#include "../analysis/GEMTree.h"
-#include "../analysis/GEMTracking.h"
-#include "../analysis/GEMFittingShape.h"
-///
-
 // main decoder lib
 #include "UserGuiGeneralDialogProcess.h"
 #include "../GUIDialog/UserGUIMapWizard.h"
@@ -651,7 +644,7 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
-	UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
+	/*UserGuiGeneralDialogProcess *generalprocess=new UserGuiGeneralDialogProcess();
 	std::string name=generalprocess->GetBaseFileName(rawfilename.c_str());
 	GEMConfigure *cfg=GEMConfigure::GetInstance();
 	std::cout<<"Working on "<<rawfilename.c_str()<<std::endl;
@@ -661,7 +654,7 @@ void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename)
 							name.c_str())));
 	std::cout<<"File will save as "<<savefilename.c_str()<<std::endl;
 	MPDDecoder *decoder= new MPDDecoder(rawfilename.c_str());
-	decoder->PedestalMode(savefilename.c_str());
+	decoder->PedestalMode(savefilename.c_str());*/
 
 }
 
@@ -683,6 +676,7 @@ void UserGuiMainFrame::fAnalysisProcess(std::vector<std::string> Filenames){
 }
 
 void UserGuiMainFrame::fAnalysisProcess(std::string fname){
+	/*
 	UserGuiGeneralDialogProcess *Filenamecheck=new UserGuiGeneralDialogProcess();
 	TChain *fChain = new TChain("GEMHit", "");
 	Filenamecheck->CheckAppendix((fname).c_str(), "root");
@@ -715,7 +709,7 @@ void UserGuiMainFrame::fAnalysisProcess(std::string fname){
 	std::string savename=savefilename;
 	printf("File will be save as : %s",savename.c_str());
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Run(-1,savename.c_str());
+	pGEMTrack->Run(-1,savename.c_str());*/
 }
 
 void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<string> rawfilename){

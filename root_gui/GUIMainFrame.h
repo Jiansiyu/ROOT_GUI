@@ -47,6 +47,7 @@
 #include "GUIInformation.h"
 class GUIMainFrame: public TGMainFrame {
 public:
+	GUIMainFrame(){};
 	GUIMainFrame(const TGWindow *p, UInt_t w, UInt_t h);
 	virtual ~GUIMainFrame();
 	virtual void CloseWindow();
@@ -60,7 +61,7 @@ public:
 	std::vector<std::string> GUIWorkZoneControlRawInput(const std::vector<std::string>);
 	std::string GUIWorkZoneControlPedestalInput(const std::string);
 // GUI main interface
-private:
+protected:
 	virtual void gMenuUnitDraw(TGLayoutHints *l );
 	virtual void gWorktabUnitDraw(TGLayoutHints *l);
 	virtual void gWorktabControlUnitDraw(TGCompositeFrame *p,TGLayoutHints *l);
@@ -75,8 +76,9 @@ private:
 	virtual TGCompositeFrame *gWorktabControlFileIODraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputButtonDraw(TGCompositeFrame *p, TGLayoutHints *l);
+	virtual TGCompositeFrame *gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHints *l);
+	virtual TGCompositeFrame *gWorktabControlFileIORawListBox(TGCompositeFrame *p, TGLayoutHints *l);
 	void gSetDefaultInformation();
-
 
 	// command process
 	virtual void gMessageProcessMenu(Long_t msg, Long_t parm);
@@ -85,12 +87,21 @@ private:
 	virtual void gMessageProcessCheckButton(Long_t msg, Long_t parm);
 	virtual void gMessageProcessColorSel(Long_t msg, Long_t parm);
 
-
+protected:
 	//global variables
 	GUIInformation *guiinfor=GUIInformation::GetInstance();
-private:
+	virtual void GUIUpdata();
+protected:
+	// some manditory global variable that used for interactive with the canvas
+	virtual void gWorkingModeRaw();
+	virtual void gWorkingModePedestal();
+	virtual void gWorkingModeZeroSubtr();
+	virtual void gWorkingModeHitDisplay();
+	virtual void gWorkingModeHit();
+	virtual void gWorkingModeCalibration();
+	virtual void gWorkingModeAnalysis();
 
-private:
+protected:
 	std::map<int64_t,TGCompositeFrame *>    vWorkZoneTabSubFrame;
 	std::map<int64_t,TRootEmbeddedCanvas *> vWorkZoneEmbededCanbas;
 	std::map<int64_t,TCanvas *>             vWorkZoneTabCanvas;

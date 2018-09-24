@@ -12,12 +12,18 @@
 #include "TGFrame.h"
 #include "TGNumberEntry.h"
 #include "TThread.h"
+#include <TGSimpleTable.h>
+
 #include "TFile.h"
 #include "libgen.h"
 #include "string"
 #include "iostream"
 #include "GUIStructure.h"
 #include "GUISysGeneral.h"
+
+#include "../GEMDetector/MPDDecoder.h"
+
+#include <thread>
 
 GUIMainFrame::GUIMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	SetCleanup(kDeepCleanup);
@@ -81,17 +87,35 @@ void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
 				std::vector<std::string> files=openDialog->FilesBrowser();
 				if(files.size()==0) break;
 				guiinfor->SetRawFileInputList_add(files);
+//				GUIUpdata();
+
 			}
 			break;
 		case B_RAWFILE_DELETE:
 			std::cout<<"Raw delete Button"<<std::endl;
 			break;
 		case B_CONFIRM:
-			std::cout<<"Confirm Button"<<std::endl;
+			{
+				std::cout<<"Confirm Button"<<std::endl;
+				switch (guiinfor->GetRunMode()) {
+					case WORKMODE_PEDESTAL:
+						{
+							gWorkingModePedestal();
+						}
+						break;
+					case WORKMODE_ANALYSIS:{
+						gWorkingModeAnalysis();
+					}
+					default:
+						std::cout<<guiinfor->GetRunMode()<<std::endl;
+						break;
+				}
+			}
 			break;
 		default:
 			break;
 	}
+
 }
 
 // menu process
@@ -145,20 +169,26 @@ void GUIMainFrame::gMessageProcessMenu(Long_t msg, Long_t parm){
 void GUIMainFrame::gMessageProcessRadioButton(Long_t msg, Long_t parm){
 	switch (parm) {
 		case C_WORKMODE_RAW:
-			guiinfor->SetRunMode(WORKMODE_ANALYSIS);
+			guiinfor->SetRunMode(WORKMODE_RAW);
 			std::cout<<"Raw mode selected"<<std::endl;
 			break;
 		case C_WORKMODE_ZEROSUBTRACTION:
 			std::cout<<"Zero Subtraction mode selected"<<std::endl;
+			guiinfor->SetRunMode(WORKMODE_ZERSUBTRACTION);
+
 			break;
 		case C_WORKMODE_PEDESTAL:
 			std::cout<<"Pedestal Mode selected"<<std::endl;
+			guiinfor->SetRunMode(WORKMODE_PEDESTAL);
+
 			break;
 		case C_WORKMODE_HIT:
 			std::cout<<"Pedestal Mode selected"<<std::endl;
+			guiinfor->SetRunMode(WORKMODE_HIT);
 			break;
 		case C_WORKMODE_ANALYSIS:
 			std::cout<<"Analysis mode selected" <<std::endl;
+			guiinfor->SetRunMode(WORKMODE_ANALYSIS);
 			break;
 		default:
 			std::cout<<"Command currently not support"<<std::endl;
@@ -307,6 +337,17 @@ TGCompositeFrame * GUIMainFrame::gWorktabControlFileIODraw(TGCompositeFrame *p, 
 	return fDataInputFrame;
 }
 
+TGCompositeFrame *GUIMainFrame::gWorktabControlFileIORawListBox(TGCompositeFrame *p, TGLayoutHints *l){
+	TGListBox *tRawDataEntry=new TGListBox(p);
+	tRawDataEntry->Resize(150,80);
+	tRawDataEntry->AddEntry("*.dat files to be process",0);
+	if(guiinfor->GetRawFileInputList().size()!=0)tRawDataEntry->Clear();
+	for(auto fname : guiinfor->GetRawFileInputList()){
+		tRawDataEntry->AddEntry(fname.c_str(),10);
+	}
+	return tRawDataEntry;
+}
+
 TGCompositeFrame *GUIMainFrame::gWorktabControlOutputDraw(TGCompositeFrame *p, TGLayoutHints *l){
 
 	TGGroupFrame *fOutputIOGroupFrame=new TGGroupFrame(p,"Output Control",kVerticalFrame);
@@ -343,6 +384,7 @@ TGFrame *GUIMainFrame::gWorktabDisplayUnitDraw(TGCompositeFrame *p,TGLayoutHints
 	canvas->GetCanvas()->SetGrid();
 	test->AddFrame(canvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 	p->AddFrame(tWorkZoneTab,new TGLayoutHints(kLHintsTop|kLHintsExpandY|kLHintsExpandX));
+	return tWorkZoneTab;
 }
 
 void GUIMainFrame::gStatusUnitDraw(TGLayoutHints *l){
@@ -438,4 +480,53 @@ void GUIMainFrame::gSetMenuHelp(TGPopupMenu *fMenuHelp){
 	fMenuHelp->Associate(this);
 }
 
+TGCompositeFrame *GUIMainFrame::gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHints *l){
+	TGVerticalFrame *gWorkZoneMainFrame=new TGVerticalFrame(p);
+	TGHorizontalFrame *gWorkStatusSubFrame=new TGHorizontalFrame(gWorkZoneMainFrame);
+	TGHorizontal3DLine *gSeperateLine=new TGHorizontal3DLine(gWorkZoneMainFrame);
 
+	gWorkZoneMainFrame->AddFrame(gWorkStatusSubFrame,new TGLayoutHints(kLHintsTop|kLHintsCenterY|kLHintsRight|kLHintsCenterX));
+	gWorkZoneMainFrame->AddFrame(gSeperateLine,new TGLayoutHints(kLHintsTop|kLHintsExpandX));
+	p->AddFrame(gWorkZoneMainFrame,new TGLayoutHints(kLHintsExpandY|kLHintsExpandX));
+	return gWorkZoneMainFrame;
+}
+
+void GUIMainFrame::GUIUpdata(){
+	MapSubwindows();
+	Resize();
+}
+
+// working command process
+void GUIMainFrame::gWorkingModeRaw(){
+
+}
+
+void GUIMainFrame::gWorkingModePedestal(){
+	std::cout<<"Pedestal mode running"<<std::endl;
+	if(guiinfor->GetRunMode()==WORKMODE_PEDESTAL){
+		std::cout<<"Woring mode checked right"<<std::endl;
+	}
+	MPDDecoder *decoder=new MPDDecoder();
+	decoder->PedestalMode(guiinfor->GetRawFileInputList(),"tpedestal_test.root");
+	delete decoder;
+}
+
+void GUIMainFrame::gWorkingModeHit(){
+	// loading the work mode
+}
+
+void GUIMainFrame::gWorkingModeZeroSubtr(){
+
+}
+
+void GUIMainFrame::gWorkingModeHitDisplay(){
+
+}
+
+void GUIMainFrame::gWorkingModeCalibration(){
+
+}
+
+void GUIMainFrame::gWorkingModeAnalysis(){
+
+}

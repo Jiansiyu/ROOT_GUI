@@ -27,9 +27,10 @@ void GEMConfigure::DetConfigParser(std::string fname="./cfg/DetConfig.cfg"){
 		cfg.readFile(fname.c_str());
 	}
 	catch (const libconfig::FileIOException &fioex) {
-		std::cerr <<"I/O error while reading file." <<std::endl;
+		std::cerr <<"I/O error while reading file." <<fname.c_str()<<" "<<fioex.what()<<std::endl;
 		return;
 	}
+
 	catch (const libconfig::ParseException &pex) {
 		std::cerr<< "Parse error at " << pex.getFile() << ":" << pex.getLine()
                       << " - " << pex.getError() << std::endl;
@@ -124,12 +125,7 @@ void GEMConfigure::GUIcfgParser(std::string fname="./cfg/GUIConfig.cfg"){
 
 GEMConfigure::GEMConfigure() {
 //	// TODO Auto-generated constructor stub
-	//std::cout<<"Initialize the singleton function:"<<std::endl;
-	DetConfigParser("./cfg/DetConfig.cfg");
+	std::cout<<"Initialize the singleton function:"<<std::endl;
+	DetConfigParser("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/cfg/DetConfig.cfg");
 	MappingParser("");
 }
-//
-//GEMConfigure::~GEMConfigure() {
-//	// TODO Auto-generated destructor stub
-//}
-//

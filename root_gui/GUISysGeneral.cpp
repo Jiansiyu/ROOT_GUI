@@ -16,7 +16,9 @@
 
 #include "vector"
 #include "string"
+//#include <libgen.h>
 #include "iostream"
+#include <algorithm>
 #include "GUISysGeneral.h"
 
 GUISysGeneral::GUISysGeneral():  TGFrame(){};
@@ -43,4 +45,23 @@ const std::vector<std::string> GUISysGeneral::FilesBrowser(const char **filetype
 	return filelist;
 }
 
-
+//template<class T>
+inline const std::vector<unsigned int> GUISysGeneral::GetNumberFromString(const std::string fname){
+	std::vector<unsigned int> num;
+	std::string filename(fname.c_str());
+	while(filename.find_first_of("0123456789")!=std::string::npos){
+		filename=filename.substr(filename.find_first_of("0123456789"));
+		auto num_t=atoi(filename.substr(filename.find_first_of("0123456789"),filename.find_first_not_of("0123456789")).c_str());
+		num.emplace_back(num_t);
+		filename=filename.substr(filename.find_first_not_of("0123456789"));
+	}
+	return num;
+}
+inline const std::string GUISysGeneral::GetOutPutFileName(const std::string fname,const std::string f_pattern){
+	std::string name(f_pattern.c_str());
+	std::vector<unsigned int> numberinfile=GetNumberFromString(fname.c_str());
+	for(auto number :numberinfile ){
+		name=Form(name.c_str(),number);
+	}
+	return name;
+}
