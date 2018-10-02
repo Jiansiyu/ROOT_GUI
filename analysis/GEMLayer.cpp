@@ -2,7 +2,7 @@
  * GEMLayer.cpp
  *
  *  Created on: Oct 2, 2018
- *      Author: newdriver
+ *      Author: Siyu
  */
 
 #include "GEMLayer.h"

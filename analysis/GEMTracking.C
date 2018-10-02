@@ -223,6 +223,10 @@ void GEMTracking::Run(Int_t event)
 	    }
 	}
 
+     // finish the cluster searching
+     // start doing the cluster matching and the layer matching
+
+      // in this step , it do the cluster and event matching
       FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
     }
 
@@ -809,6 +813,7 @@ void GEMTracking::FillHistograms()
 	    }
 	}
       
+
       //_______________________________________________________
       //Fill 2D cluster charge sharing and 2D cluster position distribution
       if(vCluster.size() > 0)

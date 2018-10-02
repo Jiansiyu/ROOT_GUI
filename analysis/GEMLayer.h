@@ -2,26 +2,31 @@
  * GEMLayer.h
  *
  *  Created on: Oct 2, 2018
- *      Author: newdriver
+ *      Author: Siyu
  */
 
 #ifndef GEMLAYER_H_
 #define GEMLAYER_H_
-#include <map>
-#include <vector>
-#include "GEMHit.h"
-#include "GEMCluster.h"
-
-#include "GEMEvent.h"
+#include "GEMStructure.h"
+#include "map"
 class GEMLayer {
 public:
 	GEMLayer();
+	GEMLayer(ClusterPair &);
 	virtual ~GEMLayer();
-	std::map<int,GEMEvent> Layerevent;
+	int AddClusterPair(ClusterPair &);
+	int Layer;
+	double PositionX;
+	double PositionY;
+	double PositionZ;
+	double total_Charge;
+	double Peak_Charge;
+	ClusterPair pair;
 private:
-	void GetPosition(GEMCluster &); //  change the position directly
-	void GetLayerPosition(GEMEvent &); // calculate  the position for one GEM event
-
+	void CalculatePosition(); // calculate the position according to the input cluster
+	int LayerMapping[]={0,0,0,1,1,1,2,2,2,3,3,3};   // the mapping for the GEMID and LayerID;
+	int ModuleSizeX[]={};
+	int ModuleSizeY[]={};
 };
 
 #endif /* GEMLAYER_H_ */
