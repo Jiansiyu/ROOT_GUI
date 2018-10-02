@@ -7,12 +7,12 @@
 
 #ifndef GEMEVENT_H_
 #define GEMEVENT_H_
+#include <TObjArray.h>
 #include <cstdint>
 #include <map>
 #include <algorithm>
 #include "GEMCluster.h"
 #include "GEMHit.h"
-
 class GEMEvent {
 public:
 	GEMEvent();
