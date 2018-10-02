@@ -6,3 +6,6 @@
 *_rdict.pcm
 *Dic.h
 *Dic.cxx
+*.prefs
+*backup*
+.

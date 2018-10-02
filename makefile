@@ -13,7 +13,7 @@
 # You make need to modify the following paths according to you system setting
 #+++++++++++++++++++++++++++++++++++++++++++
 # general make file configuration
-CC       = gcc -std=c++11 -pthread -lpthread -Ofast -g3 #-Wall
+CC       = g++-7 -std=c++11 -pthread -lpthread -Ofast -g3 #-Wall
 CFLAGS= ${CFLAG}
 THIS_DIR =`cd "\`dirname \"$0\"\`";pwd`
 #THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
