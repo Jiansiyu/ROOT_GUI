@@ -9,6 +9,7 @@
 #include "../root_gui/GUIMainFrame.h"
 #include "../root_gui/ThreadPool.h"
 #include "../GEMDetector/MPDDecoder.h"
+#include "../analysis/GEMAnalysis.h"
 //#include "../analysis/GEMAnalysis.h"
 UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()
 {
@@ -68,7 +69,7 @@ void UserRootGUI::gWorkingModePedestal(void){
 }
 
 void UserRootGUI::gWorkingModeAnalysis(){
-	GEMAnalysis * ana=new GEMAnalysis();
+	GEMAnalysis *ana=new GEMAnalysis();
 	ana->Analysis(fname.c_str());
 
 //	std::map<std::string,GEMAnalysis *> ana;
