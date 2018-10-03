@@ -70,7 +70,7 @@ const Double_t kMinChargeRatio = 0.5;
 
 const Int_t kMAXNCH =12*30*100;//1209;  // 5 chambers 10 strips per events 50 events total
 //How many strips can be fired in one event
-const Int_t kNAPV = 640;
+const Int_t kNAPV = 6400;
 //Maximum number of APVs this program can hold
 //Refer to GEMTracking::APVIndex(Int_t aKey)  -->  each module has two planes, each plane can hold up to 40 APVs
 //kNAPV = 640 means maximum 8 layers of modules.
