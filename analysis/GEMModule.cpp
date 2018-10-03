@@ -21,7 +21,7 @@ GEMModule::~GEMModule() {
 . And do the x-y cluster matching for this hit
 // ! \input the GEMClsuter vector for one Module !!
 // ! \output the number of matched cluster pairs
-uint32_t GEMModule::MatchCluster(std::vector<GEMCluster> &Clusters ){
+uint32_t GEMModule::MatchCluster(std::vector<GEMCluster> & Clusters ){
 
 	if(Clusters.size()==0) return 0;
 
@@ -59,6 +59,7 @@ uint32_t GEMModule::MatchCluster(std::vector<GEMCluster> &Clusters ){
     for(uint32_t i =0 ; i <matched_number;i++){
     	//MatchedCluster[vxCluster.at(i)]=vyCluster.at(i);  // maybe not a good way, need to change
     	ClusterPair pair(module,vxCluster.at(i),vyCluster.at(i));
+    	vMatchedClusters.push_back(pair);
     }
     if(vxCluster.size()>vyCluster.size()){
     	gostCluster.insert(gostCluster.begin(),(vxCluster.begin()+matched_number),vxCluster.end());

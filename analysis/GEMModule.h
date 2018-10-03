@@ -18,7 +18,7 @@ public:
 	GEMModule();
 	virtual ~GEMModule();
 	int module;
-	std::vector<ClusterPair> MatchedClusters;
+	std::vector<ClusterPair> vMatchedClusters;
 	std::vector<GEMCluster > gostCluster;
 	std::vector<GEMCluster > vxCluster;
 	std::vector<GEMCluster > vyCluster;
