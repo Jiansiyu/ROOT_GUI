@@ -58,6 +58,8 @@ class GEMTracking : public GEMTree
 
   void Run(Int_t event);
   void Run(Int_t event, const char *filename);   // June 28th 2016 modified so as to change the output file name 
+  void Run_test(Int_t event, const char *filename);   // June 28th 2016 modified so as to change the output file name
+
   void Reset();
   void FillHistograms();
 

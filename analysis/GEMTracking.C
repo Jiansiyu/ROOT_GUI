@@ -268,7 +268,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
 	for (int i =0; i < entries; i++)    // each entries is one event
 	{
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+
 		//Progress barss
 		Double_t ratio = i / (Double_t) entries;
 		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
@@ -277,14 +277,12 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		fChain->GetEntry(i);
 		Reset();
 		evtID = i;
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		// make sure the maximum fired strips is with the limit range
 		if(digi_gem_nch > kMAXNCH) {
 			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
 			continue;
 		}
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		// start decode the data
 		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
@@ -294,7 +292,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				Decode(j, k);
 			}
 		}
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		for (int j = 0; j < kNMODULE; j++) {
 			for (int k = 0; k < 2; k++) {
@@ -305,17 +302,21 @@ void GEMTracking::Run(Int_t event, const char *filename)
         //TODO
 
 		std::map<int,std::vector<GEMCluster>> mCluster;
+		std::map<int,GEMModule> matched;       // get the matched event and save to map <moduleid, GEMmodule>
 		for(auto cluster : vCluster){
 		    mCluster[cluster.Module].push_back(cluster);
 		}
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"]"<<"how many chamber fired"<<mCluster.size()<<std::endl;
-
-
-		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
-		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] ************************"<< i<<std::endl<<std::endl;
-		//getchar();
+        // this will include x dimension and Y dimension
+        for(auto i = mCluster.begin();i<mCluster.end();i++){
+            GEMModule module;
+            module.MatchedClusters(i->second);
+            matched[i->first]=module;
+        }
+        std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< "number of chamber fired "<< mCluster.size()<<std::endl;
+        for(auto i = matched.begin();i<matched.end();i++){
+        	std::cout<<__FUNCTION__<<"  Chamber"<< (i->first) <<"   cluster number :"<<(i->second.GEMModule)<<std::endl;
+        }
+		//FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 	}
 
 	PrintHistograms(filename);
@@ -329,7 +330,84 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	cout<<"Result"<<endl;
 }
 
+void GEMTracking::Run_test(Int_t event, const char *filename)
+{
+	// used for the efficency test
+	Long_t nEvents[kNMODULE];
+	Long_t nEffEvents[kNMODULE];
+	float_t nEfficiency[kNMODULE];
 
+	for(int i = 0 ; i <kNMODULE; i ++){
+		nEvents[i]=0;
+		nEffEvents[i]=0;
+		nEfficiency[i]=0;
+	}
+
+	if (!fChain) {
+		Error("run", "No Tree to analyze.");
+	}
+
+	Int_t entries = (Int_t) fChain->GetEntries();
+	cout << "Number of events: " << entries << endl;
+	if (event > 0)
+		entries = event; //for decoding
+	cout << "    Will analyze  " << entries << "  event..." << endl;
+
+
+	for (int i =0; i < entries; i++)    // each entries is one event
+	{
+
+		//Progress barss
+		Double_t ratio = i / (Double_t) entries;
+		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+
+
+		fChain->GetEntry(i);
+		Reset();
+		evtID = i;
+
+		// make sure the maximum fired strips is with the limit range
+		if(digi_gem_nch > kMAXNCH) {
+			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
+			continue;
+		}
+
+		// start decode the data
+		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
+				{
+			for (int k = 0; k < 2; k++)      // two dimension
+					{
+				Decode(j, k);
+			}
+		}
+
+		for (int j = 0; j < kNMODULE; j++) {
+			for (int k = 0; k < 2; k++) {
+				FindCluster(j, k, vHit, 0);
+				//FindCluster(j,k,vHit_cut,1);
+			}
+		}
+        //TODO
+
+		std::map<int,std::vector<GEMCluster>> mCluster;
+		for(auto cluster : vCluster){
+		    mCluster[cluster.Module].push_back(cluster);
+		}
+
+
+		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
+	}
+
+	PrintHistograms(filename);
+	//PrintHistogramsAPV();
+	//PrintHistogramsCut();
+	//PrintHistogramsAPVCut();
+	//PrintHistogramsBest();
+	//PrintHistogramsAPVBest();
+	save_cluster_tree();
+
+	cout<<"Result"<<endl;
+}
 
 //==============================================================
 // used for extract the single cosmic ray and calculate the distortion matrix
