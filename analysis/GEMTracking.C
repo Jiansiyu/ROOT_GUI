@@ -309,13 +309,13 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		    mCluster[cluster.Module].push_back(cluster);
 		}
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"]"<<"how many chamber fired"<<mCluster.size()<<std::endl;
-		getchar();
+
 
 		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] ************************"<< i<<std::endl<<std::endl;
-
+		getchar();
 	}
 
 	PrintHistograms(filename);
