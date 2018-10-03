@@ -268,7 +268,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
 	for (int i =0; i < entries; i++)    // each entries is one event
 	{
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 		//Progress barss
 		Double_t ratio = i / (Double_t) entries;
 		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
@@ -277,14 +277,14 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		fChain->GetEntry(i);
 		Reset();
 		evtID = i;
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		// make sure the maximum fired strips is with the limit range
 		if(digi_gem_nch > kMAXNCH) {
 			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
 			continue;
 		}
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		// start decode the data
 		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
@@ -294,7 +294,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				Decode(j, k);
 			}
 		}
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 
 		for (int j = 0; j < kNMODULE; j++) {
 			for (int k = 0; k < 2; k++) {
@@ -304,17 +304,17 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		}
         //TODO
 
-		std::map<int,std::vector<GEMCluster>> mCluster;
+		//std::map<int,std::vector<GEMCluster>> mCluster;
 		for(auto cluster : vCluster){
 		    mCluster[cluster.Module].push_back(cluster);
 		}
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"]"<<"how many chamber fired"<<mCluster.size()<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"]"<<"how many chamber fired"<<mCluster.size()<<std::endl;
 
 
 		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
-		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] ************************"<< i<<std::endl<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
+		//std::cout<<__FUNCTION__<<"["<<__LINE__<<"] ************************"<< i<<std::endl<<std::endl;
 		//getchar();
 	}
 
