@@ -315,7 +315,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< i<<std::endl;
 		std::cout<<__FUNCTION__<<"["<<__LINE__<<"] ************************"<< i<<std::endl<<std::endl;
-		getchar();
+		//getchar();
 	}
 
 	PrintHistograms(filename);
