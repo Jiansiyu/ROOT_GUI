@@ -307,13 +307,13 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		    mCluster[cluster.Module].push_back(cluster);
 		}
         // this will include x dimension and Y dimension
-        for(auto i = mCluster.begin();i<mCluster.end();i++){
+        for(auto i = mCluster.begin();i!=mCluster.end();i++){
             GEMModule module;
             module.MatchedClusters(i->second);
             matched[i->first]=module;
         }
         std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< "number of chamber fired "<< mCluster.size()<<std::endl;
-        for(auto i = matched.begin();i<matched.end();i++){
+        for(auto i = matched.begin();i!=matched.end();i++){
         	std::cout<<__FUNCTION__<<"  Chamber"<< (i->first) <<"   cluster number :"<<(i->second.module)<<std::endl;
         }
 		//FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
