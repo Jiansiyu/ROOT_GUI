@@ -70,7 +70,9 @@ void UserRootGUI::gWorkingModePedestal(void){
 
 void UserRootGUI::gWorkingModeAnalysis(){
 	GEMAnalysis *ana=new GEMAnalysis();
-	ana->Analysis(fname.c_str());
+	for(auto fname: guiinfor->GetRawFileInputList()){
+	     ana->Analysis(fname.c_str());
+	}
 
 //	std::map<std::string,GEMAnalysis *> ana;
 //	for(auto fname: guiinfor->GetRawFileInputList()){
