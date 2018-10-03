@@ -304,7 +304,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 		}
         //TODO
 
-		//std::map<int,std::vector<GEMCluster>> mCluster;
+		std::map<int,std::vector<GEMCluster>> mCluster;
 		for(auto cluster : vCluster){
 		    mCluster[cluster.Module].push_back(cluster);
 		}
