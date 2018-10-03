@@ -27,6 +27,7 @@ private:
 	int LayerMapping[]={0,0,0,1,1,1,2,2,2,3,3,3};   // the mapping for the GEMID and LayerID;
 	int ModuleSizeX[]={};
 	int ModuleSizeY[]={};
+
 };
 
 #endif /* GEMLAYER_H_ */

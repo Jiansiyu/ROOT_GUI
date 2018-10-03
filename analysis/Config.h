@@ -6,13 +6,13 @@
 //#define SHOW_EVENT_INFO_CLUSTER
 //#include <stdint.h>
 
-const int kNMODULE = 4;
+const int kNMODULE = 12;
 //How many chambers
 const int kMAXADC = 6;
 //How many Time Samples
 
-const Double_t kNbXAPVModule[] = {10, 10, 10, 10, 10};
-const Double_t kNbYAPVModule[] = {8, 8, 8, 8, 8};
+const Double_t kNbXAPVModule[] = {8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8,  8,  8};
+const Double_t kNbYAPVModule[] = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10,  10, 10};
 //This is how many APVs a plane can hold, not how many APVs are actually on that plane.
 //Postition Constants; each APV has 128 channels, each channel is 4e-2cm, so we can compute the position based on the # of APVs
 //Thus, x side positions for the first module:
@@ -20,8 +20,8 @@ const Double_t kNbYAPVModule[] = {8, 8, 8, 8, 8};
 //Y: from (-1.0)*kNbAPVYModule[0]/2*128*kStripPitchY[0] to (1.0)*kNbAPVYModule[0]/2*128*kStripPitchY[0]
 
 //distance between each two strips
-const Double_t kStripPitchX[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
-const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
+const Double_t kStripPitchX[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2,4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2};
+const Double_t kStripPitchY[] = {4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2,4e-2, 4e-2, 4e-2, 4e-2, 4e-2, 4e-2,};
 
 //Position Constants; Units in cm
 //not using the following two lines
@@ -68,7 +68,7 @@ const Double_t kMaxChargeRatio = 1.5;
 const Double_t kMinChargeRatio = 0.5;
 //Put a cut to the charge sharing ratio distribution
 
-const Int_t kMAXNCH = 5*30*100;//1209;  // 5 chambers 10 strips per events 50 events total
+const Int_t kMAXNCH =12*30*100;//1209;  // 5 chambers 10 strips per events 50 events total
 //How many strips can be fired in one event
 const Int_t kNAPV = 640;
 //Maximum number of APVs this program can hold
@@ -76,7 +76,7 @@ const Int_t kNAPV = 640;
 //kNAPV = 640 means maximum 8 layers of modules.
 
 //To secure the code
-const Double_t kMaxStripADC = 2000; //maximum value of the shape on a strip
+const Double_t kMaxStripADC = 4000; //maximum value of the shape on a strip
 const Double_t kMaxSignalADC = 15000; //Max for the Integral of the signal shape on a strip
 const Double_t kMinSignalADC = 0;
 const Int_t kMaxStripsPerEvent = 1000;
@@ -104,8 +104,8 @@ const Int_t YmapFEC[]={2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
 
 //The following two sections are not being used any more; obosolete
 //Hitting Position for SBS1 50X50
-const Int_t kXDelimit[] = {0, 150, 400, 650, 900, 1150, 1280}; // 6 sections
-const Int_t kYDelimit[] = {0, 300, 650, 950, 1280}; // 4 sections
+//const Int_t kXDelimit[] = {0, 150, 400, 650, 900, 1150, 1280}; // 6 sections
+//const Int_t kYDelimit[] = {0, 300, 650, 950, 1280}; // 4 sections
 //Thus in all, 24 hitting spots
 typedef struct{
   Int_t section;

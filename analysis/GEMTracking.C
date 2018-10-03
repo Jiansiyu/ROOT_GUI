@@ -3,6 +3,8 @@
 #include "GEMHistoManager.h"
 #include "GEMTrackConstrcution.h"
 #include "GEMCalibration.h"
+#include "GEMCluster.h"
+#include "GEMModule.h"
 #include "time.h"
 using namespace GEMHistoManager;
 using namespace std;
@@ -295,6 +297,14 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				//FindCluster(j,k,vHit_cut,1);
 			}
 		}
+        //TODO
+
+		std::map<int,std::vector<GEMCluster>> mCluster;
+		for(auto cluster : vCluster){
+		    mCluster[cluster.Module].push_back(cluster);
+		}
+		std::cout<<__FUNCTION__<<"["<<__LINE__<<"]"<<"how many chamber fired"<<mCluster.size()<<std::endl;
+		getchar();
 
 		FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 	}
