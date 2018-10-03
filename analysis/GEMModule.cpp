@@ -21,7 +21,7 @@ GEMModule::~GEMModule() {
 . And do the x-y cluster matching for this hit
 // ! \input the GEMClsuter vector for one Module !!
 // ! \output the number of matched cluster pairs
-uint32_t GEMModule::MatchCluster(std::vector<GEMCluster> const &Clusters){
+uint32_t GEMModule::MatchCluster(std::vector<GEMCluster> Clusters){
 
 	if(Clusters.size()==0) return 0;
 
