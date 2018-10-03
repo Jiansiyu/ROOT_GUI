@@ -22,7 +22,7 @@ public:
 	std::vector<GEMCluster > gostCluster;
 	std::vector<GEMCluster > vxCluster;
 	std::vector<GEMCluster > vyCluster;
-	uint32_t MatchCluster(std::vector<GEMCluster> );
+	uint32_t MatchCluster(std::vector<GEMCluster> &);
 private:
 
 };
