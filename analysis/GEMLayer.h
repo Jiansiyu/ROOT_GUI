@@ -24,9 +24,9 @@ public:
 	ClusterPair pair;
 private:
 	void CalculatePosition(); // calculate the position according to the input cluster
-	int LayerMapping[]={0,0,0,1,1,1,2,2,2,3,3,3};   // the mapping for the GEMID and LayerID;
-	int ModuleSizeX[]={};
-	int ModuleSizeY[]={};
+	int LayerMapping[];//={0,0,0,1,1,1,2,2,2,3,3,3};   // the mapping for the GEMID and LayerID;
+	int ModuleSizeX[];//={};
+	int ModuleSizeY[];//={};
 
 };
 
