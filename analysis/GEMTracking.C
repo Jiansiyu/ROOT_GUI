@@ -4,6 +4,7 @@
 #include "GEMTrackConstrcution.h"
 #include "GEMCalibration.h"
 #include "GEMCluster.h"
+#include "GEMLayer.h"
 #include "GEMModule.h"
 #include "time.h"
 using namespace GEMHistoManager;
@@ -316,6 +317,21 @@ void GEMTracking::Run(Int_t event, const char *filename)
         for(auto i = matched.begin();i!=matched.end();i++){
         	std::cout<<__FUNCTION__<<"  Chamber"<< (i->first) <<"   cluster number :"<<(i->second.module)<<std::endl;
         }
+        // do the layer matching
+        std::vector<GEMLayer> gemLayerCluster;
+        for(auto i = matched.begin();i!=matched.end();i++){
+        	for(auto cluster : i->second.vMatchedClusters){
+                 GEMLayer layer;
+                 layer.AddClusterPair(cluster);
+                 gemLayerCluster.push_back(layer);
+        	}
+        }
+        // filter the layer data
+        std::map<int,std::vector<GEMLayer>> gemData;
+        for(auto layerdata : gemLayerCluster){
+        	gemData[layerdata.Layer].push_back(layerdata);
+        }
+
 		//FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 	}
 

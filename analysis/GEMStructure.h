@@ -24,10 +24,10 @@ struct ClusterPair{
 		x=x_in;
 		y=y_in;
 	}
-
 	int module;
 	GEMCluster x;
 	GEMCluster y;
+
 };
 
 
