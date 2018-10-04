@@ -7,6 +7,8 @@
 #include "GEMLayer.h"
 #include "GEMModule.h"
 #include "time.h"
+#include "TH3F.h"
+#include "TCanvas.h"
 using namespace GEMHistoManager;
 using namespace std;
 
@@ -245,7 +247,9 @@ void GEMTracking::Run(Int_t event)
 //June 28th modified so as to change the output file name  --siyu 
 void GEMTracking::Run(Int_t event, const char *filename)
 {
-	// used for the efficency test
+
+	//TCanvas *c=new TCanvas("c","c",600,600);
+    // used for the efficency test
 	Long_t nEvents[kNMODULE];
 	Long_t nEffEvents[kNMODULE];
 	float_t nEfficiency[kNMODULE];
@@ -315,8 +319,9 @@ void GEMTracking::Run(Int_t event, const char *filename)
         }
         std::cout<<__FUNCTION__<<"["<<__LINE__<<"] "<< "number of chamber fired "<< mCluster.size()<<std::endl;
         for(auto i = matched.begin();i!=matched.end();i++){
-        	std::cout<<__FUNCTION__<<"  Chamber"<< (i->first) <<"   cluster number :"<<(i->second.module)<<std::endl;
+        	std::cout<<__FUNCTION__<<"  Chamber"<< (i->first) <<"   cluster number :"<<(i->second.module)<<"  matched:"<<(i->second.vMatchedClusters.size())<<std::endl;
         }
+
         // do the layer matching
         std::vector<GEMLayer> gemLayerCluster;
         for(auto i = matched.begin();i!=matched.end();i++){
@@ -326,11 +331,26 @@ void GEMTracking::Run(Int_t event, const char *filename)
                  gemLayerCluster.push_back(layer);
         	}
         }
+
+
         // filter the layer data
-        std::map<int,std::vector<GEMLayer>> gemData;
+     std::map<int,std::vector<GEMLayer>> gemData;
         for(auto layerdata : gemLayerCluster){
         	gemData[layerdata.Layer].push_back(layerdata);
         }
+
+        TH2F *hist2_xz=new TH2F("xz","xz",60,-30,30,130,-10,120);
+        hist2_xz->GetXaxis()->SetTitle("test");
+        std::cout<<"Layer data recognize"<<std::endl;
+        for(auto i = gemData.begin(); i != gemData.end();i++){
+        	for(auto cluster : (i->second)){
+        	std::cout <<"Layer "<<(i->first)<<" module:"<<(cluster.pair.module)<<
+					"    Position: ("<<(cluster.PositionX)<<", "<<(cluster.PositionY)<<","<<(cluster.PositionZ)<<")"<<std::endl;
+        	hist2_xz->Fill((cluster.PositionX),(cluster.PositionZ));
+        	}
+        }
+        // ready for the tracking slection
+        TrackSearching(gemLayerCluster);
 
 		//FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
 	}
@@ -344,6 +364,120 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	save_cluster_tree();
 
 	cout<<"Result"<<endl;
+}
+
+uint32_t GEMTracking::TrackSearching(std::vector<GEMLayer> &layers){
+    std::map<int16_t,std::vector<GEMLayer>> gemData;
+
+	TH2F *GEMLayerXZ[4];
+	TH2F *GEMLayerYZ[4];
+	TH3F *GEMLayerXYZ[4];
+
+	TH2F *hGEMLayerXZ=new TH2F(Form("X_Z"),Form("X_Z"),60,-30,30,140,-10,120);
+	hGEMLayerXZ->SetMarkerStyle(40);
+	hGEMLayerXZ->SetMarkerColor(3);
+	hGEMLayerXZ->SetMarkerSize(3);
+	TH2F *hGEMLayerYZ=new TH2F(Form("Y_Z"),Form("Y_Z"),190,-20,170,140,-10,120);
+	hGEMLayerYZ->SetMarkerSize(3);
+	hGEMLayerYZ->SetMarkerStyle(40);
+	hGEMLayerYZ->SetMarkerColor(3);
+	TH3F *hGEMLayerXYZ=new TH3F(Form("xyz"),Form("xyz"),60,-30,30,190,-20,170,140,-10,120);
+    hGEMLayerXYZ->SetMarkerStyle(20);
+    hGEMLayerXYZ->SetMarkerColor(3);
+    hGEMLayerXYZ->SetMarkerSize(1);
+	for(unsigned int i =0 ; i < 4 ; i ++){
+		GEMLayerXZ[i]=new TH2F(Form("Layer%d_xz",i),Form("Layer%d_xz",i),60,-30,30,140,-10,120);
+		GEMLayerXZ[i]->GetXaxis()->SetTitle("X_axis");
+		GEMLayerXZ[i]->GetYaxis()->SetTitle("Z_axis");
+
+		GEMLayerYZ[i]=new TH2F(Form("Layer%d_yz",i),Form("Layer%d_yz",i),190,-20,170,140,-10,120);
+		GEMLayerYZ[i]->GetXaxis()->SetTitle("Y_axis");
+		GEMLayerYZ[i]->GetYaxis()->SetTitle("Z_axis");
+
+		GEMLayerXYZ[i]=new TH3F(Form("Layer%d_xyz",i),Form("Layer%d_xyz",i),60,-30,30,190,-20,170,140,-10,120);
+		GEMLayerXYZ[i]->GetXaxis()->SetTitle("X_axis");
+		GEMLayerXYZ[i]->GetYaxis()->SetTitle("Y_Axis");
+		GEMLayerXYZ[i]->GetZaxis()->SetTitle("Z_axis");
+	}
+
+	for(auto layer : layers){
+		gemData[layer.Layer].push_back(layer);
+	    GEMLayerXZ[layer.Layer]->Fill(layer.PositionX,layer.PositionZ);
+	    GEMLayerYZ[layer.Layer]->Fill(layer.PositionY,layer.PositionZ);
+	    GEMLayerXYZ[layer.Layer]->Fill(layer.PositionX,layer.PositionY,layer.PositionZ);
+	}
+
+	// check the data
+	Bool_t candiate=kFALSE;
+	for(auto i = gemData.begin(); i !=gemData.end();i++){
+		//std::cout<<"layer :"<< (i->first)<<"  hit number :"<< (i->second.size())<<std::endl;
+		if(((i->second).size()<2)&&(gemData.size()>=2)){ // more than two layer fired and in each layer no more than two cluster
+		for(auto cluster : i->second){
+			hGEMLayerXZ->Fill(cluster.PositionX,cluster.PositionZ);
+			hGEMLayerYZ->Fill(cluster.PositionY,cluster.PositionZ);
+			hGEMLayerXYZ->Fill(cluster.PositionX,cluster.PositionY,cluster.PositionZ);
+			std::cout<<"Layer:"<<(i->first)<<" : ("<<cluster.PositionX<<","<<cluster.PositionY<<","<<cluster.PositionZ<<")"<<std::endl;
+			candiate=kTRUE;
+		}
+		}
+	}
+	hGEMLayerXZ->Fit("pol1","WMQE");
+	hGEMLayerYZ->Fit("pol1","WMQE");
+	// calculate the predicted missing position
+	TH2F *hGEMLayerXZ_Predict=new TH2F(Form("X_Z"),Form("X_Z"),60,-30,30,140,-10,120);
+	hGEMLayerXZ_Predict->SetMarkerStyle(40);
+	hGEMLayerXZ_Predict->SetMarkerColor(2);
+	hGEMLayerXZ_Predict->SetMarkerSize(3);
+	TH2F *hGEMLayerYZ_Predict=new TH2F(Form("Y_Z"),Form("Y_Z"),190,-20,170,140,-10,120);
+	hGEMLayerYZ_Predict->SetMarkerSize(3);
+	hGEMLayerYZ_Predict->SetMarkerStyle(40);
+	hGEMLayerYZ_Predict->SetMarkerColor(2);
+
+	TF1 *fitfunction_xz=hGEMLayerXZ->GetFunction("pol1");
+	TF1 *fitfunction_yz=hGEMLayerYZ->GetFunction("pol1");
+	 {
+		double vLayerPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
+		for (int i = 0; i < 4; i++) {
+			// if there is a missing point in that dimension
+            std::cout<<gemData.size()<<std::endl;
+			if ((gemData.find(i) == gemData.end())&&(gemData.size()>1)) {
+				double predict_x = (vLayerPositionZ[i]
+						- fitfunction_xz->GetParameter(0))
+						/ (fitfunction_xz->GetParameter(1));
+				double predict_y = (vLayerPositionZ[i]
+						- fitfunction_yz->GetParameter(0))
+						/ (fitfunction_yz->GetParameter(1));
+				double predict_z = vLayerPositionZ[i];
+				hGEMLayerXZ_Predict->Fill(predict_x, predict_z);
+				hGEMLayerYZ_Predict->Fill(predict_y, predict_z);
+			}
+		}
+	}
+	TCanvas *c=new TCanvas("c","c",1000,1000);
+
+	// draw the data and get the candidate
+	TFile *file=new TFile("test.root","recreate");
+	c->Divide(2,2);
+	c->cd(1);
+	hGEMLayerXZ->Draw();
+	hGEMLayerXZ_Predict->Draw("same");
+	c->cd(2);
+	hGEMLayerYZ->Draw();
+	hGEMLayerYZ_Predict->Draw("same");
+	c->cd(4);
+	hGEMLayerXYZ->Fit("pol1","WMQE");
+	hGEMLayerXYZ->Draw();
+	hGEMLayerXYZ->Write();
+	file->Write();
+	file->Save();
+	file->Close();
+    c->Modified();
+    c->Update();
+    c->Draw();
+    getchar();
+	// track candidate
+
+
 }
 
 void GEMTracking::Run_test(Int_t event, const char *filename)

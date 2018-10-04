@@ -9,23 +9,11 @@
 
 GEMLayer::GEMLayer() {
 	Layer=-9999;
-	// TODO Auto-generated constructor stub
-	LayerMapping={0,0,0,1,1,1,2,2,2,3,3,3};
-	ModuleSizeY={
-			     0,51.2,102.4,
-			     0,51.2,102.4,
-				 0,51.2,102.4,
-				 0,51.2,102.4
-	             };
-	ModuleSizeX={
-			0,0,0,
-			0,0,0,
-			0,0,0,
-			0,0,0
-	             };
-	// TODO
-	ModuleSizeZ={0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
+	PositionX=-999;
+	PositionY=-999;
+	PositionZ=-999;
+	Peak_Charge=-9999;
+	total_Charge=-999;
 }
 
 GEMLayer::~GEMLayer() {

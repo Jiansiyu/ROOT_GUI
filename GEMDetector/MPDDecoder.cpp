@@ -603,6 +603,7 @@ void MPDDecoder::HiModeTest(std::string pedestalfname,std::string savefname){
 		}
 	}
 	pfile->Close();
+	delete pfile;
 	std::cout<<"Reading Pedestal Done!"<<std::endl;
 	unsigned int NTSample=gemConfig->GetSysCondfig().DAQ_cfg.NSample;   // read how many time samples
 	// finish reading the pedestals
@@ -769,6 +770,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 	}
 	// finish reading the pedestals
 	pfile->Close();
+	delete pfile;
 	Benchmark *timer=new Benchmark();
 	TFile *HitFileio=new TFile(savefname.c_str(),"RECREATE");
 	//create the tree

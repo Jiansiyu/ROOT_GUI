@@ -47,7 +47,7 @@ All tracking work done by this class.
 #include "GEMCluster.h"
 #include "GEMHit.h"
 #include "Config.h"
-
+#include "GEMLayer.h"
 using namespace std;
 
 class GEMTracking : public GEMTree
@@ -93,6 +93,9 @@ class GEMTracking : public GEMTree
   Int_t IsBestHit(GEMHit hit,int max_sample_1,int max_sample_2=-1,int max_sample_3=-1); // select the events Maximum cluster on certen samples, negtive diabled.   Sept 15th 2016 Siyu 
  public:
   Int_t evtID;
+
+ public:
+  uint32_t TrackSearching(std::vector<GEMLayer> &);
 };
 
 #endif

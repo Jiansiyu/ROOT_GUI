@@ -70,9 +70,9 @@ void UserRootGUI::gWorkingModePedestal(void){
 
 void UserRootGUI::gWorkingModeAnalysis(){
 	GEMAnalysis *ana=new GEMAnalysis();
-	for(auto fname: guiinfor->GetRawFileInputList()){
-	     ana->Analysis(fname.c_str());
-	}
+	//for(auto fname: guiinfor->GetRawFileInputList()){
+	     ana->Analysis("/home/newdriver/Research/Eclipse_Workspace/photon/mpd4_vme_test_j0_3/results/Hit_run3512_1025.root");
+	//}
 
 //	std::map<std::string,GEMAnalysis *> ana;
 //	for(auto fname: guiinfor->GetRawFileInputList()){
