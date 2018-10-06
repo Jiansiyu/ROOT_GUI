@@ -25,6 +25,9 @@ public:
 
 private:
 	virtual std::vector<GEMCluster> clusterSearch(std::vector<GEMHit> const &hits);
+	//virtual std::vector<GEMCluster> clusterMatch(std::unordered_map<int16_t,std::unordered_map<int8_t,std::vector<GEMCluster>>> const &);
+	//virtual std::vector<GEMCluster> clusterMatch(std::vector<GEMCluster> const &);
+
 	void trackingSearch();
 	void detLayerMatch();
 	void hitDecoder();

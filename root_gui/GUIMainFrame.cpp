@@ -106,6 +106,12 @@ void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
 					case WORKMODE_ANALYSIS:{
 						gWorkingModeAnalysis();
 					}
+					break;
+					case WORKMODE_CALIBRATION:{
+
+						gWorkingModeCalibration();
+					}
+					break;
 					default:
 						std::cout<<guiinfor->GetRunMode()<<std::endl;
 						break;
@@ -189,6 +195,10 @@ void GUIMainFrame::gMessageProcessRadioButton(Long_t msg, Long_t parm){
 		case C_WORKMODE_ANALYSIS:
 			std::cout<<"Analysis mode selected" <<std::endl;
 			guiinfor->SetRunMode(WORKMODE_ANALYSIS);
+			break;
+		case C_WORKMODE_CALIBRATION:
+			std::cout<<"Analysis mode selected" <<std::endl;
+			guiinfor->SetRunMode(WORKMODE_CALIBRATION);
 			break;
 		default:
 			std::cout<<"Command currently not support"<<std::endl;

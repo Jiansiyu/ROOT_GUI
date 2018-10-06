@@ -34,6 +34,7 @@ protected:
 	virtual TGFrame *UserWorkTabDisplayTabDraw(TGTab *p,TGLayoutHints *l);
 	virtual void gWorkingModePedestal();
 	virtual void gWorkingModeAnalysis();
+	virtual void gWorkingModeCalibration();
 	virtual void UserGUICanvasDraw(GUIInformation *);
 	GUIInformation *guiinfor=GUIInformation::GetInstance();
 private:

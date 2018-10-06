@@ -14,10 +14,10 @@
 #include <vector>
 #include <algorithm>
 #include <mutex>
-#include "../analysis/Config.h"
-#include "../analysis/GEMTree.h"
-#include "../analysis/GEMTracking.h"
-#include "../analysis/GEMFittingShape.h"
+#include "Config.h"
+#include "GEMTree.h"
+#include "GEMTracking.h"
+#include "GEMFittingShape.h"
 #include "../src/UserGuiGeneralDialogProcess.h"
 #include "../GEMDetector/GEMConfigure.h"
 
