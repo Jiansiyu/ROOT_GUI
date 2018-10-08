@@ -69,19 +69,11 @@ void UserRootGUI::gWorkingModePedestal(void){
 }
 
 void UserRootGUI::gWorkingModeAnalysis(){
-
 	for(auto fname: guiinfor->GetRawFileInputList()){
 		GEMAnalysis *ana=new GEMAnalysis();
 		ana->Analysis(fname.c_str());
 		delete ana;
 	}
-
-//	std::map<std::string,GEMAnalysis *> ana;
-//	for(auto fname: guiinfor->GetRawFileInputList()){
-//			ana[fname]=new GEMAnalysis();
-//			ana[fname]->Analysis(fname.c_str());
-//			//THpool->enqueue(&GEMAnalysis::Analysis,ana[fname],fname);
-//	}
 }
 
 void UserRootGUI::gWorkingModeCalibration(){

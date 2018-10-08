@@ -9,6 +9,9 @@
 #include "unordered_map"
 #include "TObject.h"
 #include "algorithm"
+#include "GEMLayer.h"
+#include "vector"
+#include "map"
 
 GEMSystem::GEMSystem() {
 	// TODO Auto-generated constructor stub
@@ -84,4 +87,13 @@ std::vector<GEMCluster> GEMSystem::findcluster(std::vector<GEMHit> &vhits){
 		}
 	}
 	return Clusters_buffer;
+}
+
+std::vector<GEMLayer> GEMSystem::clusterMatch(std::unordered_map<int16_t,std::unordered_map<int8_t,std::vector<GEMCluster>>> const &clusters){
+
+}
+
+
+std::vector<GEMLayer> GEMSystem::clusterMatch(std::vector<GEMCluster> const &){
+
 }

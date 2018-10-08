@@ -251,12 +251,10 @@ void GEMTracking::Run(Int_t event, const char *filename)
 {
 
 	TFile *file=new TFile(filename, "RECREATE");
-	TH2F *predictedhit=new TH2F("predicted","predicted",60, -30, 30, 200, -30, 170);
-	TH2F *realhit=new TH2F("real","real",60, -30, 30, 200, -30, 170);
+	TH2F *predictedhit=new TH2F("predicted","predicted",20, -20, 20, 75, -25, 125);
+	TH2F *realhit=new TH2F("real","real",20, -20, 20, 75, -25, 125);
 	TH1F *chisquarehisto=new TH1F("Chisquare_dist","Chisquare_dist",200,-1,9);
 	TH1F *distancehisto=new TH1F("distance_dist","distance_dist",100,-1,10);
-	TH2F *hGEMLayerZX;
-	TH2F *hGEMLayerZY;
 
 	if (!fChain) {
 		Error("run", "No Tree to analyze.");
@@ -328,50 +326,54 @@ void GEMTracking::Run(Int_t event, const char *filename)
 
         std::map<int16_t,std::vector<GEMLayer>> gemData;
 
-		TH2F *hGEMLayerZX = new TH2F(Form("Z_X_temp"), Form("Z_X_hit"),140,-10, 120, 60, -30, 30);
-		TH2F *hGEMLayerZY = new TH2F(Form("Z_Y_temp"), Form("Z_Y_hit"), 140, -10, 120,200, -30, 170);
-		hGEMLayerZX->SetDirectory(0);
-		hGEMLayerZY->SetDirectory(0);
-
-		for (auto layer : gemLayerCluster) {
+        for (auto layer : gemLayerCluster) {
 			gemData[layer.Layer].push_back(layer);
 		}
 
-		// here only care about the first layer
 		if (gemData.find(1) != gemData.end() && gemData.find(2) != gemData.end()
 				&& gemData.find(3) != gemData.end()) {
 
 			if (gemData[1].size() == 1 && gemData[2].size() == 1
 					&& gemData[3].size() == 1) {
-				// make sure all the reference chamber have and only have one
-				for(int i = 1 ; i < 4 ; i ++){
-					auto data = gemData[i].front();
-					hGEMLayerZX->Fill(data.PositionZ,data.PositionX);
-					hGEMLayerZY->Fill(data.PositionZ,data.PositionY);
-				}
 
+				//TH2F test(Form("Z_X_temp"), Form("Z_X_hit"),140,-10, 120, 60, -30, 30);
+				TH2F hGEMLayerZX(Form("Z_X_temp"), Form("Z_X_hit"),140,-10, 120, 60, -30, 30);
+				TH2F hGEMLayerZY(Form("Z_Y_temp"), Form("Z_Y_hit"), 140, -10, 120,200, -30, 170);
+				for (int i = 1; i < 4; i++) {
+					auto data = gemData[i].front();
+					hGEMLayerZX.Fill(data.PositionZ, data.PositionX);
+					hGEMLayerZY.Fill(data.PositionZ, data.PositionY);
+				}
 				// only Y-Z and X-Z fit function is good enough
-				hGEMLayerZX->Fit("pol1","WMQ0");
-				hGEMLayerZY->Fit("pol1","WMQ0");
+				hGEMLayerZX.Fit("pol1", "WMQ0");
+				hGEMLayerZY.Fit("pol1", "WMQ0");
 
 				//TF1 *fit_zx=(hGEMLayerZX->GetFunction("pol1"));
 				//TF1 *fit_zy=hGEMLayerZY->GetFunction("pol1");
-				double fitzx_a=(hGEMLayerZX->GetFunction("pol1"))->GetParameter(0);
-				double fitzx_b=(hGEMLayerZX->GetFunction("pol1"))->GetParameter(1);
-				double fitzy_a=(hGEMLayerZY->GetFunction("pol1"))->GetParameter(0);
-				double fitzy_b=(hGEMLayerZY->GetFunction("pol1"))->GetParameter(1);
-				double chisquare_zx=(hGEMLayerZX->GetFunction("pol1"))->GetChisquare();
-				double chisquare_zy=(hGEMLayerZY->GetFunction("pol1"))->GetChisquare();
-				auto chisquare= chisquare_zx > chisquare_zy ? chisquare_zx:chisquare_zy;
-				const double vLayerPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
-				double x_predicted =(fitzx_b)*vLayerPositionZ[0]+fitzx_a;
-				double y_predicted =(fitzy_b)*vLayerPositionZ[0]+fitzy_a;
-				double z_predicted =vLayerPositionZ[0];
-				//auto chisquare= (fit_zx->GetChisquare())>fit_zy->GetChisquare()?(fit_zx->GetChisquare()):(fit_zy->GetChisquare());
-				//double x_predicted =(fit_zx->GetParameter(1))*vLayerPositionZ[0]+(fit_zx->GetParameter(0));
-				//double y_predicted =(fit_zy->GetParameter(1))*vLayerPositionZ[0]+(fit_zy->GetParameter(0));
+				const double fitzx_a =
+						(hGEMLayerZX.GetFunction("pol1"))->GetParameter(0);
+				const double fitzx_b =
+						(hGEMLayerZX.GetFunction("pol1"))->GetParameter(1);
+				const double fitzy_a =
+						(hGEMLayerZY.GetFunction("pol1"))->GetParameter(0);
+				const double fitzy_b =
+						(hGEMLayerZY.GetFunction("pol1"))->GetParameter(1);
+				const double chisquare_zx =
+						(hGEMLayerZX.GetFunction("pol1"))->GetChisquare();
+				const double chisquare_zy =
+						(hGEMLayerZY.GetFunction("pol1"))->GetChisquare();
+				auto chisquare =
+						chisquare_zx > chisquare_zy ?
+								chisquare_zx : chisquare_zy;
 
-				double distance =100;
+				const double vLayerPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
+
+				const double x_predicted = (fitzx_b) * vLayerPositionZ[0]
+						+ fitzx_a;
+				const double y_predicted = (fitzy_b) * vLayerPositionZ[0]
+						+ fitzy_a;
+				const double z_predicted = vLayerPositionZ[0];
+				double distance = 100;
 				if (gemData.find(0) != gemData.end()) {
 					for (auto data : gemData[0]) {
 						double distance_temp =
@@ -381,23 +383,20 @@ void GEMTracking::Run(Int_t event, const char *filename)
 												+ (y_predicted - data.PositionY)
 														* (y_predicted
 																- data.PositionY));
-					if(distance>distance_temp)distance=distance_temp;
+						if (distance > distance_temp)
+							distance = distance_temp;
 					}
 				}
 				// filted the chisquare and the distance
-				if(chisquare < 1) {// make sure this is a effective track
+				if (chisquare < 1) {	// make sure this is a effective track
 					// 97.1 % for sure this is a track
-					predictedhit->Fill(x_predicted,y_predicted);
-					if(distance<2.5){
-						realhit->Fill(x_predicted,y_predicted);
+					predictedhit->Fill(x_predicted, y_predicted);
+					if (distance < 2.5) {
+						realhit->Fill(x_predicted, y_predicted);
 					}
 				}
 				chisquarehisto->Fill(chisquare);
-				distancehisto->Fill(distance);
-                delete gROOT->FindObject("Z_Y_temp");
-                delete gROOT->FindObject("Z_X_temp");
-                gemData.clear();
-			}
+				distancehisto->Fill(distance);			}
 		}
 	}
 
@@ -409,6 +408,7 @@ void GEMTracking::Run(Int_t event, const char *filename)
 	file->Close();
 	delete file;
 	cout<<"Result"<<endl;
+
 }
 
 
@@ -558,9 +558,6 @@ void GEMTracking::Run_memtest(Int_t event, const char *filename)
 				distancehisto->Fill(distance);
                 delete gROOT->FindObject("Z_Y_temp");
                 delete gROOT->FindObject("Z_X_temp");
-
-                //delete hGEMLayerZX;
-				//delete hGEMLayerZY;
 			}
 		}
 	}

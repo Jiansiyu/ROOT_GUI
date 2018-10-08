@@ -50,7 +50,7 @@ void GEMAnalysis::AnalysisMT(std::vector<std::string> const fnamelist){
 void GEMAnalysis::Analysis(std::string const fname){
 
 	std::thread::id this_threadid=std::this_thread::get_id();
-	thread_mutex.lock();
+	//thread_mutex.lock();
 	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str()<<"  start !! ..."<<std::endl;
 
 	UserGuiGeneralDialogProcess *Filenamecheck =
@@ -92,6 +92,7 @@ void GEMAnalysis::Analysis(std::string const fname){
 	pGEMTrack->Run(-1, savename.c_str());
 	ff->Close();
 	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str() <<" finished !!"<<std::endl;
-
-	thread_mutex.unlock();
+	delete pGEMTrack;
+	delete ff;
+	//thread_mutex.unlock();
  }
