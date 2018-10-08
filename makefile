@@ -1,5 +1,5 @@
 ##############################################
-#	SUBDIRS MAKEFILE	
+#	MAKEFILE	
 #	author: Siyu Jian 
 #	emal:   jiansiyu@gmail.com
 #
