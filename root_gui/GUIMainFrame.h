@@ -76,8 +76,8 @@ protected:
 	virtual TGCompositeFrame *gWorktabControlFileIODraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputButtonDraw(TGCompositeFrame *p, TGLayoutHints *l);
-	virtual TGCompositeFrame *gWorktabControlPedestalInputBox(TGCompositeFrame *p, TGLayoutHints *l);
-	virtual TGCompositeFrame *gWorktabControlRawDataInputBox(TGCompositeFrame *p, TGLayoutHints *l);
+	//virtual TGCompositeFrame *gWorktabControlPedestalInputBox(TGCompositeFrame *p, TGLayoutHints *l);
+	//virtual TGCompositeFrame *gWorktabControlRawDataInputBox(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlFileIORawListBox(TGCompositeFrame *p, TGLayoutHints *l);
 	void gSetDefaultInformation();

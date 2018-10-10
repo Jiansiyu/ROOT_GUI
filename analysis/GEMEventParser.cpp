@@ -7,11 +7,17 @@
 
 #include "GEMEventParser.h"
 
-GEMEventParser::GEMEventParser() {
+GEMEventParser::GEMEventParser(TChain* chain):GEMTree(chain){
 	// TODO Auto-generated constructor stub
+	EvtID=0;
+	entries=(int64_t) fChain->GetEntries();
 
 }
 
+Bool_t GEMEventParser::ReadBlock(){
+	if(!fChain) return false;
+
+}
 GEMEventParser::~GEMEventParser() {
 	// TODO Auto-generated destructor stub
 }

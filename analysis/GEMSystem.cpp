@@ -40,7 +40,7 @@ std::vector<GEMCluster> GEMSystem::clusterSearch(std::vector<GEMHit> const & hit
 	for(auto iter_module=hits_buffer.begin();iter_module!=hits_buffer.end();iter_module++){
 		for(auto iter_plane=(iter_module->second).begin();iter_plane!=(iter_module->second).end();iter_plane){
 			std::vector<GEMCluster> vclusters_temp=findcluster((iter_plane->second));
-			vclusters.insert(vclusters.end(),vclusters_temp.begin(),vclusters_temp.end());
+ 			vclusters.insert(vclusters.end(),vclusters_temp.begin(),vclusters_temp.end());
 		};
 	}
 	return vclusters;

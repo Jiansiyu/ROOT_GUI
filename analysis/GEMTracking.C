@@ -251,8 +251,8 @@ void GEMTracking::Run(Int_t event, const char *filename)
 {
 
 	TFile *file=new TFile(filename, "RECREATE");
-	TH2F *predictedhit=new TH2F("predicted","predicted",20, -20, 20, 75, -25, 125);
-	TH2F *realhit=new TH2F("real","real",20, -20, 20, 75, -25, 125);
+	TH2F *predictedhit=new TH2F("predicted","predicted",200, -20, 20, 750, -25, 125);
+	TH2F *realhit=new TH2F("real","real",200, -20, 20, 750, -25, 125);
 	TH1F *chisquarehisto=new TH1F("Chisquare_dist","Chisquare_dist",200,-1,9);
 	TH1F *distancehisto=new TH1F("distance_dist","distance_dist",100,-1,10);
 
