@@ -30,6 +30,7 @@ public:
 	void SetPedestalInputFile(std::string);
 	void SetRawFileInputList_add(std::vector<std::string>);
 	void SetRawFileInputList_remove(std::vector<std::string>);
+	void SetRawFileInputList_remove(std::string);
 
 	GUIWorkMode GetRunMode();
 	std::string *GetPedestalInputFile();

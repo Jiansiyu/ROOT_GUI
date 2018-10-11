@@ -76,8 +76,8 @@ protected:
 	virtual TGCompositeFrame *gWorktabControlFileIODraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlOutputButtonDraw(TGCompositeFrame *p, TGLayoutHints *l);
-	//virtual TGCompositeFrame *gWorktabControlPedestalInputBox(TGCompositeFrame *p, TGLayoutHints *l);
-	//virtual TGCompositeFrame *gWorktabControlRawDataInputBox(TGCompositeFrame *p, TGLayoutHints *l);
+	virtual TGCompositeFrame *gWorktabControlPedestalInputBox(TGCompositeFrame *p, TGLayoutHints *l);
+	virtual TGCompositeFrame *gWorktabControlRawDataInputBox(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHints *l);
 	virtual TGCompositeFrame *gWorktabControlFileIORawListBox(TGCompositeFrame *p, TGLayoutHints *l);
 	void gSetDefaultInformation();
@@ -89,6 +89,10 @@ protected:
 	virtual void gMessageProcessCheckButton(Long_t msg, Long_t parm);
 	virtual void gMessageProcessColorSel(Long_t msg, Long_t parm);
 
+	// command
+	virtual void cUpdateWorkTabControlPedestalInputBox();
+	virtual void cUpdateWorkTabControlRawInputBox();
+	virtual std::string cGetSelectedWorkTabControlRawInputBox();
 protected:
 	//global variables
 	GUIInformation *guiinfor=GUIInformation::GetInstance();
@@ -107,6 +111,11 @@ protected:
 	std::map<int64_t,TGCompositeFrame *>    vWorkZoneTabSubFrame;
 	std::map<int64_t,TRootEmbeddedCanvas *> vWorkZoneEmbededCanbas;
 	std::map<int64_t,TCanvas *>             vWorkZoneTabCanvas;
+
+protected:
+	TGTextEntry *gfPedestalFileEntry;
+	TGListBox   *gtRawDataEntry;
+	std::map<int,std::string> gRawDataEntryMap;  //map be would be better to put in singlton function
 
 };
 

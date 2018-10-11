@@ -5,8 +5,8 @@
  *      Author: newdriver
  */
 
-#ifndef USERGUIMAPWIZARD_H_
-#define USERGUIMAPWIZARD_H_
+#ifndef GUIMAPWIZARD_H_
+#define GUIMAPWIZARD_H_
 
 #include <TROOT.h>
 #include <TGFrame.h>
@@ -103,4 +103,4 @@ private:
 
 };
 
-#endif /* USERGUIMAPWIZARD_H_ */
+#endif /* GUIMAPWIZARD_H_ */

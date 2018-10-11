@@ -15,4 +15,9 @@
 * for zero mode, add the title staff, make the x-axis just the strip that have to solve confuse, should  not be hard coded
 * zero mode, one summary tab
 * add the pedestal multi-file support
+<<<<<<< HEAD
 * average ADC/ channe;
+=======
+* check the peak in the cluster charge
+
+>>>>>>> 76b11fbd08d92ffe4ae112cbb833f615838f7f0f

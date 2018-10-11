@@ -19,13 +19,11 @@
 
 // main decoder lib
 #include "UserGuiGeneralDialogProcess.h"
-#include "../GUIDialog/UserGUIMapWizard.h"
-
-// raw decoder
 #include "../GEMDetector/MPDDecoder.h"
 #include "../GEMDetector/GEMConfigure.h"
 
 #include <libgen.h>
+#include "../GUIDialog/GUIMapWizard.h"
 
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 

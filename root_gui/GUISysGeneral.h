@@ -26,8 +26,11 @@ public:
 	inline const std::string *GetPathname(const std::string filename);
 	inline const std::string *GetBasename(const std::string filename);
 	inline const std::string GetOutPutFileName(const std::string filename,const std::string pattern="Tracking_run%4d_%4d.root");
-//	template<class T>
 	inline const std::vector<unsigned int> GetNumberFromString(const std::string filename);
+	inline const Bool_t IsFileExist();
+	inline const Bool_t IsFolderExist();
+	inline const Bool_t IsExtension();
+	inline const Bool_t IsPattern();
 private:
 	GUIInformation *guiinfor=GUIInformation::GetInstance();
 };

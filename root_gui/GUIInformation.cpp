@@ -10,6 +10,7 @@
 #include "vector"
 #include "string"
 #include "iostream"
+#include "algorithm"
 GUIInformation *GUIInformation::m_instance=nullptr;
 GUIInformation *GUIInformation::GetInstance(){
 	if(m_instance ==nullptr)
@@ -20,11 +21,24 @@ GUIInformation *GUIInformation::GetInstance(){
 
 void GUIInformation::SetRawFileInputList_add(std::vector<std::string> filelist){
 	iRawFileList.insert(iRawFileList.end(),filelist.begin(),filelist.end());
-	for(auto file : iRawFileList){
-		std::cout<<"File input : "<< file.c_str()<<std::endl;
-	}
+//	for(auto file : iRawFileList){
+//		std::cout<<"File input : "<< file.c_str()<<std::endl;
+//	}
 }
 
+void GUIInformation::SetRawFileInputList_remove(std::vector<std::string> fnames){
+
+	for(auto i : fnames)
+		SetRawFileInputList_remove(i.c_str());
+
+}
+
+void GUIInformation::SetRawFileInputList_remove(std::string fname){
+	auto iter=std::find(iRawFileList.begin(),iRawFileList.end(),fname);
+	if(iter!=iRawFileList.end()) iRawFileList.erase(iter);
+
+
+}
 
 void GUIInformation::SetPedestalInputFile(std::string file){
 	iPedestal=file;

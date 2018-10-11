@@ -58,7 +58,7 @@ void UserRootGUI::gWorkingModePedestal(void){
 	std::vector<std::string> flist=guiinfor->GetRawFileInputList();
 	std::string fname="test.root";
 	std::cout<<"Main thread :"<<std::this_thread::get_id()<<std::endl;
-	//decoder->PedestalMode(flist,fname);
+
 	try{
 	using func_type=void (MPDDecoder::*)(std::vector<std::string>,std::string);
 	func_type func=&MPDDecoder::PedestalMode;
