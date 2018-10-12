@@ -21,9 +21,8 @@ GUIInformation *GUIInformation::GetInstance(){
 
 void GUIInformation::SetRawFileInputList_add(std::vector<std::string> filelist){
 	iRawFileList.insert(iRawFileList.end(),filelist.begin(),filelist.end());
-//	for(auto file : iRawFileList){
-//		std::cout<<"File input : "<< file.c_str()<<std::endl;
-//	}
+	std::sort(iRawFileList.begin(),iRawFileList.end());
+	iRawFileList.erase(std::unique(iRawFileList.begin(),iRawFileList.end()),iRawFileList.end()); // erase the duplicated files
 }
 
 void GUIInformation::SetRawFileInputList_remove(std::vector<std::string> fnames){

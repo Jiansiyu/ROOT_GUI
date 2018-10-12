@@ -10,6 +10,7 @@
 #include "../root_gui/ThreadPool.h"
 #include "../GEMDetector/MPDDecoder.h"
 #include "../analysis/GEMAnalysis.h"
+#include "TThread.h"
 //#include "../analysis/GEMAnalysis.h"
 UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()
 {
@@ -18,6 +19,7 @@ UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()
 	gMenuUnitDraw(new TGLayoutHints(kLHintsExpandX,0,0,1,0));
 	gWorktabUnitDraw(new TGLayoutHints(kLHintsRight|kLHintsExpandX|kLHintsExpandY));
 	gStatusUnitDraw(new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY));
+
 	SetWindowName("UVa GEM Analysis Framework");
 	MapSubwindows();
 	Resize();   //resize to default size

@@ -23,7 +23,8 @@
 
 #include "../GEMDetector/MPDDecoder.h"
 
-#include <thread>
+#include "TTree.h"
+
 
 GUIMainFrame::GUIMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
 	SetCleanup(kDeepCleanup);
@@ -89,7 +90,6 @@ void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
 				if(files.size()==0) break;
 				guiinfor->SetRawFileInputList_add(files);
 				cUpdateWorkTabControlRawInputBox();
-//				GUIUpdata();
 
 			}
 			break;
@@ -275,7 +275,6 @@ void GUIMainFrame::gWorktabUnitDraw(TGLayoutHints *l){
 	fWorkZoneFrame->AddFrame(fWorkZoneControlFrame,new TGLayoutHints(kLHintsLeft |kLHintsExpandY));
 	fWorkZoneFrame->AddFrame(WorkZoneSeparation,new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
 	fWorkZoneFrame->AddFrame(fWorkZoneCanvasFrame,new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsExpandY));
-
 	AddFrame(fWorkZoneFrame, l);
 }
 
@@ -296,8 +295,8 @@ TGCompositeFrame *GUIMainFrame::gWorktabControlButtonSetDraw(TGCompositeFrame *p
 	fWorkModeButtonGroup->DrawBorder();
 	fWorkModeButtonGroup->SetLayoutHints(new TGLayoutHints(kLHintsCenterX));
 	// add the button
-	TGRadioButton *bWorkModeRAW = new TGRadioButton(fWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
-	TGRadioButton *bWorkModeZeroSubtraction = new TGRadioButton(fWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
+	TGRadioButton *bWorkModeRAW = new TGRadioButton(fWorkModeButtonGroup,"&Raw*",C_WORKMODE_RAW);
+	TGRadioButton *bWorkModeZeroSubtraction = new TGRadioButton(fWorkModeButtonGroup,"&ZeroSub*",C_WORKMODE_ZEROSUBTRACTION);
 	TGRadioButton *bWorkModePedestal = new TGRadioButton(fWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
 	TGRadioButton *bWorkModeHit = new TGRadioButton(fWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
 	TGRadioButton *bWorkModeAnalysis = new TGRadioButton(fWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
@@ -305,8 +304,6 @@ TGCompositeFrame *GUIMainFrame::gWorktabControlButtonSetDraw(TGCompositeFrame *p
 	TGRadioButton *bWorkModeOnlineMonitor = new TGRadioButton(fWorkModeButtonGroup,"&Monitor",C_WORKMODE_ONLINEMONITOR);
 	TGRadioButton *bWorkModeTracking = new TGRadioButton(fWorkModeButtonGroup,"&Tracking",C_WORKMODE_TRACKING);
 	TGRadioButton *bWorkModetest = new TGRadioButton(fWorkModeButtonGroup,"&Test",C_WORKMODE_TEST);
-
-
 
 	bWorkModeRAW->Associate(this);
 	bWorkModeZeroSubtraction->Associate(this);
@@ -322,44 +319,9 @@ TGCompositeFrame *GUIMainFrame::gWorktabControlButtonSetDraw(TGCompositeFrame *p
 
 TGCompositeFrame * GUIMainFrame::gWorktabControlFileIODraw(TGCompositeFrame *p, TGLayoutHints *l){
 	TGGroupFrame *fDataInputFrame=new TGGroupFrame(p,"Data Input");
-	/*
-	TGHorizontalFrame *fPedestalInputFrame=new TGHorizontalFrame(fDataInputFrame);
-	TGHorizontalFrame *fRawFileInputFrame =new TGHorizontalFrame(fDataInputFrame);
-	TGVerticalFrame   *fRawFileButtomFrame=new TGVerticalFrame(fRawFileInputFrame);
-	TGHorizontal3DLine *horizentalline=new TGHorizontal3DLine(fDataInputFrame);
-	// pedestal input layout control
-	TGTextEntry *fPedestalFileEntry= new TGTextEntry(fPedestalInputFrame);
-	fPedestalFileEntry->SetTitle("Pedestal *.root");
-	fPedestalFileEntry->Resize(150,30);
-	TGTextButton *bPedestalFileButton=new TGTextButton (fPedestalInputFrame,"Open..",B_PEDESTALFILE_OPEN);
-	bPedestalFileButton->Associate(this);
-
-	// raw file input layout
-	TGListBox *tRawDataEntry=new TGListBox(fRawFileInputFrame);
-	tRawDataEntry->Resize(150,80);
-	tRawDataEntry->AddEntry("*.dat files to be process",0);
-
-	TGTextButton *bRawDataFileOpenButton= new TGTextButton(fRawFileButtomFrame,"Open..",B_RAWFILE_OPEN);
-	TGTextButton *bRawDataFileDeleteButton= new TGTextButton(fRawFileButtomFrame,"Delete",B_RAWFILE_DELETE);
-	bRawDataFileOpenButton->Associate(this);
-	bRawDataFileDeleteButton->Associate(this);
-
-	fRawFileButtomFrame->AddFrame(bRawDataFileDeleteButton,new TGLayoutHints(kLHintsCenterX|kLHintsBottom,10,10));
-	fRawFileButtomFrame->AddFrame(bRawDataFileOpenButton,new TGLayoutHints(kLHintsCenterX|kLHintsBottom,10,10,10,10));
-	fRawFileInputFrame->AddFrame(tRawDataEntry,new TGLayoutHints(kLHintsLeft));
-	fRawFileInputFrame->AddFrame(fRawFileButtomFrame,new TGLayoutHints(kLHintsLeft));
-
-	fPedestalInputFrame->AddFrame(fPedestalFileEntry,new TGLayoutHints(kLHintsLeft));
-	fPedestalInputFrame->AddFrame(bPedestalFileButton,new TGLayoutHints(kLHintsLeft|kLHintsBottom,10,10,10,10));
-	fDataInputFrame->AddFrame(fPedestalInputFrame,new TGLayoutHints(kLHintsExpandX));
-	fDataInputFrame->AddFrame(horizentalline,new TGLayoutHints(kLHintsTop | kLHintsExpandX));
-	fDataInputFrame->AddFrame(fRawFileInputFrame,new TGLayoutHints(kLHintsTop | kLHintsExpandX));
-*/
-
 	fDataInputFrame->AddFrame(gWorktabControlPedestalInputBox(fDataInputFrame,new TGLayoutHints(kLHintsExpandX)),new TGLayoutHints(kLHintsExpandX));
 	fDataInputFrame->AddFrame(new TGHorizontal3DLine(fDataInputFrame),new TGLayoutHints(kLHintsTop | kLHintsExpandX));
 	fDataInputFrame->AddFrame(gWorktabControlRawDataInputBox(fDataInputFrame,new TGLayoutHints(kLHintsExpandX)),new TGLayoutHints(kLHintsTop | kLHintsExpandX));
-
 	return fDataInputFrame;
 }
 
@@ -601,7 +563,9 @@ void GUIMainFrame::cUpdateWorkTabControlPedestalInputBox(){
 }
 
 void GUIMainFrame::cUpdateWorkTabControlRawInputBox(){
+
 	gtRawDataEntry->RemoveAll();
+	gRawDataEntryMap.clear();
 	int id=0;
 	for(auto file : guiinfor->GetRawFileInputList()){
 
