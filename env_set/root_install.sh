@@ -64,6 +64,6 @@ make install
 
 echo "Generate the file enviroment"
 source $INSTALL_PATH/bin/thisroot.sh
-echo "install version " root-config --version
+echo "install version " $(root-config --version)
 echo "install path $ROOTSYS"
 cd $THIS_DIR
