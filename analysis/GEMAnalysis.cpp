@@ -89,7 +89,9 @@ void GEMAnalysis::Analysis(std::string const fname){
 	printf("File will be save as : %s", savename.c_str());
 
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
-	pGEMTrack->Run(-1, savename.c_str());
+
+	pGEMTrack->efficiency(-1,1, savename.c_str());
+
 	ff->Close();
 	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str() <<" finished !!"<<std::endl;
 	delete pGEMTrack;
