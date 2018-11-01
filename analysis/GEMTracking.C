@@ -11,6 +11,10 @@
 #include "TCanvas.h"
 #include "math.h"
 #include "TLinearFitter.h"
+
+#include <iostream>
+#include <fstream>
+
 using namespace GEMHistoManager;
 using namespace std;
 
@@ -135,7 +139,6 @@ Int_t GEMTracking::IsBestHit(GEMHit hit)
 // Sept 15th 2016    Siyu
 // select the maximum position  
 // To be improved
-// 
 Int_t GEMTracking::IsBestHit(GEMHit hit,int max_sample_1,int max_sample_2,int max_sample_3)
 {
   //criterion:
@@ -229,20 +232,11 @@ void GEMTracking::Run(Int_t event)
 	      FindCluster(j,k,vHit,0);
 	    }
 	}
-
-     // finish the cluster searching
-     // start doing the cluster matching and the layer matching
-
       // in this step , it do the cluster and event matching
       FillHistograms(); //up to here, all hits and clusters in one entry have been filled to vHit and vCluster.
     }
 
   PrintHistograms();
-  //PrintHistogramsAPV();
-  //PrintHistogramsCut();
-  //PrintHistogramsAPVCut();
-  //PrintHistogramsBest();
-  //PrintHistogramsAPVBest();
   save_cluster_tree();
 }
 //==================================================================================
@@ -348,8 +342,6 @@ void GEMTracking::Run(Int_t event, const char *filename)
 				hGEMLayerZX.Fit("pol1", "WMQ0");
 				hGEMLayerZY.Fit("pol1", "WMQ0");
 
-				//TF1 *fit_zx=(hGEMLayerZX->GetFunction("pol1"));
-				//TF1 *fit_zy=hGEMLayerZY->GetFunction("pol1");
 				const double fitzx_a =
 						(hGEMLayerZX.GetFunction("pol1"))->GetParameter(0);
 				const double fitzx_b =
@@ -566,12 +558,168 @@ void GEMTracking::efficiency(Int_t event,Int_t chamberID, const char *filename)
 }
 //============================================================================================
 
-
-
 //============================================================================================
-void GEMTracking::produceTrainingData(Int_t event +, const char *filename)
+void GEMTracking::produceTrainingData(Int_t event, std::string filename)
+{
+	//create the txt file
+	ofstream txtfileio;
+	std::cout<<"Training data File will be save as : "<<filename<<std::endl;
+	txtfileio.open(filename.c_str());
+
+	std::vector<int> chamberList{0,1,2,3};
+	const double vChamberPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
+
+	TFile *file=new TFile("test.root", "RECREATE");
+//	TH2F *predictedhit=new TH2F("predicted","predicted",20, -20, 20, 75, -25, 125);
+//	TH2F *realhit=new TH2F("real","real",20, -20, 20, 75, -25, 125);
+//	TH1F *chisquarehisto=new TH1F("Chisquare_dist","Chisquare_dist",200,-1,9);
+//	TH1F *distancehisto=new TH1F("distance_dist","distance_dist",100,-1,10);
+
+	if (!fChain) {
+		Error("run", "No Tree to analyze.");
+	}
+
+	Int_t entries = (Int_t) fChain->GetEntries();
+	cout << "Number of events: " << entries << endl;
+	if (event > 0)
+		entries = event; //for decoding
+	cout << "    Will analyze  " << entries << "  event..." << endl;
+
+	for (int i =0; i < entries; i++)    // each entries is one event
+	{
+
+		Double_t ratio = i / (Double_t) entries;
+		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
+
+		fChain->GetEntry(i);
+		Reset();
+		evtID = i;
+
+		// make sure the maximum fired strips is with the limit range
+		if(digi_gem_nch > kMAXNCH) {
+			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
+			continue;
+		}
+
+		// start decode the data
+		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
+				{
+			for (int k = 0; k < 2; k++)      // two dimension
+					{
+				Decode(j, k);
+			}
+		}
+
+		for (int j = 0; j < kNMODULE; j++) {
+			for (int k = 0; k < 2; k++) {
+				FindCluster(j, k, vHit, 0);
+			}
+		}
+
+		std::map<int,std::vector<GEMCluster>> mCluster;
+		std::map<int,GEMModule> matched;       // get the matched event and save to map <moduleid, GEMmodule>
+		for(auto cluster : vCluster){
+		    mCluster[cluster.Module].push_back(cluster);
+		}
+        // this will include x dimension and Y dimension
+        for(auto i = mCluster.begin();i!=mCluster.end();i++){
+            GEMModule module;
+            module.MatchCluster((i->second));
+            matched[i->first]=module;
+        }
+        // do the layer matching
+        std::vector<GEMLayer> gemLayerCluster;
+        for(auto i = matched.begin();i!=matched.end();i++){
+        	for(auto cluster : i->second.vMatchedClusters){
+                 GEMLayer layer;
+                 layer.AddClusterPair(cluster);
+                 gemLayerCluster.push_back(layer);
+        	}
+        }
+        mCluster.clear();
+        matched.clear();
+        std::map<int16_t,std::vector<GEMLayer>> gemData;
+        for (auto layer : gemLayerCluster) {
+			gemData[layer.Layer].push_back(layer);
+		}
+        // the training result need all the four chamber have and only have one track
+        Bool_t mFlag=kTRUE;
+        Bool_t eventCandidateFlag=kTRUE;
+        for(auto vchamberid : chamberList){
+        	{ // if the current  chamber is the target chamber, ignore it
+        		if(gemData.find(vchamberid)==gemData.end())mFlag=kFALSE;
+        		if((gemData.find(vchamberid)!=gemData.end())&&(gemData[vchamberid].size()>1))mFlag=kFALSE;
+        	}
+        }
+
+/*        // test data
+        std::cout<<std::endl<<std::endl<<std::endl<<"Position:"<<std::endl;
+        for(auto data=gemData.begin();data!=gemData.end();data++){
+        	for(auto value: (data->second)){
+        		std::cout<<"Chamber: "<<(data->first)<<"   ("<<(value.PositionX)<<", "<<(value.PositionY)<<", "<<(value.PositionZ)<<")"<<std::endl;
+        	}
+        }
+
+        if(mFlag){
+        	std::cout<<"This is a candidate"<<std::endl;
+        }else{
+        	std::cout<<"This is NOT a candidate"<<std::endl;
+        }*/
+
+        TH2F *hGEMLayerZX;
+        TH2F *hGEMLayerZY;
+        if(mFlag){
+        	hGEMLayerZX=new TH2F(Form("Z_X_temp"), Form("Z_X_hit"),140,-10, 120, 60, -30, 30);
+        	hGEMLayerZY=new TH2F(Form("Z_Y_temp"), Form("Z_Y_hit"), 140, -10, 120,200, -30, 170);
+        	for(auto vchamberid: chamberList){
+        		if(gemData.find(vchamberid)!=gemData.end()){
+        			auto data=gemData[vchamberid].front();
+        			hGEMLayerZX->Fill(data.PositionZ,data.PositionX);
+        			hGEMLayerZY->Fill(data.PositionZ,data.PositionY);
+        		}
+        	}
+          	hGEMLayerZX->Fit("pol1", "WMQ0");
+        	hGEMLayerZY->Fit("pol1", "WMQ0");
+			const double fitzx_a =(hGEMLayerZX->GetFunction("pol1"))->GetParameter(0);
+			const double fitzx_b =(hGEMLayerZX->GetFunction("pol1"))->GetParameter(1);
+			const double fitzy_a =(hGEMLayerZY->GetFunction("pol1"))->GetParameter(0);
+			const double fitzy_b =(hGEMLayerZY->GetFunction("pol1"))->GetParameter(1);
+			const double chisquare_zx =(hGEMLayerZX->GetFunction("pol1"))->GetChisquare();
+			const double chisquare_zy =(hGEMLayerZY->GetFunction("pol1"))->GetChisquare();
+			auto chisquare =chisquare_zx > chisquare_zy ? chisquare_zx : chisquare_zy;
+
+			// make the chis-quare cut
+			if (chisquare < 2) {
+				// ready to write to file
+//				std::cout << std::endl << std::endl << std::endl
+//						<< "==> Position:" << std::endl;
+				for (auto data = gemData.begin(); data != gemData.end();
+						data++) {
+					for (auto value : (data->second)) {
+//						std::cout << "Chamber: " << (data->first) << "   ("
+//								<< (value.PositionX) << ", "
+//								<< (value.PositionY) << ", "
+//								<< (value.PositionZ) << ")" << std::endl;
+						txtfileio<<value.PositionX<<" "<<value.PositionY<<" "<<value.PositionZ<<" ";
+ 				}
+				}
+				txtfileio<<"\n";
+
+			}
+
+			// write the data to file
+			hGEMLayerZX->Delete();
+			hGEMLayerZY->Delete();
+        }
+	}
+	txtfileio.close();
+	file->Write();
+	file->Close();
+	delete file;
+}
 //============================================================================================
-void GEMTracking::efficiency(Int_t event,Int_t chamberID, const char *filename)
+
+/*
 {
 	std::vector<int> chamberList{0,1,2,3};
 	const double vChamberPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
@@ -724,159 +872,7 @@ void GEMTracking::efficiency(Int_t event,Int_t chamberID, const char *filename)
 	cout<<"Result"<<endl;
 }
 //============================================================================================
-
-{
-	std::vector<int> chamberList{0,1,2,3};
-	const double vChamberPositionZ[4] = { 76.0, 0, 115.9, 40.4 };
-
-	TFile *file=new TFile(filename, "RECREATE");
-	TH2F *predictedhit=new TH2F("predicted","predicted",20, -20, 20, 75, -25, 125);
-	TH2F *realhit=new TH2F("real","real",20, -20, 20, 75, -25, 125);
-	TH1F *chisquarehisto=new TH1F("Chisquare_dist","Chisquare_dist",200,-1,9);
-	TH1F *distancehisto=new TH1F("distance_dist","distance_dist",100,-1,10);
-
-	if (!fChain) {
-		Error("run", "No Tree to analyze.");
-	}
-
-	Int_t entries = (Int_t) fChain->GetEntries();
-	cout << "Number of events: " << entries << endl;
-	if (event > 0)
-		entries = event; //for decoding
-	cout << "    Will analyze  " << entries << "  event..." << endl;
-
-	for (int i =0; i < entries; i++)    // each entries is one event
-	{
-
-		Double_t ratio = i / (Double_t) entries;
-		cout<<setw(8)<<(int)(ratio*100)<<"%\r"<<flush;
-
-		fChain->GetEntry(i);
-		Reset();
-		evtID = i;
-
-		// make sure the maximum fired strips is with the limit range
-		if(digi_gem_nch > kMAXNCH) {
-			printf("WORNING : the maximum fired strips is %d, beyound the seted range(%d)",digi_gem_nch,kMAXNCH);
-			continue;
-		}
-
-		// start decode the data
-		for (int j = 0; j < kNMODULE; j++)	// loop on detector and dimension
-				{
-			for (int k = 0; k < 2; k++)      // two dimension
-					{
-				Decode(j, k);
-			}
-		}
-
-		for (int j = 0; j < kNMODULE; j++) {
-			for (int k = 0; k < 2; k++) {
-				FindCluster(j, k, vHit, 0);
-			}
-		}
-
-		std::map<int,std::vector<GEMCluster>> mCluster;
-		std::map<int,GEMModule> matched;       // get the matched event and save to map <moduleid, GEMmodule>
-		for(auto cluster : vCluster){
-		    mCluster[cluster.Module].push_back(cluster);
-		}
-        // this will include x dimension and Y dimension
-        for(auto i = mCluster.begin();i!=mCluster.end();i++){
-            GEMModule module;
-            module.MatchCluster((i->second));
-            matched[i->first]=module;
-        }
-        // do the layer matching
-        std::vector<GEMLayer> gemLayerCluster;
-        for(auto i = matched.begin();i!=matched.end();i++){
-        	for(auto cluster : i->second.vMatchedClusters){
-                 GEMLayer layer;
-                 layer.AddClusterPair(cluster);
-                 gemLayerCluster.push_back(layer);
-        	}
-        }
-        mCluster.clear();
-        matched.clear();
-
-        std::map<int16_t,std::vector<GEMLayer>> gemData;
-
-        for (auto layer : gemLayerCluster) {
-			gemData[layer.Layer].push_back(layer);
-		}
-
-        //check the rest of the chamber have and only have one event
-        Bool_t mFlag=kTRUE;
-        Bool_t eventCandidateFlag=kTRUE;
-        for(auto vchamberid : chamberList){
-        	if(vchamberid!=chamberID){ // if the current  chamber is the target chamber, ignore it
-        		if(gemData.find(vchamberid)==gemData.end())mFlag=kFALSE;
-        		if((gemData.find(vchamberid)!=gemData.end())&&(gemData[vchamberid].size()>1))mFlag=kFALSE;
-        	}
-        }
-
-        TH2F *hGEMLayerZX;
-        TH2F *hGEMLayerZY;
-        if(mFlag){
-        	//std::cout<<"find candidate :"<< int(chamberID)<<std::endl;
-        	hGEMLayerZX=new TH2F(Form("Z_X_temp"), Form("Z_X_hit"),140,-10, 120, 60, -30, 30);
-        	hGEMLayerZY=new TH2F(Form("Z_Y_temp"), Form("Z_Y_hit"), 140, -10, 120,200, -30, 170);
-        	for(auto vchamberid: chamberList){
-        		if(gemData.find(vchamberid)!=gemData.end()){
-        			auto data=gemData[vchamberid].front();
-        			hGEMLayerZX->Fill(data.PositionZ,data.PositionX);
-        			hGEMLayerZY->Fill(data.PositionZ,data.PositionY);
-        		}
-        	}
-
-          	hGEMLayerZX->Fit("pol1", "WMQ0");
-        	hGEMLayerZY->Fit("pol1", "WMQ0");
-
-			const double fitzx_a =(hGEMLayerZX->GetFunction("pol1"))->GetParameter(0);
-			const double fitzx_b =(hGEMLayerZX->GetFunction("pol1"))->GetParameter(1);
-			const double fitzy_a =(hGEMLayerZY->GetFunction("pol1"))->GetParameter(0);
-			const double fitzy_b =(hGEMLayerZY->GetFunction("pol1"))->GetParameter(1);
-			const double chisquare_zx =(hGEMLayerZX->GetFunction("pol1"))->GetChisquare();
-			const double chisquare_zy =(hGEMLayerZY->GetFunction("pol1"))->GetChisquare();
-
-			auto chisquare =chisquare_zx > chisquare_zy ? chisquare_zx : chisquare_zy;
-			const double x_predicted = (fitzx_b) * vChamberPositionZ[chamberID] + fitzx_a;
-			const double y_predicted = (fitzy_b) * vChamberPositionZ[chamberID] + fitzy_a;
-			const double z_predicted = vChamberPositionZ[chamberID];
-			double distance = 100;
-			if(gemData.find(chamberID)!=gemData.end()){
-				for(auto data : gemData[chamberID]){
-					double distance_temp =std::sqrt((x_predicted - data.PositionX)*(x_predicted - data.PositionX)
-											+ (y_predicted - data.PositionY)* (y_predicted - data.PositionY));
-					if (distance > distance_temp)
-						distance = distance_temp;
-				}
-			}
-			// filted the chisquare and the distance
-			if (chisquare < 1) {
-				predictedhit->Fill(x_predicted, y_predicted);
-				if (distance < 2.5) {
-					realhit->Fill(x_predicted, y_predicted);
-				}
-			}
-			chisquarehisto->Fill(chisquare);
-			distancehisto->Fill(distance);
-			hGEMLayerZX->Delete();
-			hGEMLayerZY->Delete();
-        }
-
-	}
-
-	predictedhit->SetDirectory(file);
-	realhit->SetDirectory(file);
-	chisquarehisto->SetDirectory(file);
-	distancehisto->SetDirectory(file);
-	file->Write();
-	file->Close();
-	delete file;
-	cout<<"Result"<<endl;
-}
-//============================================================================================
+*/
 
 
 

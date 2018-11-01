@@ -16,6 +16,7 @@ public:
 	virtual ~GEMAnalysis();
 	void Analysis(std::string const);
 	void AnalysisMT(std::vector<std::string> const );
+	void TrainingData(std::string const);
 	std::mutex thread_mutex;
 };
 

@@ -60,7 +60,7 @@ class GEMTracking : public GEMTree
   void Run(Int_t event, const char *filename);   // June 28th 2016 modified so as to change the output file name 
   void Run_test(Int_t event, const char *filename);   // June 28th 2016 modified so as to change the output file name
   void efficiency(Int_t event,Int_t chamberID, const char *filename);
-  void produceTrainingData(Int_t event,const char *filename);
+  void produceTrainingData(Int_t event,std::string filename);
   void Run_memtest(Int_t event, const char *filename);
   void Reset();
   void FillHistograms();

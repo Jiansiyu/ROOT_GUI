@@ -90,7 +90,59 @@ void GEMAnalysis::Analysis(std::string const fname){
 
 	GEMTracking *pGEMTrack = new GEMTracking(fChain);
 
-	pGEMTrack->efficiency(-1,1, savename.c_str());
+//	pGEMTrack->efficiency(-1,1, savename.c_str());
+	pGEMTrack->produceTrainingData(-1,savename.c_str());
+
+	ff->Close();
+	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str() <<" finished !!"<<std::endl;
+	delete pGEMTrack;
+	delete ff;
+	//thread_mutex.unlock();
+ }
+
+void GEMAnalysis::TrainingData(std::string const fname){
+
+	std::thread::id this_threadid=std::this_thread::get_id();
+	//thread_mutex.lock();
+	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str()<<"  start !! ..."<<std::endl;
+
+	UserGuiGeneralDialogProcess *Filenamecheck =
+			new UserGuiGeneralDialogProcess();
+	TChain *fChain = new TChain("GEMHit", "");
+	Filenamecheck->CheckAppendix((fname).c_str(), "root");
+	TFile *ff = new TFile((fname).c_str());
+	if (ff->IsOpen()) {
+		TTree *theTree = (TTree *) ff->Get("GEMHit");
+		if (!(theTree->IsZombie())) {
+			fChain->AddFile((fname).c_str());
+		} else
+			printf("Tree is not found in the file\n");
+	}
+	UserGuiGeneralDialogProcess *a = new UserGuiGeneralDialogProcess();
+	std::string file = fname;
+	GEMConfigure *cfg = GEMConfigure::GetInstance();
+	UserGuiGeneralDialogProcess *generalprocess =
+			new UserGuiGeneralDialogProcess();
+
+	//extract the number in the string
+	std::string filebasename = basename(strdup(fname.c_str()));
+	filebasename.substr(0, filebasename.find_first_of("."));
+	std::string filename_temp = filebasename;
+	int rundividednumber = atoi(
+			filename_temp.substr(filename_temp.find_last_of("_") + 1).c_str());
+
+	std::string test = filebasename.substr(0, filebasename.find_last_of("_"));
+	std::cout << "Test :" << test.c_str() << std::endl;
+	std::string savefilename = Form("Training_run%04d_%04d.txt",
+			generalprocess->GetNumberFromFilename(test.c_str()),
+			rundividednumber);
+	std::cout << "Working on file : " << file.c_str() << std::endl
+			<< "Save file name   : " << savefilename.c_str() << std::endl;
+	std::string savename = savefilename;
+	printf("File will be save as : %s", savename.c_str());
+
+	GEMTracking *pGEMTrack = new GEMTracking(fChain);
+	pGEMTrack->produceTrainingData(-1,savename.c_str());
 
 	ff->Close();
 	std::cout<<__FUNCTION__<<"["<<__LINE__<<"] thread :"<<this_threadid<<" file:"<<fname.c_str() <<" finished !!"<<std::endl;

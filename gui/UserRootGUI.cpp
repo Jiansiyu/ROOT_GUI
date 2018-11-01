@@ -81,7 +81,7 @@ void UserRootGUI::gWorkingModeAnalysis(){
 void UserRootGUI::gWorkingModeCalibration(){
 	for(auto fname: guiinfor->GetRawFileInputList()){
 			GEMAnalysis *ana=new GEMAnalysis();
-			ana->Analysis(fname.c_str());
+			ana->TrainingData(fname.c_str());
 			delete ana;
 		}
 }
