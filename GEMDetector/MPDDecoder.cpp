@@ -23,6 +23,7 @@
 #include "unordered_map"
 #include <math.h>
 #include <algorithm>
+#include <numeric>
 #ifdef __MULT_THREAD
 #include "thread"
 #endif
