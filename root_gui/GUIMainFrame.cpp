@@ -106,6 +106,7 @@ void GUIMainFrame::gMessageProcessButton(Long_t msg, Long_t parm){
 				switch (guiinfor->GetRunMode()) {
 					case WORKMODE_PEDESTAL:
 						{
+							std::cout<<"Pedestal mode process switch function"<<std::endl;
 							gWorkingModePedestal();
 						}
 						break;
@@ -530,6 +531,7 @@ void GUIMainFrame::gWorkingModePedestal(){
 		std::cout<<"Woring mode checked right"<<std::endl;
 	}
 	MPDDecoder *decoder=new MPDDecoder();
+	std::cout<<__FUNCTION__<<": Pedestal input data file: "<<guiinfor->GetRawFileInputList()<<std::endl;
 	decoder->PedestalMode(guiinfor->GetRawFileInputList(),"tpedestal_test.root");
 	delete decoder;
 }
