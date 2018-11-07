@@ -10,8 +10,8 @@ const int kNMODULE = 4;
 const int kMAXADC = 6;
 //How many Time Samples
 
-const Double_t kNbXAPVModule[] = {10, 10, 10, 10, 10};
-const Double_t kNbYAPVModule[] = {8, 8, 8, 8, 8};
+const Double_t kNbXAPVModule[] = {12, 12, 12, 12, 12};
+const Double_t kNbYAPVModule[] = {10, 10, 10, 10, 10};
 //This is how many APVs a plane can hold, not how many APVs are actually on that plane.
 //Postition Constants; each APV has 128 channels, each channel is 4e-2cm, so we can compute the position based on the # of APVs
 //Thus, x side positions for the first module:
