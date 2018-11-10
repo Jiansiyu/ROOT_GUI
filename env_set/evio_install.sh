@@ -69,3 +69,7 @@ echo "# !/bin/bash" >> ${ENV_SETFILE_SH}
 echo "export EVIO_BIN=${INSTALL_BIN}" >> ${ENV_SETFILE_SH}
 echo "export EVIO_INC=${INSTALL_INC}" >> ${ENV_SETFILE_SH}
 echo "export EVIO_LIB=${INSTALL_LIB}" >> ${ENV_SETFILE_SH}
+
+echo "setenv EVIO_INC ${INSTALL_INC}" >> ${ENV_SETFILE_CSH}
+echo "setenv EVIO_LIB ${INSTALL_LIB}" >> ${ENV_SETFILE_CSH}
+echo "setenv EVIO_BIN ${INSTALL_BIN}" >> ${ENV_SETFILE_CSH}
