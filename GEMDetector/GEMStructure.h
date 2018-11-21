@@ -14,8 +14,8 @@
 #include "iostream"
 #include "stdio.h"
 #include <algorithm>
-
 #include "GEMIDGenerator.h"
+#include "../detector/DetStructure.h"
 namespace GEM{
 
 struct apvMapping {
@@ -167,6 +167,14 @@ private:
 		apvUIDList.erase(std::unique(apvUIDList.begin(),apvUIDList.end()),apvUIDList.end());
 	}
 };  // end of apvmap
+
+struct GEMHit : DetHit {
+
+};
+
+struct GEMEvent : DetEvent {
+
+};
 
 } // end of namespace
 
