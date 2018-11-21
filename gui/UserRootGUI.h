@@ -30,18 +30,24 @@ public:
 	virtual ~UserRootGUI();
 
 protected:
+	virtual void gMessageProcessRadioButton(Long_t msg, Long_t parm);
+
 	virtual TGFrame *gWorktabDisplayUnitDraw(TGCompositeFrame *p,TGLayoutHints *l);
 	virtual TGFrame *UserWorkTabDisplayTabDraw(TGTab *p,TGLayoutHints *l);
+	virtual TGFrame *UserWorkTabDisplayTabDraw();
 	virtual void gWorkingModePedestal();
 	virtual void gWorkingModeAnalysis();
 	virtual void gWorkingModeCalibration();
 	virtual void UserGUICanvasDraw(GUIInformation *);
+	virtual TGCompositeFrame *gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHints *l);
+	TGCompositeFrame *gSysInforUpData();
 	GUIInformation *guiinfor=GUIInformation::GetInstance();
 private:
+	TGTab *tWorkZoneTab;
 	TGCompositeFrame *fWorkZoneTabDefultFrame;
-	std::map<std::string /*tab id*/,TGCompositeFrame *>fWorkZoneTabSubFrame;
-	std::map<std::string /*tab id*/,TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
-	std::map<std::string ,TCanvas *> cfWorkZoneTabCanvas;
+	std::map<int/*tab id*/,TGCompositeFrame *>fWorkZoneTabSubFrame;
+	std::map<int/*tab id*/,TRootEmbeddedCanvas *>fWorkZoneTabEnbeddedCanvas;
+	std::map<int,TCanvas *> cfWorkZoneTabCanvas;
 private:
 	ThreadPool *THpool=new ThreadPool(std::min((std::thread::hardware_concurrency()!=0?std::thread::hardware_concurrency():12),(unsigned int)12));
 };

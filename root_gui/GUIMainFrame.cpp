@@ -184,6 +184,7 @@ void GUIMainFrame::gMessageProcessRadioButton(Long_t msg, Long_t parm){
 		case C_WORKMODE_RAW:
 			guiinfor->SetRunMode(WORKMODE_RAW);
 			std::cout<<"Raw mode selected"<<std::endl;
+			GUIUpdata();
 			break;
 		case C_WORKMODE_ZEROSUBTRACTION:
 			std::cout<<"Zero Subtraction mode selected"<<std::endl;
@@ -517,7 +518,8 @@ TGCompositeFrame *GUIMainFrame::gSysInforTabDraw(TGCompositeFrame *p, TGLayoutHi
 
 void GUIMainFrame::GUIUpdata(){
 	MapSubwindows();
-	Resize();
+	Resize();   //resize to default size
+
 }
 
 // working command process
@@ -531,7 +533,6 @@ void GUIMainFrame::gWorkingModePedestal(){
 		std::cout<<"Woring mode checked right"<<std::endl;
 	}
 	MPDDecoder *decoder=new MPDDecoder();
-	std::cout<<__FUNCTION__<<": Pedestal input data file: "<<guiinfor->GetRawFileInputList()<<std::endl;
 	decoder->PedestalMode(guiinfor->GetRawFileInputList(),"tpedestal_test.root");
 	delete decoder;
 }

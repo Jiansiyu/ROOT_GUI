@@ -18,7 +18,9 @@
 #include "vector"
 #include "GUIStructure.h"
 #include  "GUISignalSlot.h"
-
+#include "iostream"
+#include "map"
+#include "../GEMDetector/GEMConfigure.h"
 struct GUIDisplaySetting{
 
 };
@@ -35,7 +37,7 @@ public:
 	GUIWorkMode GetRunMode();
 	std::string *GetPedestalInputFile();
 	std::vector<std::string> GetRawFileInputList();
-	std::vector<std::string> GetWorkZoneTabList(GUIWorkMode=WORKMODE_RAW);
+	std::map<int,std::string> GetWorkZoneTabList(GUIWorkMode=WORKMODE_RAW);
 	CpuInfo_t GetCPUInfor();
 	MemInfo_t GetMemeryInfor();
 private:
@@ -64,21 +66,30 @@ private:
 	CpuInfo_t iCPUinfor;
 	MemInfo_t iMemeryInfor;
 
+	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
 	///WorkZoneTab Name rules:
-	///
-	std::vector<std::string> iWorkZoneTabList_Raw;
+
+	std::map<int,std::string> iWorkZoneTabList_Raw;
+	std::map<int,std::string> iWorkZoneTabList_Pedestal;
+	std::map<int,std::string> iWorkZoneTabList_ZeroSubtraction;
+	std::map<int,std::string> iWorkZoneTabList_Hit;
+	std::map<int,std::string> iWorkZoneTabList_Analysis;
+	std::map<int,std::string> iWorkZoneTabList_default;
+
+	/*std::vector<std::string> iWorkZoneTabList_Raw;
 	std::vector<std::string> iWorkZoneTabList_Pedestal;
 	std::vector<std::string> iWorkZoneTabList_ZeroSubtraction;
 	std::vector<std::string> iWorkZoneTabList_Hit;
 	std::vector<std::string> iWorkZoneTabList_Analysis;
-	std::vector<std::string> iWorkZoneTabList_default;
+	std::vector<std::string> iWorkZoneTabList_default;*/
 
+	void iWorkModeCalculation();
 //+++++++++++++++++++++++++++++++++++
 public:
 	static GUIInformation *GetInstance();
 private:
 	static GUIInformation *m_instance;
-	GUIInformation(){};
+	GUIInformation();
 	virtual ~GUIInformation(){};
 	class Garbo{
 	public:

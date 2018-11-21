@@ -48,7 +48,7 @@ void GUIInformation::SetRunMode(GUIWorkMode command){
 	iWorkmode=command;
 }
 
-std::vector<std::string> GUIInformation::GetWorkZoneTabList(GUIWorkMode wmode){
+std::map<int,std::string> GUIInformation::GetWorkZoneTabList(GUIWorkMode wmode){
 	switch (wmode) {
 		case WORKMODE_RAW:
 			return iWorkZoneTabList_Raw;
@@ -70,6 +70,26 @@ std::vector<std::string> GUIInformation::GetWorkZoneTabList(GUIWorkMode wmode){
 			break;
 	}
 }
+
+
+
+void GUIInformation::iWorkModeCalculation(){
+	//delete the buffered data
+	iWorkZoneTabList_Raw.clear();
+	iWorkZoneTabList_Pedestal.clear();
+	iWorkZoneTabList_ZeroSubtraction.clear();
+	iWorkZoneTabList_Hit.clear();
+	iWorkZoneTabList_Analysis.clear();
+	iWorkZoneTabList_default.clear();
+	for(auto mpd: gemcfg->GetMapping().GetMPDList()){
+		iWorkZoneTabList_Raw[mpd]=Form("Crate%d_MPD%d",GEM::getCrateID(mpd),GEM::getMPDID(mpd));
+	}
+	for(auto layer: gemcfg->GetMapping().GetGEMModuleList()){
+		iWorkZoneTabList_ZeroSubtraction[layer]=(Form("Layer%d",layer));
+	}
+
+}
+
 
 //! Return the work mode
 //
@@ -95,4 +115,8 @@ CpuInfo_t GUIInformation::GetCPUInfor(){
 MemInfo_t GUIInformation::GetMemeryInfor(){
 	gSystem->GetMemInfo(&iMemeryInfor);
 	return iMemeryInfor;
+}
+
+GUIInformation::GUIInformation(){
+	iWorkModeCalculation();
 }
