@@ -64,7 +64,7 @@ ${TARGET}: ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
 	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  $@
-	@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
+	@cp -f ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
 	#@{RM} ${OBJS}
 	@echo

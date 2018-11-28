@@ -20,9 +20,9 @@ GUIInformation *GUIInformation::GetInstance(){
 
 
 void GUIInformation::SetRawFileInputList_add(std::vector<std::string> filelist){
-	iRawFileList.insert(iRawFileList.end(),filelist.begin(),filelist.end());
+	/*iRawFileList.insert(iRawFileList.end(),filelist.begin(),filelist.end());
 	std::sort(iRawFileList.begin(),iRawFileList.end());
-	iRawFileList.erase(std::unique(iRawFileList.begin(),iRawFileList.end()),iRawFileList.end()); // erase the duplicated files
+	iRawFileList.erase(std::unique(iRawFileList.begin(),iRawFileList.end()),iRawFileList.end()); // erase the duplicated files*/
 }
 
 void GUIInformation::SetRawFileInputList_remove(std::vector<std::string> fnames){
@@ -33,8 +33,10 @@ void GUIInformation::SetRawFileInputList_remove(std::vector<std::string> fnames)
 }
 
 void GUIInformation::SetRawFileInputList_remove(std::string fname){
+/*
 	auto iter=std::find(iRawFileList.begin(),iRawFileList.end(),fname);
 	if(iter!=iRawFileList.end()) iRawFileList.erase(iter);
+*/
 
 
 }
@@ -75,7 +77,7 @@ std::map<int,std::string> GUIInformation::GetWorkZoneTabList(GUIWorkMode wmode){
 
 void GUIInformation::iWorkModeCalculation(){
 	//delete the buffered data
-	iWorkZoneTabList_Raw.clear();
+	/*iWorkZoneTabList_Raw.clear();
 	iWorkZoneTabList_Pedestal.clear();
 	iWorkZoneTabList_ZeroSubtraction.clear();
 	iWorkZoneTabList_Hit.clear();
@@ -86,7 +88,7 @@ void GUIInformation::iWorkModeCalculation(){
 	}
 	for(auto layer: gemcfg->GetMapping().GetGEMModuleList()){
 		iWorkZoneTabList_ZeroSubtraction[layer]=(Form("Layer%d",layer));
-	}
+	}*/
 
 }
 

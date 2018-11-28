@@ -18,8 +18,10 @@
 #include "libgen.h"
 #include "string"
 #include "iostream"
-#include "GUIStructure.h"
+
+//#include "GUIStructure.h"
 #include "GUISysGeneral.h"
+
 
 //#include "../GEMDetector/MPDDecoder.h"
 

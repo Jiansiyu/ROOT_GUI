@@ -20,7 +20,7 @@
 #include  "GUISignalSlot.h"
 #include "iostream"
 #include "map"
-#include "../GEMDetector/GEMConfigure.h"
+//#include "../GEMDetector/GEMConfigure.h"
 struct GUIDisplaySetting{
 
 };
@@ -66,7 +66,7 @@ private:
 	CpuInfo_t iCPUinfor;
 	MemInfo_t iMemeryInfor;
 
-	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
+//	GEMConfigure *gemcfg=GEMConfigure::GetInstance();
 	///WorkZoneTab Name rules:
 
 	std::map<int,std::string> iWorkZoneTabList_Raw;
