@@ -15,7 +15,6 @@
 #include "evioFileChannel.hxx"
 #include "evioException.hxx"
 #include "../GEMDetector/MPDStructure.h"
-//#include "../msg/SysMsgCenter.h"
 
 RawDecoder::RawDecoder() {
 	// TODO Auto-generated constructor stub
