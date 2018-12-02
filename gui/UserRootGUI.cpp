@@ -5,11 +5,8 @@
  *      Author: newdriver
  */
 #include <algorithm>
+#include "stdio.h"
 #include "UserRootGUI.h"
-#include "../root_gui/GUIMainFrame.h"
-#include "../root_gui/ThreadPool.h"
-//#include "../GEMDetector/MPDDecoder.h"
-//#include "../analysis/GEMAnalysis.h"
 #include "TThread.h"
 //#include "../analysis/GEMAnalysis.h"
 UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()

@@ -23,7 +23,7 @@
 #include <chrono>
 #include "../root_gui/GUIMainFrame.h"
 #include "../root_gui/GUIInformation.h"
-#include "../root_gui/ThreadPool.h"
+#include "../thread/ThreadPool.h"
 class UserRootGUI: public GUIMainFrame {
 public:
 	UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h);
