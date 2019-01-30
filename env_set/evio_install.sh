@@ -44,7 +44,8 @@ echo "install inc : ${INSTALL_INC}"
 echo "install lib : ${INSTALL_LIB}"
 echo "create the install folder"
 
-until test -f ${DOWNLOAD_FILE}
+
+until test -f ${INSTALL_PATH}
 do 
     mkdir ${INSTALL_PATH}
 done 
