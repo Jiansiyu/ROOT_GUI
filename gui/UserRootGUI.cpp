@@ -8,7 +8,11 @@
 #include "stdio.h"
 #include "UserRootGUI.h"
 #include "TThread.h"
-//#include "../analysis/GEMAnalysis.h"
+
+// used for the test
+#include "../gem/MPDDecoder.h"
+
+
 UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()
 {
 	// TODO Auto-generated constructor stub
@@ -58,6 +62,14 @@ void UserRootGUI::gMessageProcessRadioButton(Long_t msg, Long_t parm){
 			std::cout<<"Calibration mode selected" <<std::endl;
 			guiinfor->SetRunMode(WORKMODE_CALIBRATION);
 			UserWorkTabDisplayTabDraw();
+			break;
+		case C_WORKMODE_TEST:
+
+		    {
+		    	std::cout<<"Test mode selected"<<std::endl;
+		    	MPDDecoder *test=new MPDDecoder("/home/newdriver/Research/Eclipse_Workspace/photon/ROOT_GUI/mpd_ssp_3508.dat.100");
+		    	test->PedestalMode("test_pedestal.root");
+		    }
 			break;
 		default:
 			std::cout<<"Command currently not support"<<std::endl;

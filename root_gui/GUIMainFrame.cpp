@@ -315,6 +315,10 @@ TGCompositeFrame *GUIMainFrame::gWorktabControlButtonSetDraw(TGCompositeFrame *p
 	bWorkModeHit->Associate(this);
 	bWorkModeAnalysis->Associate(this);
 	bWorkModeCalibration->Associate(this);
+	bWorkModeOnlineMonitor->Associate(this);
+	bWorkModeTracking->Associate(this);
+	bWorkModetest->Associate(this);
+
 	//bWorkModeOnlineMonitor->Associate(this);
 	fWorkButtonSelectionFrame->AddFrame(fWorkModeButtonGroup,new TGLayoutHints(kLHintsTop|kLHintsExpandX,10,10,0,10));
 	fWorkControlButtonFrame->AddFrame(tWorkModeTab,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
