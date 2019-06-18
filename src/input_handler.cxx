@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <fstream>
 #include <TStyle.h>
+#include <iostream>
 
 #include <cmath>
+#include "unordered_map"
 
 //_______________________________________________
 InputHandler::InputHandler()
@@ -508,6 +510,16 @@ int InputHandler::SummPedestal()
   f = new TFile(PedFilename_temp,"RECREATE");
   delete[] PedFilename_temp;
   map<int,TH1F* > ::iterator it;
+
+
+  // add the Pedestal storage for the PRex experiment
+  // NOTICS: ALL THE stripNB here is the logic position with out the conversion
+  // need to convert when save the data into the file for PRex
+          //MPD         ADC        stripNB, RMS/Mean
+  std::map<int,std::map<int,std::map<int,float>>> prex_mean;
+  std::map<int,std::map<int,std::map<int,float>>> prex_rms;
+  std::map<int,std::map<int,std::map<int,float>>> prex_hybridID_index;
+
   for(it = mPedestalHisto.begin(); it!=mPedestalHisto.end(); ++it)
     {
       int hybridID = it->first;//cout<<"hybridid:"<<hybridID<<endl;
@@ -519,9 +531,16 @@ int InputHandler::SummPedestal()
       float rms  = Pedestal_temp->GetRMS();
       //cout<<"StripNb: "<<stripNb<<" RMS: "<<rms<<"MEAN: "<<mean<<endl;
       mPedestalMean[hybridID&0xfff00]->Fill(stripNb,mean);
-      mPedestalRMS[hybridID&0xfff00]->Fill(stripNb,rms);      
+      mPedestalRMS[hybridID&0xfff00]->Fill(stripNb,rms);
+
+      prex_mean[mpd_id][adc_ch][stripNb]=mean;
+      prex_rms[mpd_id][adc_ch][stripNb]=rms;
+      prex_hybridID_index[mpd_id][adc_ch][stripNb]=hybridID;
+
     }
-  
+
+
+  // save the data into the root tree
    for(map<int,vector<int> >::iterator it = mMapping.begin(); it!=mMapping.end(); ++it)
 	{
 	  int hybridID = it->first;
@@ -529,8 +548,96 @@ int InputHandler::SummPedestal()
 	  mPedestalRMS[hybridID]->SetDirectory(f);
 	}
 
+   // open the file to print out the value
+   ofstream pfilio("PRex_Pedestal.txt",ios::out);
+   int ChNb[128] ={1, 33, 65, 97, 9, 41, 73, 105, 17, 49, 81, 113, 25, 57, 89, 121, 3, 35, 67, 99, 11, 43, 75, 107, 19, 51, 83, 115, 27, 59, 91, 123, 5, 37, 69, 101, 13, 45, 77, 109, 21, 53, 85, 117, 29, 61, 93, 125, 7, 39, 71, 103, 15, 47, 79, 111, 23, 55, 87, 119, 31, 63, 95, 127, 0, 32, 64, 96, 8, 40, 72, 104, 16, 48, 80, 112, 24, 56, 88, 120, 2, 34, 66, 98, 10, 42, 74, 106, 18, 50, 82, 114, 26, 58, 90, 122, 4, 36, 68, 100, 12, 44, 76, 108, 20, 52, 84, 116, 28, 60, 92, 124, 6, 38, 70, 102, 14, 46, 78, 110, 22, 54, 86, 118, 30, 62, 94, 126};//this is original and believed to be the right one,Jan 09 2017
 
-  // save the data into a folder. used for the prex experiment
+          //planeID     dimension          plane-strips value
+   std::map<int,std::map<int,std::unordered_map<int,float>>> prex_mean_array;
+   std::map<int,std::map<int,std::unordered_map<int,float>>> prex_rms_array;
+
+   //convert all the value into the real order
+   for(auto mpd_iter=prex_mean.begin();mpd_iter!=prex_mean.end();mpd_iter++){
+   	   for (auto adc_iter=(mpd_iter->second).begin();adc_iter!=(mpd_iter->second).end();adc_iter++){
+   		   auto _mpd_temp=mpd_iter->first;
+   		   auto _adc_temp=adc_iter->first;
+   		   auto _hybridID=prex_hybridID_index[_mpd_temp][_adc_temp][0];
+   		   auto detID  =mMapping[_hybridID][0];
+   		   auto planeID=mMapping[_hybridID][1];
+
+   		   // locate the strips on each APV
+   		   for (auto stripnb_iter=(adc_iter->second).begin();stripnb_iter!=(adc_iter->second).end();stripnb_iter++){
+   			   auto _strip_nb=ChNb[stripnb_iter->first]; // index on each APV
+   			   // convert the the addrees to real position
+   			   _strip_nb=_strip_nb+(127-2*_strip_nb)*mMapping[_hybridID][3];
+   			   auto strip_pos=_strip_nb+128*mMapping[_hybridID][2]; // the position of the strip in the detector plane
+
+   			   prex_mean_array[detID][planeID][strip_pos]=prex_mean[_mpd_temp][_adc_temp][stripnb_iter->first];
+   			   prex_rms_array[detID][planeID][strip_pos]=prex_rms[_mpd_temp][_adc_temp][stripnb_iter->first];
+
+   		   }
+   	   }
+   }
+
+   // save the data into file
+
+   for(auto plane_iter=prex_mean_array.begin();plane_iter!=prex_mean_array.end();plane_iter++){
+
+	   for(auto dimension_iter=(plane_iter->second).begin();dimension_iter!=(plane_iter->second).end();dimension_iter++){
+
+
+		   std::string _mean_header;
+		   if(dimension_iter->first){  // if 1,Y dimension
+			   _mean_header=Form("prex.gems.y%d.mean = \\\n",plane_iter->first);
+		   }else{
+			   _mean_header=Form("prex.gems.x%d.mean = \\\n",plane_iter->first);
+		   }
+		   pfilio<<_mean_header;
+
+		   unsigned char temp_counter=0;
+		   // write the mean value to the file
+		   for (auto pos_iter=(dimension_iter->second).begin();pos_iter!=(dimension_iter->second).end();pos_iter++){
+			   auto _pos=pos_iter->first;
+			   auto _mean=pos_iter->second;
+			   std::string _value(Form("%5d %5.2f ",_pos,_mean));
+			   pfilio <<_value;
+			   if(temp_counter++>8){
+				   pfilio<<"\\ \n";
+				   temp_counter=0;
+			   }
+		   }
+		   pfilio<<"]\n";
+
+		   // write the rms value to the file
+		   std::string _rms_header;
+		   if(dimension_iter->first){  // if 1,Y dimension
+		   		_rms_header=Form("prex.gems.y%d.rms = \\\n",plane_iter->first);
+		   	}else{
+		   	    _rms_header=Form("prex.gems.x%d.rms = \\\n",plane_iter->first);
+		   	}
+		   pfilio<<_rms_header;
+
+		   temp_counter=0;
+		   for (auto pos_iter=(dimension_iter->second).begin();pos_iter!=(dimension_iter->second).end();pos_iter++){
+			   auto _pos=pos_iter->first;
+			   //auto _rms=prex_rms_array[]
+			   //[detID][planeID][strip_pos]
+			   auto _rms=prex_rms_array[plane_iter->first][dimension_iter->first][_pos];
+
+			   std::string _value(Form("%5d %5.2f ",_pos,_rms));
+			   pfilio << _value;
+			   if(temp_counter++>8){
+				   pfilio<<"\\ \n";
+				   temp_counter=0;
+			   	}
+		   }
+		   pfilio<<"]\n";
+
+	   }
+   }
+
+   pfilio.close();
+
 
   f->Write();
   f->Close();
