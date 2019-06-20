@@ -21,7 +21,7 @@
 #include "GUIStructure.h"
 #include "GUISysGeneral.h"
 
-#include "../GEMDetector/MPDDecoder.h"
+//#include "../GEMDetector/MPDDecoder.h"
 
 #include <thread>
 
@@ -514,13 +514,7 @@ void GUIMainFrame::gWorkingModeRaw(){
 }
 
 void GUIMainFrame::gWorkingModePedestal(){
-	std::cout<<"Pedestal mode running"<<std::endl;
-	if(guiinfor->GetRunMode()==WORKMODE_PEDESTAL){
-		std::cout<<"Woring mode checked right"<<std::endl;
-	}
-	MPDDecoder *decoder=new MPDDecoder();
-	decoder->PedestalMode(guiinfor->GetRawFileInputList(),"tpedestal_test.root");
-	delete decoder;
+
 }
 
 void GUIMainFrame::gWorkingModeHit(){

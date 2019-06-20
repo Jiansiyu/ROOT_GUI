@@ -8,8 +8,8 @@
 #include "UserRootGUI.h"
 #include "../root_gui/GUIMainFrame.h"
 #include "../root_gui/ThreadPool.h"
-#include "../GEMDetector/MPDDecoder.h"
-#include "../analysis/GEMAnalysis.h"
+//#include "../GEMDetector/MPDDecoder.h"
+//#include "../analysis/GEMAnalysis.h"
 //#include "../analysis/GEMAnalysis.h"
 UserRootGUI::UserRootGUI(const TGWindow *p, UInt_t w, UInt_t h):GUIMainFrame()
 {
@@ -54,32 +54,13 @@ void UserRootGUI::UserGUICanvasDraw(GUIInformation *infor){
 }
 
 void UserRootGUI::gWorkingModePedestal(void){
-	MPDDecoder *decoder=new MPDDecoder();
-	std::vector<std::string> flist=guiinfor->GetRawFileInputList();
-	std::string fname="test.root";
-	std::cout<<"Main thread :"<<std::this_thread::get_id()<<std::endl;
-	//decoder->PedestalMode(flist,fname);
-	try{
-	using func_type=void (MPDDecoder::*)(std::vector<std::string>,std::string);
-	func_type func=&MPDDecoder::PedestalMode;
-	THpool->enqueue(func,decoder,flist,fname);
-	}catch (exception e) {
-		std::cout<<e.what()<<std::endl;
-	}
+
 }
 
 void UserRootGUI::gWorkingModeAnalysis(){
-	for(auto fname: guiinfor->GetRawFileInputList()){
-		GEMAnalysis *ana=new GEMAnalysis();
-		ana->Analysis(fname.c_str());
-		delete ana;
-	}
+
 }
 
 void UserRootGUI::gWorkingModeCalibration(){
-	for(auto fname: guiinfor->GetRawFileInputList()){
-			GEMAnalysis *ana=new GEMAnalysis();
-			ana->Analysis(fname.c_str());
-			delete ana;
-		}
+
 }
