@@ -631,7 +631,7 @@ int InputHandler::SummPedestal()
 				   temp_counter=0;
 			   	}
 		   }
-		   pfilio<<"\n";
+		   pfilio<<"\n\n";
 
 	   }
    }
