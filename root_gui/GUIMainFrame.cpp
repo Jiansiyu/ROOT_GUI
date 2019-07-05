@@ -20,7 +20,7 @@
 #include "iostream"
 #include "GUIStructure.h"
 #include "GUISysGeneral.h"
-
+#include "../GUIDialog/UserGUIHRSOpticsWizard.h"
 //#include "../GEMDetector/MPDDecoder.h"
 
 #include <thread>
@@ -165,6 +165,9 @@ void GUIMainFrame::gMessageProcessMenu(Long_t msg, Long_t parm){
 		case M_TOOL_APVMAPPINGWIZARD:
 			std::cout<<"APV mapping wizard diaglog"<<std::endl;
 			break;
+		case M_TOOL_HRSOPTICSWIZARD:
+			std::cout<<"HRS OPTICS WIZARD"<<std::endl;
+			new UserGUIHRSOpticsWizard(fClient->GetRoot(), this, 400, 800);
 		default:
 			std::cout<<"Command Currently not support"<<std::endl;
 			break;
@@ -239,11 +242,13 @@ void GUIMainFrame::gMenuUnitDraw(TGLayoutHints *l ){
 	TGPopupMenu *fMenuTool  = new TGPopupMenu(fClient->GetRoot());
 	TGPopupMenu *fMenuView  = new TGPopupMenu(fClient->GetRoot());
 	TGPopupMenu *fMenuHelp  = new TGPopupMenu(fClient->GetRoot());
+
 	gSetMenuFile(fMenuFile);
 	gSetMenuSet(fMenuSet);
 	gSetMenuTool(fMenuTool);
 	gSetMenuView(fMenuView);
 	gSetMenuHelp(fMenuHelp);
+
 	fMenuDock->EnableUndock(kTRUE);
 	fMenuDock->EnableHide(kTRUE);
 	TGMenuBar *fMenuBar= new TGMenuBar(fMenuDock,1,1,kHorizontalFrame);
@@ -470,6 +475,7 @@ void GUIMainFrame::gSetMenuSet(TGPopupMenu *fMenuSet){
 
 void GUIMainFrame::gSetMenuTool(TGPopupMenu * fMenuTool){
 	fMenuTool->AddEntry("&APVMapping Wizard...",M_TOOL_APVMAPPINGWIZARD);
+	fMenuTool->AddEntry("&HRS Optics Wizard...",M_TOOL_HRSOPTICSWIZARD);
 	fMenuTool->Associate(this);
 }
 

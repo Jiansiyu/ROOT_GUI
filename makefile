@@ -56,15 +56,15 @@ SLOT_OBJS   += ${patsubst ./%, ./bin/%, ${patsubst %.cpp, %Dic.o, ${SLOT_SOURCE}
 SOURCE_OBJS += ${patsubst ./%, ./bin/%, ${addsuffix .o, ${basename ${SOURCE}}}}
 OBJS    +=  ${SOURCE_OBJS} ${SLOT_OBJS}
 
-TARGET = ROOT_GUI 
+TARGET = PRexViewer 
 all: ${TARGET}  
 
-ROOT_GUI: ${OBJS} 
+${TARGET}: ${OBJS} 
 	@echo ${THIS_DIR}
 	@echo ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
-	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
+	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o   "$@" 
 	@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
 	#@{RM} ${OBJS}
