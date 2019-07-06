@@ -20,7 +20,7 @@
 #include "iostream"
 #include "GUIStructure.h"
 #include "GUISysGeneral.h"
-#include "../GUIDialog/UserGUIHRSOpticsWizard.h"
+#include "../HRSOptics/UserGUIHRSOpticsWizard.h"
 //#include "../GEMDetector/MPDDecoder.h"
 
 #include <thread>
@@ -167,7 +167,7 @@ void GUIMainFrame::gMessageProcessMenu(Long_t msg, Long_t parm){
 			break;
 		case M_TOOL_HRSOPTICSWIZARD:
 			std::cout<<"HRS OPTICS WIZARD"<<std::endl;
-			new UserGUIHRSOpticsWizard(fClient->GetRoot(), this, 400, 800);
+			new UserGUIHRSOpticsWizard(fClient->GetRoot(), this, 800, 800);
 		default:
 			std::cout<<"Command Currently not support"<<std::endl;
 			break;

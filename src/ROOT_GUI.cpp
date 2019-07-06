@@ -22,6 +22,7 @@
 #include <TTree.h>
 
 #include "../gui/UserRootGUI.h"
+#include "../HRSOptics/UserGUIHRSOpticsWizard.h"
 
 int main(int argc, char **argv)
 {

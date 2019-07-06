@@ -22,6 +22,8 @@
 #include <TGListBox.h>
 #include <TGLabel.h>
 #include <TGNumberEntry.h>
+#include <TGTab.h>
+//#include "TGFrame.h"
 //#include
 #include <map>
 #include <vector>
@@ -56,12 +58,33 @@ private:
 	TGNumberEntry *nOpticsTargetPosEntry_x;
 	TGNumberEntry *nOpticsTargetPosEntry_y;
 	TGNumberEntry *nOpticsTargetPosEntry_z;
+
 	// sieve information input
 private:
+	TGNumberEntry *nOpticsSieveSizeX;
+	TGNumberEntry *nOpticsSieveSizeY;
+	TGNumberEntry *nOpticsSieveRow;
+	TGNumberEntry *nOpticsSieveCol;
+	TGNumberEntry *nOpticsSieveRowPos;
+	TGNumberEntry *nOpticsSieveColPos;
+	TGTextButton *nOpticsSievePrintOut;
+
+
+	// canvas frame informtions
+private:
+	TRootEmbeddedCanvas *opticsMainCanvas;
 
 private:
 	void opticsBeamInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
 	void opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsCutInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsCanvasFrameUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsSieveInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
+
+	//cut unit
+	void opticsDpCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsSieveCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsCustmizeCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
 
 };
 
