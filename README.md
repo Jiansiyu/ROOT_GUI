@@ -1,5 +1,5 @@
 # UVa decoder
-A modified version of the UVa MPD4 decoder. 
+A modified version of the UVa MPD4 decoder used for PRex Event Display and also generate the pedestal data for the GEM detectors.
 
 ## main change
 
