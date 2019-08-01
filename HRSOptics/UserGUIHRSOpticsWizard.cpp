@@ -6,12 +6,15 @@
  */
 #include "TGDimension.h"
 #include "iostream"
+#include "TGDockableFrame.h"
+#include "TGMenu.h"
 #include "UserGUIHRSOpticsWizard.h"
 
 UserGUIHRSOpticsWizard::UserGUIHRSOpticsWizard(const TGWindow *p, const TGWindow *main, UInt_t w,
         UInt_t h, UInt_t options) : TGTransientFrame(p, main, w, h, options) {
 	// TODO Auto-generated constructor stub
 	SetCleanup(kDeepCleanup);
+	gMenuUnitDraw(this,new TGLayoutHints(kLHintsLeft|kLHintsTop,2,2,2,2));
 	opticsMainFrame= new TGHorizontalFrame(this,400,800);
 	opticsInforFrame=new TGVerticalFrame(opticsMainFrame);
 	opticsCanvasFrame=new TGVerticalFrame(opticsMainFrame);
@@ -21,11 +24,17 @@ UserGUIHRSOpticsWizard::UserGUIHRSOpticsWizard(const TGWindow *p, const TGWindow
 	opticsTargetInforUnit(opticsInforFrame,new TGLayoutHints(kLHintsTop));
 	opticsSieveInforUnit(opticsInforFrame,new TGLayoutHints(kLHintsTop));
 	opticsCutInforUnit(opticsInforFrame,new TGLayoutHints(kLHintsTop));
+	opticsTextPrintOutUnit(opticsInforFrame,new TGLayoutHints(kLHintsBottom|kLHintsLeft|kLHintsExpandX));
 
+
+	// add the canvas frame
+
+	opticsCanvasFrameUnit(opticsCanvasFrame,new TGLayoutHints(kLHintsTop));
 	opticsMainFrame ->AddFrame(opticsInforFrame,new TGLayoutHints(kLHintsLeft|kLHintsTop,2,2,2,2));
 	opticsMainFrame ->AddFrame( new TGVertical3DLine(opticsMainFrame),new TGLayoutHints(kLHintsExpandY|kLHintsLeft,2,2));
 	opticsMainFrame ->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsBottom|kLHintsTop|kLHintsLeft,2,2,2,2));
 
+	gStatusUnitDraw(this,new TGLayoutHints(kLHintsLeft|kLHintsTop,2,2,2,2));
 	//redraw the main windows
 	AddFrame(opticsMainFrame,new TGLayoutHints(kLHintsTop | kLHintsRight|kLHintsExpandX|kLHintsExpandY, 2, 2, 5, 1));
 	SetWindowName("HRS Optics Wizard");
@@ -56,7 +65,7 @@ void UserGUIHRSOpticsWizard::opticsBeamInforUnit(TGCompositeFrame *p,TGLayoutHin
 	fBeamInforFram->AddFrame(fBeamXFrame,new TGLayoutHints(kLHintsTop));
 	fBeamInforFram->AddFrame(fBeamYFrame,new TGLayoutHints(kLHintsTop));
 
-	p->AddFrame(fBeamInforFram,new TGLayoutHints(kLHintsTop|kLHintsCenterX));
+	p->AddFrame(fBeamInforFram,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 
 }
 
@@ -128,15 +137,41 @@ void UserGUIHRSOpticsWizard::opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutH
 
 
 void UserGUIHRSOpticsWizard::opticsCanvasFrameUnit(TGCompositeFrame *p,TGLayoutHints *l){
+	//-------------------------------
+	//
+	//[ Main Canvas]
+	//[Sub Canvas 1]  [Sub Canvas 2]
+	//--------------------------------
+
+
 	TGVerticalFrame *opticsCanvasFrame=new TGVerticalFrame(p);
+	TGHorizontalFrame *opticsMainCanvasFrame=new TGHorizontalFrame(opticsCanvasFrame);
 
-	// add the canvas,
-	opticsMainCanvas=new TRootEmbeddedCanvas("opticsCanvas",opticsCanvasFrame,600,400);
+	// add the main canvas control code
+	opticsMainCanvas=new TRootEmbeddedCanvas("mainCanvas",opticsMainCanvasFrame,600,600);
+
+	opticsMainCanvasFrame->AddFrame(opticsMainCanvas,new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsTop|kLHintsExpandY));
+	// add the sub canvas frame
+	TGHorizontalFrame *opticsSubCanvasFrame=new TGHorizontalFrame(opticsCanvasFrame);
+	TGVerticalFrame *opticsSubCanvasFrame_Left=new TGVerticalFrame(opticsSubCanvasFrame);
+	TGVerticalFrame *opticsSubCanvasFrame_right=new TGVerticalFrame(opticsSubCanvasFrame);
+
+	opticsSubCanvas_left=new TRootEmbeddedCanvas("SubLeft",opticsSubCanvasFrame_Left,300,300);
+	opticsSubCanvas_right=new TRootEmbeddedCanvas("SubRight",opticsSubCanvasFrame_right,300,300);
+
+	opticsSubCanvasFrame_Left->AddFrame(opticsSubCanvas_left,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+	opticsSubCanvasFrame_right->AddFrame(opticsSubCanvas_right,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+
+	opticsSubCanvasFrame->AddFrame(opticsSubCanvasFrame_Left,new TGLayoutHints(kLHintsLeft|kLHintsCenterX|kLHintsTop|kLHintsExpandY));
+	opticsSubCanvasFrame->AddFrame(new TGVertical3DLine(opticsSubCanvasFrame),new TGLayoutHints(kLHintsTop|kLHintsExpandY));
+	opticsSubCanvasFrame->AddFrame(opticsSubCanvasFrame_right,new TGLayoutHints(kLHintsCenterX|kLHintsRight|kLHintsTop|kLHintsExpandY));
 
 
-	opticsCanvasFrame->AddFrame(opticsMainCanvas,new TGLayoutHints(kLHintsCenterX|kLHintsTop));
-	// add selection buttern used for control the canvas display
-	p->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsExpandX|kLHintsCenterY));
+	opticsCanvasFrame->AddFrame(opticsMainCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsExpandY|kLHintsLeft|kLHintsExpandX,5,5,5,5));
+	opticsCanvasFrame->AddFrame(new TGHorizontal3DLine(opticsCanvasFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandX,5,5,5,5));
+	opticsCanvasFrame->AddFrame(opticsSubCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX,5,5,5,5));
+
+	p->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsExpandY|kLHintsLeft|kLHintsExpandX));
 }
 
 
@@ -241,11 +276,196 @@ void UserGUIHRSOpticsWizard::opticsCutInforUnit(TGCompositeFrame *p,TGLayoutHint
 	TGCompositeFrame *opticsCutTabFrameSieve=opticsCutTab->AddTab("Sieve Cut");
 	TGCompositeFrame *opticsCutTabFrameCustomize=opticsCutTab->AddTab("Customize");
 
-	opticsCutInforFrame->AddFrame(opticsCutTab,new TGLayoutHints(kLHintsLeft|kLHintsExpandX));
+	opticsSieveCutUnit(opticsCutTabFrameSieve,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+	opticsDpCutUnit(opticsCutTabFrameDp,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+	opticsCustmizeCutUnit(opticsCutTabFrameCustomize,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 
+	opticsCutInforFrame->AddFrame(opticsCutTab,new TGLayoutHints(kLHintsLeft|kLHintsExpandX));
 	opticsCutInforGroup->AddFrame(opticsCutInforFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 	p->AddFrame(opticsCutInforGroup,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 
+}
+
+
+void UserGUIHRSOpticsWizard::opticsSieveCutUnit(TGCompositeFrame *p,TGLayoutHints *l){
+	//----------------------
+	// Enable []
+	//----------------------
+	//Plot Coomand
+	//Plot Cut
+	//Auto recginize[*]
+	//Select Range you want to apply cut
+	//Raw Range[]    Col Range[]
+	//---------------------------------
+	//[Start Cut] [Skip] [Next]
+	//[Print Out Informations]
+	//[Print Out Informations]
+	//----------------------
+	//----------------------
+	//[Sieve Design] [Cutted] []
+	//
+	//[                      ]
+	//-------------------------
+
+	TGVerticalFrame *SieveCutFrame=new TGVerticalFrame(p);
+
+	TGHorizontalFrame *SieveCutEnableFrame=new TGHorizontalFrame(SieveCutFrame);
+	SieveEnableButt=new TGCheckButton(SieveCutEnableFrame,new TGHotString("Enable"));
+	SievePatternAutoRecEnableButt=new TGCheckButton(SieveCutEnableFrame,new TGHotString("Auto Rec Pattern"));
+	SieveCutEnableFrame->AddFrame(SieveEnableButt,new TGLayoutHints(kLHintsLeft,5,5,5,5));
+	SieveCutEnableFrame->AddFrame(SievePatternAutoRecEnableButt,new TGLayoutHints(kLHintsLeft,5,5,5,5));
+
+
+	TGHorizontalFrame *SieveCutPlotCommandFrame=new TGHorizontalFrame(SieveCutFrame);
+	SieveCutPlotCommandFrame->AddFrame(new TGLabel(SieveCutPlotCommandFrame,new TGHotString("  Plot:   ")),new TGLayoutHints(kLHintsLeft));
+	SieveCutplotCommandInput=new TGTextEntry(SieveCutPlotCommandFrame);
+	SieveCutplotCommandInput->SetText("L.tr.theta:L.tr.phi");
+	SieveCutPlotCommandFrame->AddFrame(SieveCutplotCommandInput,new TGLayoutHints(kLHintsLeft|kLHintsExpandX,3,3,3,3));
+
+	TGHorizontalFrame *SieveCutPlotCutCommandFrame=new TGHorizontalFrame(SieveCutFrame);
+	SieveCutPlotCutCommandFrame->AddFrame(new TGLabel(SieveCutPlotCutCommandFrame,new TGHotString("  Cut :  ")),new TGLayoutHints(kLHintsLeft));
+	SieveCutplotCutCommandInput=new TGTextEntry(SieveCutPlotCutCommandFrame);
+	SieveCutPlotCutCommandFrame->AddFrame(SieveCutplotCutCommandInput,new TGLayoutHints(kLHintsLeft|kLHintsExpandX,3,3,3,3));
+
+//	TGHorizontalFrame *SieveCutAutoRecButtFrame=new TGHorizontalFrame(SieveCutFrame);
+
+	// used for set the cut rang for Row and Col
+	TGHorizontalFrame *SieveCutSetRangeFrame=new TGHorizontalFrame(SieveCutFrame);
+	SieveCutSetRangeFrame->AddFrame(new TGLabel(SieveCutSetRangeFrame,new TGHotString(" Hole Range  Row:  ")),new TGLayoutHints(kLHintsLeft));
+	SieveCutRowRange=new TGTextEntry(SieveCutSetRangeFrame);
+	SieveCutRowRange->SetWidth(50);
+	SieveCutRowRange->SetText("3-10");
+	SieveCutSetRangeFrame->AddFrame(SieveCutRowRange, new TGLayoutHints(kLHintsLeft,2,2,2,2));
+	SieveCutSetRangeFrame->AddFrame(new TGLabel(SieveCutSetRangeFrame,new TGHotString("  Col:  ")),new TGLayoutHints(kLHintsLeft));
+	SieveCutColRange=new TGTextEntry(SieveCutSetRangeFrame);
+	SieveCutColRange->SetWidth(50);
+	SieveCutColRange->SetText("0-10");
+	SieveCutSetRangeFrame->AddFrame(SieveCutColRange, new TGLayoutHints(kLHintsLeft,2,2,2,2));
+
+	//  the control buttons for the cut
+	TGHorizontalFrame *SieveCutButtFrame=new TGHorizontalFrame(SieveCutFrame);
+	SieveCutStartCut=new TGTextButton(SieveCutButtFrame,"Start Cut");
+	SieveCutSkip=new TGTextButton(SieveCutButtFrame,"Skip");
+	SieveCutNext=new TGTextButton(SieveCutButtFrame,"Next");
+
+	SieveCutButtFrame->AddFrame(SieveCutNext,new TGLayoutHints(kLHintsRight,5,5,2,2));
+	SieveCutButtFrame->AddFrame(SieveCutSkip,new TGLayoutHints(kLHintsRight,10,10,2,2));
+	SieveCutButtFrame->AddFrame(SieveCutStartCut,new TGLayoutHints(kLHintsRight,5,5,2,2));
+
+	SieveCutFrame->AddFrame(SieveCutEnableFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft));
+	SieveCutFrame->AddFrame(new TGHorizontal3DLine(SieveCutFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandX,2,2,2,2));
+	SieveCutFrame->AddFrame(SieveCutPlotCommandFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+	SieveCutFrame->AddFrame(SieveCutPlotCutCommandFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+	SieveCutFrame->AddFrame(SieveCutSetRangeFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+	SieveCutFrame->AddFrame(new TGHorizontal3DLine(SieveCutFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandX,2,2,2,2));
+	SieveCutFrame->AddFrame(SieveCutButtFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+
+	//SieveCutFrame->AddFrame(new TGHorizontal3DLine(SieveCutFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandX,2,2,2,2));
+
+	p->AddFrame(SieveCutFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+
+}
+
+void UserGUIHRSOpticsWizard::opticsDpCutUnit(TGCompositeFrame *p,TGLayoutHints *l){
+//	TGGroupFrame *SieveCutFrame=new TGGroupFrame
+	TGVerticalFrame *DpCutFrame=new TGVerticalFrame(p);
+	TGHorizontalFrame *DpCutEnableFrame=new TGHorizontalFrame(DpCutFrame);
+
+	TGCheckButton *DpEnableButt=new TGCheckButton(DpCutEnableFrame,new TGHotString("Enable"));
+
+	DpCutEnableFrame->AddFrame(DpEnableButt,new TGLayoutHints(kLHintsLeft,5,5,5,5));
+	DpCutFrame->AddFrame(DpCutEnableFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft));
+	p->AddFrame(DpCutFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+
+}
+
+
+void UserGUIHRSOpticsWizard::opticsCustmizeCutUnit(TGCompositeFrame *p,TGLayoutHints *l){
+	TGVerticalFrame *CustmizeCutFrame=new TGVerticalFrame(p);
+	TGHorizontalFrame *CustmizeCutEnableFrame=new TGHorizontalFrame(CustmizeCutFrame);
+	TGCheckButton *CustmizeEnableButt=new TGCheckButton(CustmizeCutEnableFrame,new TGHotString("Enable"));
+
+	CustmizeCutEnableFrame->AddFrame(CustmizeEnableButt,new TGLayoutHints(kLHintsLeft,5,5,5,5));
+	CustmizeCutFrame->AddFrame(CustmizeCutEnableFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft));
+	p->AddFrame(CustmizeCutFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
+}
+
+
+// draw menu on top of the canvas
+void UserGUIHRSOpticsWizard::gMenuUnitDraw(TGCompositeFrame *p,TGLayoutHints *l ){
+	TGDockableFrame *fMenuDock = new TGDockableFrame(p);
+	AddFrame(fMenuDock,l);
+	fMenuDock->SetWindowName("UVa GEM Analysis Framework");
+	TGLayoutHints *fMenuBarLayout = new TGLayoutHints(kLHintsTop | kLHintsExpandX);
+	TGLayoutHints *fMenuBarItemLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 0, 4, 0,0);
+	TGLayoutHints *fMenuBarHelpLayout = new TGLayoutHints(kLHintsTop | kLHintsRight);
+	TGPopupMenu *fMenuFile = new TGPopupMenu(fClient->GetRoot());
+	TGPopupMenu *fMenuSet  = new TGPopupMenu(fClient->GetRoot());
+	TGPopupMenu *fMenuTool  = new TGPopupMenu(fClient->GetRoot());
+	TGPopupMenu *fMenuView  = new TGPopupMenu(fClient->GetRoot());
+	TGPopupMenu *fMenuHelp  = new TGPopupMenu(fClient->GetRoot());
+
+	fMenuDock->EnableUndock(kTRUE);
+	fMenuDock->EnableHide(kTRUE);
+	TGMenuBar *fMenuBar= new TGMenuBar(fMenuDock,1,1,kHorizontalFrame);
+	fMenuBar -> AddPopup("&File",fMenuFile,fMenuBarItemLayout);
+	fMenuBar -> AddPopup("&Set",fMenuSet,fMenuBarItemLayout);
+	fMenuBar -> AddPopup("&Tool",fMenuTool,fMenuBarItemLayout);
+	fMenuBar -> AddPopup("&View",fMenuView,fMenuBarItemLayout);
+	fMenuBar -> AddPopup("&Help",fMenuHelp,fMenuBarHelpLayout);
+	fMenuDock -> AddFrame(fMenuBar,fMenuBarLayout);
+	TGHorizontal3DLine *menu_seperator=new TGHorizontal3DLine(this);
+	AddFrame(menu_seperator,new TGLayoutHints(kLHintsExpandX));
+}
+
+void UserGUIHRSOpticsWizard::opticsTextPrintOutUnit(TGCompositeFrame *p,TGLayoutHints *l){
+	TGVerticalFrame *opticsTextPrintoutFrame=new TGVerticalFrame(p);
+	Pixel_t backpxl;
+	gClient->GetColorByName("#c0c0c0", backpxl);
+	opticsTextDisplay = new TGTextView(opticsTextPrintoutFrame,300,94,p->GetUniqueID(),kFixedWidth);
+	opticsTextDisplay->SetBackgroundColor(backpxl);
+	opticsTextDisplay->SetWidth(300);
+	opticsTextDisplay->SetText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
+	opticsTextDisplay->AddText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
+
+	opticsTextPrintoutFrame->AddFrame(opticsTextDisplay,new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsBottom,2,2,2,2));
+	p->AddFrame(opticsTextPrintoutFrame,l);
+}
+
+
+void UserGUIHRSOpticsWizard::gStatusUnitDraw(TGCompositeFrame *p,TGLayoutHints *l){
+	TGCompositeFrame *fStatusFrame = new TGCompositeFrame(p, 60,20,kHorizontalFrame|kSunkenFrame);
+
+	Pixel_t yellow,green;
+	fClient->GetColorByName("yellow",yellow);
+	fClient->GetColorByName("green",green);
+
+	TGVertical3DLine *lStatusbarSeparation0=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation0,new TGLayoutHints(kLHintsRight | kLHintsTop |kLHintsExpandY));
+
+	TGLabel *author_display=new TGLabel(fStatusFrame,"UVa GEM Analysis Framework @Siyu");
+	fStatusFrame->AddFrame(author_display,new TGLayoutHints(kLHintsRight | kLHintsTop | kLHintsExpandY,5,5,0,0));
+	TGVertical3DLine *lStatusbarSeparation1=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation1, new TGLayoutHints(kLHintsRight | kLHintsTop | kLHintsExpandY));
+
+	TGVertical3DLine *lStatusbarSeparation2=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation2, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY));
+
+	TGLabel *nStatusBarInfor = new TGLabel(fStatusFrame,"Jefferson Lab Hall A HRS Optics");
+	fStatusFrame->AddFrame(nStatusBarInfor, new TGLayoutHints(kLHintsRight|kLHintsTop|kLHintsExpandY,15,15,0,0));
+
+	// set the time display
+	TGLayoutHints *StatusBarLayout1=new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY,10,10);
+	TDatime *lSystemTime = new TDatime();
+
+	TGLabel *nStatusBarTimeLabel = new TGLabel(fStatusFrame,new TGString(Form("%4d : %02d : %02d",lSystemTime->GetYear(),lSystemTime->GetMonth(),lSystemTime->GetDay())));
+	nStatusBarTimeLabel->Set3DStyle(0);
+	fStatusFrame->AddFrame(nStatusBarTimeLabel,StatusBarLayout1);
+
+	TGVertical3DLine *lStatusbarSeparation3=new TGVertical3DLine(fStatusFrame);
+	fStatusFrame->AddFrame(lStatusbarSeparation3, new TGLayoutHints(kLHintsLeft|kLHintsTop|kLHintsExpandY));
+
+	p->AddFrame(fStatusFrame,new TGLayoutHints(kLHintsBottom|kLHintsExpandX,0,0,1,0));
 }
 
 

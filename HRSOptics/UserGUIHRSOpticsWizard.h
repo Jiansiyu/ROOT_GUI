@@ -23,6 +23,9 @@
 #include <TGLabel.h>
 #include <TGNumberEntry.h>
 #include <TGTab.h>
+#include <TGTextView.h>
+#include <TGClient.h>
+//#include <TPi>
 //#include "TGFrame.h"
 //#include
 #include <map>
@@ -69,12 +72,49 @@ private:
 	TGNumberEntry *nOpticsSieveColPos;
 	TGTextButton *nOpticsSievePrintOut;
 
+	// sieve cut
+private:
+	TGCheckButton *SieveEnableButt;
+	TGTextEntry *SieveCutplotCommandInput;
+	TGTextEntry *SieveCutplotCutCommandInput;
+	TGCheckButton *SievePatternAutoRecEnableButt;
+	TGTextEntry *SieveCutRowRange;
+	TGTextEntry *SieveCutColRange;
+
+	TGTextButton *SieveCutSkip;
+	TGTextButton *SieveCutNext;
+	TGTextButton *SieveCutStartCut;
+
+
+
+	//Dp Cut informations
+private:
+
+	// custmize cut
+private:
+
+
 
 	// canvas frame informtions
 private:
 	TRootEmbeddedCanvas *opticsMainCanvas;
+	TRootEmbeddedCanvas *opticsSubCanvas_left;
+	TRootEmbeddedCanvas *opticsSubCanvas_right;
+
+	// Left Information display
+private:
+	std::string displayInfor;
+	TGTextView *opticsTextDisplay;
+
 
 private:
+	void gMenuUnitDraw(TGCompositeFrame *p,TGLayoutHints *l);
+	void gStatusUnitDraw(TGCompositeFrame *p,TGLayoutHints *l);
+
+private:
+	// the main canvas unit
+	void opticsMainCanvasUnit(TGCompositeFrame *p,TGLayoutHints *l);
+
 	void opticsBeamInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
 	void opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
 	void opticsCutInforUnit(TGCompositeFrame *p,TGLayoutHints *l);
@@ -85,6 +125,7 @@ private:
 	void opticsDpCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
 	void opticsSieveCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
 	void opticsCustmizeCutUnit(TGCompositeFrame *p,TGLayoutHints *l);
+	void opticsTextPrintOutUnit(TGCompositeFrame *p,TGLayoutHints *l);
 
 };
 
