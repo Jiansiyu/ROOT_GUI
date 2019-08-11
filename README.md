@@ -3,6 +3,7 @@
 The initial version was based on the ROOT-GUI. Used for PRex Viewer GUI and the PRex Optics GUI
 
 ![](doc/root_gui.png)
+![](doc/prex_optics_gui.png)
 ## Getting Start
 
 ## Prerequisites
