@@ -65,6 +65,7 @@
 #include "UserGUIDataStructue.h"
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 #include "GUIInforCenter.h"
+
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
 	M_FILE_NEWCANVAS,
@@ -282,6 +283,8 @@ private :
 	void fAnalysisProcess(std::vector<std::string> Filenames); // analysis mode process
 	void fAnalysisProcess(std::string Filenames); // analysis mode process
 	void fCalibrationProcess(std::vector<std::string> Filenames); // analysis mode process
+
+
 
 
 };

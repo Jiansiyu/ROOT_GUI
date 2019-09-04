@@ -230,15 +230,10 @@ void UserGuiMainFrame::SetWorkZoneButton(){
 	// add the button to the frame
 
 	bWorkModeRAW = new TGRadioButton(bWorkModeButtonGroup,"&Raw",C_WORKMODE_RAW);
-
 	bWorkModeZeroSubtraction = new TGRadioButton(bWorkModeButtonGroup,"&ZeroSub",C_WORKMODE_ZEROSUBTRACTION);
-
 	bWorkModePedestal = new TGRadioButton(bWorkModeButtonGroup,"&Pedestal",C_WORKMODE_PEDESTAL);
-
 	bWorkModeHit = new TGRadioButton(bWorkModeButtonGroup,"&Hit",C_WORKMODE_HIT);
-
 	bWorkModeAnalysis = new TGRadioButton(bWorkModeButtonGroup,"&Analysis",C_WORKMODE_ANALYSIS);
-
 	bWorkModeCalibration = new TGRadioButton(bWorkModeButtonGroup,"&Calibration",C_WORKMODE_CALIBRATION);
 
 	bWorkModeRAW->Associate(this);
@@ -645,10 +640,15 @@ void UserGuiMainFrame::fRawModeProcess(int entries, string rawfilename){
 #ifdef __DECODER_DEBUG_MODE
 	rawfilename="/home/newdriver/Storage/Server/JLabFarm/mpd_ssp_3300.dat.0";
 #endif
-	MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
+//        if(vDecoderBuffer->Find(rawfilename->c_str())==vDecoderBuffer->end()){
+ //          vDecoderBuffer[rawfilename->c_str()]=new MPDDecoder(rawfilename.c_str());
+ //       }else
+{
+	
+        MPDDecoder *decoder=new MPDDecoder(rawfilename.c_str());
 	decoder->Connect("GUICanvasTabDraw(GUICanvasDataStream *)","UserGuiMainFrame",this,"fCanvasDraw(GUICanvasDataStream *)");
 	decoder->RawDisplay(entries);
-
+      }
 }
 
 void UserGuiMainFrame::fPedestalModeProcess(int entries,std::string rawfilename){
@@ -737,7 +737,6 @@ void UserGuiMainFrame::fHitModeProcess(int entries,string Pedestal_name,vector<s
 		std::string fname(file);
 		std::string pedestalfname(Pedestal_name.c_str());
 		MPDDecoder *decoder=new MPDDecoder(file.c_str());
-
 		std::string savefilename=Form(cfg->GetSysCondfig().Analysis_cfg.HitSavePattern.c_str(),
 					generalprocess->GetNumberFromFilename(
 							generalprocess->GetAppendixLess_FileName(

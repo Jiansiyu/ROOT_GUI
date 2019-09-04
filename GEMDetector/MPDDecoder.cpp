@@ -57,19 +57,21 @@ void MPDDecoder::LoadFile(std::string fname){
 }
 
 void MPDDecoder::RawDisplay(uint id) {
-
-	if ((Rawstream.size() == 0 )|| (id>Rawstream.end()->first)) {
+        std::cout<<"Check size :"<< Rawstream.size() << "   end eventid:"<<Rawstream.end()->first<<std::endl;
+	if ((Rawstream.size() == 0 )|| (id>(Rawstream.end()->first))) {
 		std::cout<<"read raw "<<(Rawstream.end()->first)<< " to " << Rawstream.end()->first+50<<std::endl;
 		MPDRawParser *rawparser = new MPDRawParser();
 		uint64_t evtid = 0;
-		while (ReadBlock() && (evtid < 50)) {
+		while (ReadBlock() && (evtid <50)) {
 			evtid++;
 			rawparser->LoadRawData(block_vec_mpd);
 			GUICanvasDataStream *stream = new GUICanvasDataStream();
 			stream->LoadData(rawparser->GetDecoded());
-			Rawstream[evtid] = stream;
+			Rawstream[Rawstream.end()->first+evtid] = stream;
 		}
+               RawDisplay(id);
 	}
+       
 
 	if(Rawstream.find(id)!=Rawstream.end()){
 		CanvasTabDisplay(Rawstream[id]);      // load to display
@@ -85,7 +87,7 @@ void MPDDecoder::PedestalMode(std::string savefname){
 	int i =0;
 	Benchmark *timer=new Benchmark();
 	while(ReadBlock()){
-		if((i++)%100==0)timer->Print(i);
+		if((i++)%1000==0)timer->Print(i);
 		rawparser->LoadRawData(block_vec_mpd);
 		auto data =rawparser->GetCommonModeSubtraction(); // get  the common mode subtracted data
 		// calculate the mean of the six time sample
@@ -226,7 +228,7 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
 			}
 		}else{
-			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+			std::cout<< "[WARNING] " << __FUNCTION__ << " " << __LINE__
 					<< "MPD_" << mpdid << " APV_" << apvid
 					<< " is declared in the map, but cannot file in the pedestal file"
 					<< std::endl;
@@ -250,6 +252,7 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 		GEMModuleHisto.clear();
 		for(auto moduleid:cfg->GetMapping().GetGEMModuleList()){
 			std::cout<<"GEM Module ID: "<<moduleid<<std::endl;
+			/**
 			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_raw",moduleid),Form("module%d_x_raw",moduleid),1600,0,1600));
 			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_raw",moduleid),Form("module%d_y_raw",moduleid),1600,0,1600));
 
@@ -261,7 +264,18 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 
 			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_hit",moduleid),Form("module%d_x_hit",moduleid),1600,0,1600));
 			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_hit",moduleid),Form("module%d_y_hit",moduleid),1600,0,1600));
+			*/
+			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_raw",moduleid),Form("module%d_x_raw",moduleid),1024,0,1024));
+			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_raw",moduleid),Form("module%d_y_raw",moduleid),1280,0,1280));
 
+			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_msub",moduleid),Form("module%d_x_msub",moduleid),1024,0,1024));
+			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_msub",moduleid),Form("module%d_y_msub",moduleid),1280,0,1280));
+
+			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_csub",moduleid),Form("module%d_x_csub",moduleid),1024,0,1024));
+			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_csub",moduleid),Form("module%d_y_csub",moduleid),1280,0,1280));
+
+			GEMModuleHisto[moduleid][0].push_back(new TH1F(Form("module%d_x_hit",moduleid),Form("module%d_x_hit",moduleid),1024,0,1024));
+			GEMModuleHisto[moduleid][1].push_back(new TH1F(Form("module%d_y_hit",moduleid),Form("module%d_y_hit",moduleid),1280,0,1280));
 		}
 		if(EvtID<eventid) {
 			EvtID++;
@@ -283,7 +297,7 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 
 			int totalsize=adc_temp.size();
 			if (totalsize % 129 != 0) {
-				std::cout << "[WORNING]: " << __FUNCTION__ << "< " << __LINE__
+				std::cout << "[WARNING]: " << __FUNCTION__ << "< " << __LINE__
 						<< "> the size of the raw data is not expexted!!"
 						<< std::endl;
 				continue;
@@ -303,7 +317,7 @@ void MPDDecoder::HitDisplay(std::string pedestalfname,int eventid){
 				}
 				adcsum_temp=adcsum_temp/TSsize;
 				GEMModuleHisto[planeID][dimension].at(0)->Fill(RstripPos,adcsum_temp);
-//				std::cout<<planeID<<" dimension"<<dimension<<"  file"<< RstripPos<<std::endl;
+				//				std::cout<<planeID<<" dimension"<<dimension<<"  file"<< RstripPos<<std::endl;
 			}
 //			std::cout<<"This is a test at" <<__FUNCTION__<<" <"<<__LINE__<<">"<<std::endl;
 			// subtract the common mode
@@ -398,7 +412,7 @@ void MPDDecoder::HiModeTest(std::string pedestalfname,std::string savefname){
 				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
 			}
 		}else{
-			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+			std::cout<< "[WARNING] " << __FUNCTION__ << " " << __LINE__
 					<< "MPD_" << mpdid << " APV_" << apvid
 					<< " is declared in the map, but cannot file in the pedestal file"
 					<< std::endl;
@@ -561,7 +575,7 @@ void MPDDecoder::HitMode(std::string pedestalfname,std::string savefname){
 				mPedestal_rms[uid]=(hRMS->GetBinContent(i+1));
 			}
 		}else{
-			std::cout<< "[WORNING] " << __FUNCTION__ << " " << __LINE__
+			std::cout<< "[WARNING] " << __FUNCTION__ << " " << __LINE__
 					<< "MPD_" << mpdid << " APV_" << apvid
 					<< " is declared in the map, but cannot file in the pedestal file"
 					<< std::endl;
