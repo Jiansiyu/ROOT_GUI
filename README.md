@@ -31,6 +31,6 @@
 * 1
 	* change the layout of the code, build the path for the headers and .so seperatly before link
 	
-# Any Contribution is Welcome!
+# Branch instruction
 
-contect me at: jiansiyu@gmail.com
+This is the working version for EEL cleanroom and INFN cleanroom GEM analysis
