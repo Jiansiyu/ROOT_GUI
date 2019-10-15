@@ -98,8 +98,6 @@ private:
 	// canvas frame informtions
 private:
 	TRootEmbeddedCanvas *opticsMainCanvas;
-	TRootEmbeddedCanvas *opticsSubCanvas_left;
-	TRootEmbeddedCanvas *opticsSubCanvas_right;
 
 	// Left Information display
 private:

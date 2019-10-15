@@ -32,7 +32,7 @@ UserGUIHRSOpticsWizard::UserGUIHRSOpticsWizard(const TGWindow *p, const TGWindow
 	opticsCanvasFrameUnit(opticsCanvasFrame,new TGLayoutHints(kLHintsTop));
 	opticsMainFrame ->AddFrame(opticsInforFrame,new TGLayoutHints(kLHintsLeft|kLHintsTop,2,2,2,2));
 	opticsMainFrame ->AddFrame( new TGVertical3DLine(opticsMainFrame),new TGLayoutHints(kLHintsExpandY|kLHintsLeft,2,2));
-	opticsMainFrame ->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsBottom|kLHintsTop|kLHintsLeft,2,2,2,2));
+	opticsMainFrame ->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 
 	gStatusUnitDraw(this,new TGLayoutHints(kLHintsLeft|kLHintsTop,2,2,2,2));
 	//redraw the main windows
@@ -129,8 +129,6 @@ void UserGUIHRSOpticsWizard::opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutH
 	fTargetInforFram->AddFrame(inforFrame,new TGLayoutHints(kLHintsCenterX|kLHintsTop));
 	fTargetInforFram->AddFrame(targetInputFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 
-
-
 	p->AddFrame(fTargetInforFram,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX));
 }
 
@@ -140,38 +138,12 @@ void UserGUIHRSOpticsWizard::opticsCanvasFrameUnit(TGCompositeFrame *p,TGLayoutH
 	//-------------------------------
 	//
 	//[ Main Canvas]
-	//[Sub Canvas 1]  [Sub Canvas 2]
 	//--------------------------------
 
-
 	TGVerticalFrame *opticsCanvasFrame=new TGVerticalFrame(p);
-	TGHorizontalFrame *opticsMainCanvasFrame=new TGHorizontalFrame(opticsCanvasFrame);
-
-	// add the main canvas control code
-	opticsMainCanvas=new TRootEmbeddedCanvas("mainCanvas",opticsMainCanvasFrame,600,600);
-
-	opticsMainCanvasFrame->AddFrame(opticsMainCanvas,new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsTop|kLHintsExpandY));
-	// add the sub canvas frame
-	TGHorizontalFrame *opticsSubCanvasFrame=new TGHorizontalFrame(opticsCanvasFrame);
-	TGVerticalFrame *opticsSubCanvasFrame_Left=new TGVerticalFrame(opticsSubCanvasFrame);
-	TGVerticalFrame *opticsSubCanvasFrame_right=new TGVerticalFrame(opticsSubCanvasFrame);
-
-	opticsSubCanvas_left=new TRootEmbeddedCanvas("SubLeft",opticsSubCanvasFrame_Left,300,300);
-	opticsSubCanvas_right=new TRootEmbeddedCanvas("SubRight",opticsSubCanvasFrame_right,300,300);
-
-	opticsSubCanvasFrame_Left->AddFrame(opticsSubCanvas_left,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-	opticsSubCanvasFrame_right->AddFrame(opticsSubCanvas_right,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
-
-	opticsSubCanvasFrame->AddFrame(opticsSubCanvasFrame_Left,new TGLayoutHints(kLHintsLeft|kLHintsCenterX|kLHintsTop|kLHintsExpandY));
-	opticsSubCanvasFrame->AddFrame(new TGVertical3DLine(opticsSubCanvasFrame),new TGLayoutHints(kLHintsTop|kLHintsExpandY));
-	opticsSubCanvasFrame->AddFrame(opticsSubCanvasFrame_right,new TGLayoutHints(kLHintsCenterX|kLHintsRight|kLHintsTop|kLHintsExpandY));
-
-
-	opticsCanvasFrame->AddFrame(opticsMainCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsExpandY|kLHintsLeft|kLHintsExpandX,5,5,5,5));
-	opticsCanvasFrame->AddFrame(new TGHorizontal3DLine(opticsCanvasFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandX,5,5,5,5));
-	opticsCanvasFrame->AddFrame(opticsSubCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsLeft|kLHintsExpandX,5,5,5,5));
-
-	p->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsTop|kLHintsExpandY|kLHintsLeft|kLHintsExpandX));
+	opticsMainCanvas=new TRootEmbeddedCanvas("mainCanvas",opticsCanvasFrame,600,600);
+	opticsCanvasFrame->AddFrame(opticsMainCanvas,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
+	p->AddFrame(opticsCanvasFrame,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY));
 }
 
 
