@@ -24,7 +24,9 @@
 #include <TGNumberEntry.h>
 #include <TGTab.h>
 #include <TGTextView.h>
+#include <TGTextViewStream.h>
 #include <TGClient.h>
+#include <TGComboBox.h>
 //#include <TPi>
 //#include "TGFrame.h"
 //#include
@@ -54,10 +56,15 @@ private:
 
 	// beam information text input
 private:
+	TGHorizontalFrame *OpticsBeaminforSourceSelectionFrame;
+	TGCheckButton *BeamInforReadFromData;
+	TGTextButton *BeamInforParameterSet;
+
 
 	// target information input
 private:
-	TGTextEntry   *tOpticsTargetMaterial;
+	TGComboBox   *tOpticsTargetMaterial;
+	TGNumberEntry *nOpticsTargetID;
 	TGNumberEntry *nOpticsTargetPosEntry_x;
 	TGNumberEntry *nOpticsTargetPosEntry_y;
 	TGNumberEntry *nOpticsTargetPosEntry_z;
@@ -102,7 +109,7 @@ private:
 	// Left Information display
 private:
 	std::string displayInfor;
-	TGTextView *opticsTextDisplay;
+	TGTextViewostream *opticsTextDisplay;
 
 
 private:

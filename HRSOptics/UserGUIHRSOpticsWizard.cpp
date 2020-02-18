@@ -10,6 +10,7 @@
 #include "TGMenu.h"
 #include "UserGUIHRSOpticsWizard.h"
 
+
 UserGUIHRSOpticsWizard::UserGUIHRSOpticsWizard(const TGWindow *p, const TGWindow *main, UInt_t w,
         UInt_t h, UInt_t options) : TGTransientFrame(p, main, w, h, options) {
 	// TODO Auto-generated constructor stub
@@ -48,9 +49,20 @@ UserGUIHRSOpticsWizard::UserGUIHRSOpticsWizard(const TGWindow *p, const TGWindow
 // plot the Input informations
 void UserGUIHRSOpticsWizard::opticsBeamInforUnit(TGCompositeFrame *p,TGLayoutHints *l){
 	TGGroupFrame *fBeamInforFram=new TGGroupFrame(p,"Beam Information");
+
+	// Set Enable Read from database
+	OpticsBeaminforSourceSelectionFrame=new TGHorizontalFrame(fBeamInforFram);
+
+	BeamInforReadFromData=new TGCheckButton(OpticsBeaminforSourceSelectionFrame,new TGHotString("Use Data Par"));
+	BeamInforParameterSet=new TGTextButton(OpticsBeaminforSourceSelectionFrame,"SetPar...");
+
+	OpticsBeaminforSourceSelectionFrame->AddFrame(BeamInforReadFromData,new TGLayoutHints(kLHintsLeft,2,2,2,2));
+	OpticsBeaminforSourceSelectionFrame->AddFrame(BeamInforParameterSet,new TGLayoutHints(kLHintsLeft,2,2,2,2));
+
+
 //  fBeamInforFram->SetBackgroundColor(3);
 	//fBeamInforFram->SetLayoutManager(new TGMatrixLayout(fBeamInforFram,0,2,15));
-	std::cout<<(fBeamInforFram->GetWidth())<<"  "<<(fBeamInforFram->GetSize().fWidth)<<std::endl;
+//	std::cout<<(fBeamInforFram->GetWidth())<<"  "<<(fBeamInforFram->GetSize().fWidth)<<std::endl;
     // add the beam X dimension
 	TGHorizontalFrame *fBeamXFrame=new TGHorizontalFrame(fBeamInforFram);
 	fBeamXFrame->AddFrame(new TGLabel(fBeamXFrame,new TGHotString("Beam position x:  ")));
@@ -62,6 +74,8 @@ void UserGUIHRSOpticsWizard::opticsBeamInforUnit(TGCompositeFrame *p,TGLayoutHin
 	TGTextEntry *tBeamInforY_input=new TGTextEntry(fBeamYFrame);
 	fBeamYFrame->AddFrame(tBeamInforY_input,new TGLayoutHints(kLHintsTop));
 
+	fBeamInforFram->AddFrame(OpticsBeaminforSourceSelectionFrame,new TGLayoutHints(kLHintsTop));
+	fBeamInforFram->AddFrame(new TGHorizontal3DLine(fBeamInforFram),new TGLayoutHints(kLHintsTop|kLHintsExpandX));
 	fBeamInforFram->AddFrame(fBeamXFrame,new TGLayoutHints(kLHintsTop));
 	fBeamInforFram->AddFrame(fBeamYFrame,new TGLayoutHints(kLHintsTop));
 
@@ -73,12 +87,23 @@ void UserGUIHRSOpticsWizard::opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutH
 	TGGroupFrame *fTargetInforFram=new TGGroupFrame(p,"Target Information");
 	TGVerticalFrame *inforFrame=new TGVerticalFrame(fTargetInforFram);
 	TGHorizontalFrame *targetInputFrame=new TGHorizontalFrame(fTargetInforFram);
+	TGVerticalFrame *targetIDFrame=new TGVerticalFrame(targetInputFrame);
+
+	nOpticsTargetID=new TGNumberEntry(targetIDFrame,1,3);
+	targetIDFrame->AddFrame(new TGLabel(targetIDFrame,TGHotString("TargetID")),new TGLayoutHints(kLHintsCenterY|kLHintsLeft));
+	targetIDFrame->AddFrame(nOpticsTargetID,new TGLayoutHints(kLHintsCenterX|kLHintsCenterY));
 
 	TGVerticalFrame *targetNumericalInput=new TGVerticalFrame(targetInputFrame);
 	TGHorizontalFrame *targetMaterialFrame=new TGHorizontalFrame(targetNumericalInput);
-	targetMaterialFrame->AddFrame(new TGLabel(targetMaterialFrame,TGHotString("TargetType:  ")),new TGLayoutHints(kLHintsLeft));
-	tOpticsTargetMaterial=new TGTextEntry(targetMaterialFrame);
-	tOpticsTargetMaterial->SetWidth(50);
+	targetMaterialFrame->AddFrame(new TGLabel(targetMaterialFrame,TGHotString("TargetType: ")),new TGLayoutHints(kLHintsLeft));
+	tOpticsTargetMaterial=new TGComboBox(targetMaterialFrame,100);
+	tOpticsTargetMaterial->SetWidth(70);
+	tOpticsTargetMaterial->SetHeight(20);
+
+	tOpticsTargetMaterial->AddEntry("H2O",0);
+	tOpticsTargetMaterial->AddEntry("Carbon",1);
+	tOpticsTargetMaterial->AddEntry("LH2",2);
+
 	targetMaterialFrame->AddFrame(tOpticsTargetMaterial,new TGLayoutHints(kLHintsRight|kLHintsTop,5));
 
 	TGHorizontalFrame *targetPosXFrame=  new TGHorizontalFrame(targetNumericalInput);
@@ -123,6 +148,8 @@ void UserGUIHRSOpticsWizard::opticsTargetInforUnit(TGCompositeFrame *p,TGLayoutH
 	targetNumericalInput->AddFrame(targetPosZFrame,new TGLayoutHints(kLHintsRight|kLHintsTop));
 	targetNumericalInput->AddFrame(new TGHorizontal3DLine(targetNumericalInput),new TGLayoutHints(kLHintsTop|kLHintsExpandX));
 
+	targetInputFrame->AddFrame(targetIDFrame, new TGLayoutHints(kLHintsLeft|kLHintsExpandY));
+	targetInputFrame->AddFrame(new TGVertical3DLine(targetInputFrame), new TGLayoutHints(kLHintsLeft|kLHintsExpandY,2,2,2,2));
 	targetInputFrame->AddFrame(targetNumericalInput,new TGLayoutHints(kLHintsLeft|kLHintsCenterX));
 	targetInputFrame->AddFrame(new TGVertical3DLine(targetInputFrame),new TGLayoutHints(kLHintsLeft|kLHintsExpandY,5,5,5,5));
 	targetInputFrame->AddFrame(targetButtControlFrame,new TGLayoutHints(kLHintsTop|kLHintsRight));
@@ -394,13 +421,16 @@ void UserGUIHRSOpticsWizard::opticsTextPrintOutUnit(TGCompositeFrame *p,TGLayout
 	TGVerticalFrame *opticsTextPrintoutFrame=new TGVerticalFrame(p);
 	Pixel_t backpxl;
 	gClient->GetColorByName("#c0c0c0", backpxl);
-	opticsTextDisplay = new TGTextView(opticsTextPrintoutFrame,300,94,p->GetUniqueID(),kFixedWidth);
-	opticsTextDisplay->SetBackgroundColor(backpxl);
+	opticsTextDisplay = new TGTextViewostream(opticsTextPrintoutFrame,300,94,p->GetUniqueID(),kFixedWidth);
+//	opticsTextDisplay->SetBackgroundColor(backpxl);
 	opticsTextDisplay->SetWidth(300);
-	opticsTextDisplay->SetText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
-	opticsTextDisplay->AddText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
+	for (int i =0; i <=50; i++)
+	*opticsTextDisplay<<"Test Test Test"<<std::endl;
+//	opticsTextDisplay->ShowBottom();
+//	opticsTextDisplay->SetText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
+//	opticsTextDisplay->AddText(new TGText("> Jefferson Lab Hall A Optics Wizard"));
 
-	opticsTextPrintoutFrame->AddFrame(opticsTextDisplay,new TGLayoutHints(kLHintsLeft|kLHintsExpandX|kLHintsBottom,2,2,2,2));
+	opticsTextPrintoutFrame->AddFrame(opticsTextDisplay,new TGLayoutHints(kLHintsExpandX|kLHintsExpandY,2,2,2,2));
 	p->AddFrame(opticsTextPrintoutFrame,l);
 }
 
