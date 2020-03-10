@@ -20,4 +20,18 @@
 =======
 * check the peak in the cluster charge
 
->>>>>>> 76b11fbd08d92ffe4ae112cbb833f615838f7f0f
+
+# New TDataframe strcuture 
+
+### Decoder plan 
+* First step, decode the raw data and save to root file 
+* load the root file into TDataframe
+* Concurrent processs all event 
+
+#### Raw Display plan
+
+* Generate the Histogram in the subfolder, 
+* in the return scripts, it only return a trigger signal 
+* in the respond scripts code, it use gROOT to look for the histogram
+
+
