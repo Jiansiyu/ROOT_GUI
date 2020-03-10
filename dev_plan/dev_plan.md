@@ -35,3 +35,9 @@
 * in the respond scripts code, it use gROOT to look for the histogram
 
 
+#### Display code plan 
+
+* a global code that used for trigger the signal/slot that can handle all the display requirement 
+
+
+
