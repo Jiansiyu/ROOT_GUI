@@ -22,7 +22,7 @@
 # New TDataframe strcuture 
 
 ### Decoder plan 
-- [ ] First step, decode the raw data and save to root file 
+- [x] First step, decode the raw data and save to root file 
 - [ ] load the root file into TDataframe
 - [ ] Concurrent processs all event 
 
