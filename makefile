@@ -1,5 +1,5 @@
 ##############################################
-#	SUBDIRS MAKEFILE	
+#	MAKEFILE	
 #	author: Siyu Jian 
 #	emal:   jiansiyu@gmail.com
 #
@@ -10,14 +10,12 @@
 
 
 #+++++++++++++++++++++++++++++++++++++++++++
-# You make need to modify the following paths according to you system setting
-#+++++++++++++++++++++++++++++++++++++++++++
 # general make file configuration
-#CC       = g++ -std=c++0x  -O3 -g3 #-Wall
-CC       = g++#-Wall
-THIS_DIR =`cd "\`dirname \"$0\"\`";pwd`
-#THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+CC       = g++-7 -std=c++11 -pthread -lpthread -Ofast -g3 #-Wall
+CFLAGS= ${CFLAG}
+THIS_DIR =`cd "\`dirname \"$0\"\`";pwd`
+HEADERDIR= $(sort $(dir $(wildcard ./*/*.h)))
 #------------------------------------------------------------------------------
 # ROOT related configuration
 ROOTCFLAGS   := $(shell root-config --cflags)
@@ -29,20 +27,17 @@ ROOTAUXLIB       := $(shell root-config --auxlibs)
 ROOTAUXCFLAG     := $(shell root-config --auxcflags)
 #------------------------------------------------------------------------------
 
+INC_PARAMS=$(foreach d, $(HEADERDIR), -I$d)
+INC_PARAMS +=-I${EVIO_INC}
 
-CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS} -I${EVIO_INC} -I/usr/include -I./ -I./GEMDetector -I./src
+CXXFLAGS  +=${ROOTCFLAGS} ${CFLAGS}  -I./ ${INC_PARAMS}
 LDFLAGS	  +=${ROOTLDFLAGS}
 
 ifeq ($(shell uname -s), Linux)
-LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat -levioxx -levio  -L/usr/lib64/ -lconfig++
+LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat -levioxx -levio  -lstdc++ -lm
 else
 LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}/libevioxx.dylib ${EVIO_LIB}/libevio.dylib 
 endif
-
-# Allow user to specify a directory containing libraries if not in places ld usually looks.
-# # For example, I needed to install libconfig in /home/sbs-onl so I do:
-# #      export EXTRA_LIB=/home/sbs-onl/local/lib
-#LIBS   +=-L${EXTRA_LIB}
 
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
 LINKOPTION += -pthread -lm -ldl -lconfig++
@@ -61,53 +56,55 @@ SLOT_OBJS   += ${patsubst ./%, ./bin/%, ${patsubst %.cpp, %Dic.o, ${SLOT_SOURCE}
 SOURCE_OBJS += ${patsubst ./%, ./bin/%, ${addsuffix .o, ${basename ${SOURCE}}}}
 OBJS    +=  ${SOURCE_OBJS} ${SLOT_OBJS}
 
-
-
-
-TARGET = ROOT_GUI 
+TARGET = GEMAnalyzer 
 all: ${TARGET}  
 
-ROOT_GUI: ${OBJS} 
+${TARGET}: ${OBJS} 
 	@echo ${THIS_DIR}
 	@echo ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
-	@$(CC)  ${CXXFLAGS} $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  "ROOT_GUI"
+	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  $@
 	@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
-#@{RM} ${OBJS}
+	#@{RM} ${OBJS}
 	@echo
+
 ./bin/%.o : %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<" 
+	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
+	
 ./bin/%.o : %.cxx
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
+	
 bin/%.o : %.C
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	@$(CC)  ${CXXFLAGS} -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finish building: $<'
 	@echo
+	
 ./%Dic.cxx : ./%.h ./%LinkDef.h
 	@echo 'Building file: $@'
 	@echo 'Invoking: rootcling Compiler'
 	@mkdir -p $(@D)
-	@rootcint  -f "$@" -c -I/home/coda/ROOT_GUI_multiCrate/GEMDetector -I${EVIO_INC} ${patsubst %Dic.cxx, %.h, $@} ${patsubst %Dic.cxx, %LinkDef.h, $@}
+	@rootcint   -f  "$@" -c  ${patsubst %Dic.cxx, %.h, $@} ${INC_PARAMS} ${patsubst %Dic.cxx, %LinkDef.h, $@} 
+	
 ./bin/%Dic.o : ./%Dic.cxx 
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	@mkdir -p $(@D)
-	$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
+	@$(CC)  ${CXXFLAGS} -I./ -c  $^ -o $@
 	@echo 'Finish building: $<'
 	@echo
 
@@ -115,7 +112,10 @@ bin/%.o : %.C
 JUNK_L1 = *~ ./*~ ./*/*~
 JUNK_L2 = ${OBJS}
 JUNK_L3 = *_rdict.pcm ./*_rdict.pcm ./*/*_rdict.pcm  ${TARGET}
-PHONY: clean help test
+	 
+PHONY: clean help test joker
+joker:
+	echo ${INC_PARAMS}
 
 clean:
 	${RM} ${OBJS} ${TARGET} *~ ./*/*Dic.cxx ./*/*rdict.pcm *rdict.pcm ./*/*~
@@ -134,5 +134,3 @@ test:
 	@echo 
 	@echo "Source"
 	@echo ${SOURCE}
-	@echo ${CXXFLAGS}
-
