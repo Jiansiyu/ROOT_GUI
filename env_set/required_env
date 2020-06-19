@@ -1,0 +1,4 @@
+ROOTSYS root-config 6.14.04
+EVIO_BIN
+EVIO_LIB
+EVIO_INC
