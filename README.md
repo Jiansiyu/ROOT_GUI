@@ -13,23 +13,5 @@
 *	[root6 or higher](https://root.cern.ch/downloading-root)
 *	[libconfig++](http://www.hyperrealm.com/oss_libconfig.shtml)
 
-
-## Installing
-
-
-## develep plan
-
-* 1
-	* add the MPD4.0 and MPD_SSP data structure support
-* 2
-	* change the code structure
-* 3
-	* add the multi-thread support in the GUI
-* 4
-	* new QT support
-	
-* 5 
-	* 
-# Any Contribution is Welcome!
-
-contect me at: jiansiyu@gmail.com
+# Pre-Compiled version 
+[Run ROOT_GUI in Docker](https://github.com/Jiansiyu/GeneralScripts/tree/master/root_gui_docker)
