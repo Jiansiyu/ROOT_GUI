@@ -1,3 +1,8 @@
+# Pre-Compiled version 
+If you want to avoid the troubles to compile by yourself, try the docker image:
+[Run ROOT_GUI in Docker](https://github.com/Jiansiyu/GeneralScripts/tree/master/root_gui_docker)
+
+
 # GEM Decoder GUI
 
  The GUI version of GEM_Decoder. The code is based on Danning's GEMDecoder which is used for Display, zero subtraction and Analysis GEM data.
@@ -13,5 +18,3 @@
 *	[root6 or higher](https://root.cern.ch/downloading-root)
 *	[libconfig++](http://www.hyperrealm.com/oss_libconfig.shtml)
 
-# Pre-Compiled version 
-[Run ROOT_GUI in Docker](https://github.com/Jiansiyu/GeneralScripts/tree/master/root_gui_docker)
