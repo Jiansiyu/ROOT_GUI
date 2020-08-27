@@ -25,7 +25,7 @@ file(GLOB ROOTGUI_SRC
     "*.C"
     "*.cpp"
 )
-set(sources ${ROOTGUI_SRC}) 
+set(sources analysis/GEMCalibration.cpp analysis/GEMEffAnalysis.cpp analysis/GEMTrackConstrcution.cpp GEMDetector/GEMConfigure.cpp GEMDetector/MPDDecoder.cpp GEMDetector/MPDRawParser.cpp GUIDialog/UserGUIHelpDialog.cpp GUIDialog/UserGUIMapWizard.cpp GUIDialog/UserGUIToolDialog.cpp GUIDialog/UserGUIWorkStatus.cpp msg/SysMsgCenter.cpp src/Benchmark.cpp src/GUIInforCenter.cpp src/ROOT_GUI.cpp src/UserGuiGeneralDialogProcess.cpp src/UserGUIKeyProcess.cpp src/UserGuiMainFrame.cpp analysis/GEMTracking.C analysis/GEMTree.C analysis/GEMCluster.cxx analysis/GEMHit.cxx analysis/GEMTCluster.cxx analysis/GEMTreeGenerator.cxx)
 ## Make corresponding header files
 string(REGEX REPLACE .cxx .h headers "${sources}")
 ## Append a few extra header files in the repository.  (But do not append the
@@ -53,8 +53,7 @@ find_package(ROOT REQUIRED)
 
 #----------------------------------------------------------------------------
 ## Setup the PODD Analyzer
-find_package(Podd 1.6 REQUIRED)
-
+#find_package(Podd 1.6 REQUIRED)
 
 # Required dependencies
 find_package(EVIO CONFIG QUIET)
