@@ -6,7 +6,7 @@
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set build type (Debug is default)")
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(prexCounting)
+project(ROOT_GUI)
 
 ## Disable in-source builds!
 if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
@@ -19,9 +19,19 @@ endif()
 
 #8#----------------------------------------------------------------------------
 ## Set the sources which have a corresponding .h file here
-set(sources PRex_pedestal_generator/src/BenchMark.cxx PRex_pedestal_generator/src/input_handler.cxx PRex_pedestal_generator/src/prex_online_display.cxx  PRex_pedestal_generator/src/raw_decoder.cxx  ) 
+set(sources GUIDialog/UserGUIToolDialog.cpp GUIDialog/UserGUIWorkStatus.cpp
+        gui/UserRootGUI.cpp msg/SysMsgCenter.cpp root_gui/GUIConfigure.cpp
+        root_gui/GUIHelpDialog.cpp  root_gui/GUIInformation.cpp
+        root_gui/GUIMainFrame.cpp
+        root_gui/GUIMapWizard.cpp
+        root_gui/GUISignalSlot.cpp
+        root_gui/GUISysGeneral.cpp
+        root_gui/GUISysStatus.cpp
+        src/Benchmark.cpp
+        #src/ROOT_GUI.cpp
+        )
 ## Make corresponding header files
-string(REGEX REPLACE .cxx .h headers "${sources}")
+string(REGEX REPLACE .cpp .h headers "${sources}")
 ## Append a few extra header files in the repository.  (But do not append the
 ## sbs_LinkDef.h header here, that is further down this cmake config.
 #list(APPEND headers "DebugDef.h")
@@ -100,23 +110,37 @@ if(VERBOSE)
   list(APPEND VERBOSE)
 endif()
 
-include_directories(${ROOT_INCLUDE_DIR} ${Podd_INCLUDE_DIR} ${EVIO_INCLUDE_DIR})
+#include_directories(${ROOT_INCLUDE_DIR} ${Podd_INCLUDE_DIR} ${EVIO_INCLUDE_DIR})
+include_directories(${ROOT_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
 ## Generate the ROOT dictionary
-set(PROJECT_DICTIONARY ${PROJECT_NAME}Dict)
-ROOT_GENERATE_DICTIONARY( ${PROJECT_DICTIONARY} ${headers}
-  LINKDEF ${PROJECT_NAME}_LinkDef.h)
+#set(PROJECT_DICTIONARY ${PROJECT_NAME}Dict)
+#ROOT_GENERATE_DICTIONARY( ${PROJECT_DICTIONARY} ${headers}
+#  LINKDEF ${PROJECT_NAME}_LinkDef.h)
 
 ## Create the library
-add_library(${PROJECT_NAME} SHARED ${sources} ${headers} ${PROJECT_DICTIONARY}.cxx )
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
-target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES})
-foreach(_def ${PREXEXTRADEF_LIST})
-  if(${${_def}})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
-  endif()
-endforeach()
+#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} ${PROJECT_DICTIONARY}.cpp )
+#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp )
+#set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
+#target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES})
+#foreach(_def ${PREXEXTRADEF_LIST})
+#  if(${${_def}})
+#    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
+#  endif()
+#endforeach()
+
+ADD_EXECUTABLE(${PROJECT_NAME} ${sources} ${headers} src/ROOT_GUI.cpp )
+#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp )
+#set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
+#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp)
+target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_EXE_LINKER_FLAGS} ${PREX_LINKFLAGS})
+#foreach(_def ${PREXEXTRADEF_LIST})
+#  if(${${_def}})
+#    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
+#  endif()
+#endforeach()
+
 
 message(AUTHOR_WARNING ${DEV_WARNING})
 
