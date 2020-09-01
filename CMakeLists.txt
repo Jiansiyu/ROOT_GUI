@@ -57,17 +57,8 @@ find_package(ROOT REQUIRED)
 
 #----------------------------------------------------------------------------
 ## Setup the PODD Analyzer
-find_package(Podd 1.6 REQUIRED)
+#find_package(Podd 1.6 REQUIRED)
 
-
-# Required dependencies
-find_package(EVIO CONFIG QUIET)
-if(NOT EVIO_FOUND)
-  find_package(EVIO MODULE)
-  if(NOT EVIO_FOUND)
-    include(FetchBuildEVIO)
-  endif()
-endif()
 
 
 ##----------------------------------------------------------------------------
@@ -114,32 +105,10 @@ endif()
 include_directories(${ROOT_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
-## Generate the ROOT dictionary
-#set(PROJECT_DICTIONARY ${PROJECT_NAME}Dict)
-#ROOT_GENERATE_DICTIONARY( ${PROJECT_DICTIONARY} ${headers}
-#  LINKDEF ${PROJECT_NAME}_LinkDef.h)
 
-## Create the library
-#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} ${PROJECT_DICTIONARY}.cpp )
-#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp )
-#set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
-#target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES})
-#foreach(_def ${PREXEXTRADEF_LIST})
-#  if(${${_def}})
-#    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
-#  endif()
-#endforeach()
+ADD_EXECUTABLE(${PROJECT_NAME} ${sources} ${headers} src/ROOT_GUI.cpp)
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${sources} ${headers} src/ROOT_GUI.cpp )
-#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp )
-#set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
-#add_library(${PROJECT_NAME} SHARED ${sources} ${headers} src/ROOT_GUI.cpp)
-target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_EXE_LINKER_FLAGS} ${PREX_LINKFLAGS})
-#foreach(_def ${PREXEXTRADEF_LIST})
-#  if(${${_def}})
-#    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
-#  endif()
-#endforeach()
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ROOT_LIBRARIES})
 
 
 message(AUTHOR_WARNING ${DEV_WARNING})
