@@ -6,7 +6,7 @@
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set build type (Debug is default)")
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(prexCounting)
+project(ROOT_GUI)
 
 ## Disable in-source builds!
 if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
@@ -17,17 +17,24 @@ if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 endif()
 
 
+#8#---------------------------------------------------------------------------
+file(GLOB sources analysis/*cpp analysis/*.cxx analysis/*.C GEMDetector/*.cpp msg/*cpp GUIDialog/*cpp src/*cpp)
+file(GLOB header src/*.h analysis/*.h GUIDialog/*.h GEMDetector/*.h)
 #8#----------------------------------------------------------------------------
 ## Set the sources which have a corresponding .h file here
-file(GLOB ROOTGUI_SRC
-    "*.cxx"
-    "*.c"
-    "*.C"
-    "*.cpp"
-)
-set(sources analysis/GEMCalibration.cpp analysis/GEMEffAnalysis.cpp analysis/GEMTrackConstrcution.cpp GEMDetector/GEMConfigure.cpp GEMDetector/MPDDecoder.cpp GEMDetector/MPDRawParser.cpp GUIDialog/UserGUIHelpDialog.cpp GUIDialog/UserGUIMapWizard.cpp GUIDialog/UserGUIToolDialog.cpp GUIDialog/UserGUIWorkStatus.cpp msg/SysMsgCenter.cpp src/Benchmark.cpp src/GUIInforCenter.cpp src/ROOT_GUI.cpp src/UserGuiGeneralDialogProcess.cpp src/UserGUIKeyProcess.cpp src/UserGuiMainFrame.cpp analysis/GEMTracking.C analysis/GEMTree.C analysis/GEMCluster.cxx analysis/GEMHit.cxx analysis/GEMTCluster.cxx analysis/GEMTreeGenerator.cxx)
-## Make corresponding header files
-string(REGEX REPLACE .cxx .h headers "${sources}")
+#set(sources GUIDialog/UserGUIToolDialog.cpp GUIDialog/UserGUIWorkStatus.cpp
+#        gui/UserRootGUI.cpp msg/SysMsgCenter.cpp root_gui/GUIConfigure.cpp
+#        root_gui/GUIHelpDialog.cpp  root_gui/GUIInformation.cpp
+#        root_gui/GUIMainFrame.cpp
+#        root_gui/GUIMapWizard.cpp
+#        root_gui/GUISignalSlot.cpp
+#        root_gui/GUISysGeneral.cpp
+#        root_gui/GUISysStatus.cpp
+#        src/Benchmark.cpp
+#        #src/ROOT_GUI.cpp
+#        )
+### Make corresponding header files
+#string(REGEX REPLACE .cpp .h headers "${sources}")
 ## Append a few extra header files in the repository.  (But do not append the
 ## sbs_LinkDef.h header here, that is further down this cmake config.
 #list(APPEND headers "DebugDef.h")
@@ -49,21 +56,8 @@ list(APPEND PREXEXTRADEF_LIST VERBOSE TESTCODE MCDATA)
 # Find ROOT (using custom FindROOT.cmake taken from G4SBS)
 set(minimum_root_version 5.10)
 find_package(ROOT REQUIRED)
-
-
-#----------------------------------------------------------------------------
-## Setup the PODD Analyzer
-#find_package(Podd 1.6 REQUIRED)
-
-# Required dependencies
-find_package(EVIO CONFIG QUIET)
-if(NOT EVIO_FOUND)
-  find_package(EVIO MODULE)
-  if(NOT EVIO_FOUND)
-    include(FetchBuildEVIO)
-  endif()
-endif()
-
+find_package(EVIO REQUIRED)
+find_library(libconfig libconfig)
 
 ##----------------------------------------------------------------------------
 ## Check for SStream support
@@ -105,23 +99,15 @@ if(VERBOSE)
   list(APPEND VERBOSE)
 endif()
 
-include_directories(${ROOT_INCLUDE_DIR} ${Podd_INCLUDE_DIR} ${EVIO_INCLUDE_DIR})
+#include_directories(${ROOT_INCLUDE_DIR} ${Podd_INCLUDE_DIR} ${EVIO_INCLUDE_DIR})
+include_directories(${ROOT_INCLUDE_DIR} ${EVIO_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
-## Generate the ROOT dictionary
-set(PROJECT_DICTIONARY ${PROJECT_NAME}Dict)
-ROOT_GENERATE_DICTIONARY( ${PROJECT_DICTIONARY} ${headers}
-  LINKDEF ${PROJECT_NAME}_LinkDef.h)
 
-## Create the library
-add_library(${PROJECT_NAME} SHARED ${sources} ${headers} ${PROJECT_DICTIONARY}.cxx )
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " ${PREX_LINKFLAGS}")
-target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES})
-foreach(_def ${PREXEXTRADEF_LIST})
-  if(${${_def}})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${_def})
-  endif()
-endforeach()
+ADD_EXECUTABLE(${PROJECT_NAME} ${sources} ${headers})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ROOT_LIBRARIES} ${EVIO_LIBRARY})
+target_link_libraries(${PROJECT_NAME} config++ Minuit)
 
 message(AUTHOR_WARNING ${DEV_WARNING})
 

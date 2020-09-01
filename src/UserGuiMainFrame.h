@@ -65,7 +65,7 @@
 #include "UserGUIDataStructue.h"
 //#include "../DecoderMPD4_VME/GEMDataParserM4V.h"
 #include "GUIInforCenter.h"
-#include "MPDDecoder.h"
+#include "../GEMDetector/MPDDecoder.h"
 
 enum ETestCommandIdentifiers {
 	M_FILE_OPEN,
