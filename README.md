@@ -26,8 +26,7 @@ make
 
 
 ### ROOT-GUI Pre-Compiled docker image [read more](https://github.com/Jiansiyu/GeneralScripts/tree/master/root_gui_docker)
-<img src="https://blog.xebialabs.com/wp-content/uploads/2019/05/docker-e1558536954364.jpg?raw=true" width="300">
-
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Docker_%28container_engine%29_logo.svg/330px-Docker_%28container_engine%29_logo.svg.png)
 #### pre-start
 
 * [set up docker container](https://docs.docker.com/engine/install/)
