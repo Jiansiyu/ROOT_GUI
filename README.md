@@ -75,7 +75,7 @@ cd /home/rootGUI/ROOT_GUI_multiCrate
 ```
 
 
-#### [Reference]
+#### [Read More]
 * [How to share data between a docker container and host](https://thenewstack.io/docker-basics-how-to-share-data-between-a-docker-container-and-host/)
 
 * [ROOT-GUI run script](https://github.com/Jiansiyu/GeneralScripts/tree/master/root_gui_docker)
